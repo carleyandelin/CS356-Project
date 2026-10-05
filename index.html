@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Hobby Atlas information architecture wireframe" />
+    <title>Hobby Atlas | IA wireframe</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="site-header">
+        <a class="brand" href="#browse" aria-label="Hobby Atlas home" data-log="Hobby Atlas home" data-log-destination="browse">
+          <span class="brand-mark">HA</span>
+          <span><strong>Hobby Atlas</strong><small>an IA wireframe</small></span>
+        </a>
+        <nav class="top-nav" aria-label="Primary navigation">
+          <a href="#browse" data-view-link="browse" data-log="Explore" data-log-destination="browse">Explore</a>
+          <a href="#about" data-view-link="about" data-log="Card sort evidence" data-log-destination="about">Card sort evidence</a>
+          <a href="#log" data-view-link="log" data-log="Click log" data-log-destination="log">Click log</a>
+        </nav>
+        <a class="wire-button" href="#browse" data-log="Start over" data-log-destination="browse">Start over</a>
+      </header>
+
+      <main id="app" tabindex="-1"></main>
+
+      <footer class="site-footer">
+        <span>HOBBY ATLAS / WIREFRAME V1</span>
+        <span>Based on 8 open card sorts · 26 cards</span>
+      </footer>
+    </div>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
