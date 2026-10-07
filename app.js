@@ -1,12 +1,21 @@
 const data = window.HobbyAtlasData;
 
 const app = document.querySelector("#app");
+const categoryNav = document.querySelector(".category-nav");
 const categoryById = Object.fromEntries(data.categories.map((category) => [category.id, category]));
 const facetById = Object.fromEntries(
   data.categories.flatMap((category) => (category.facets || []).map((facet) => [facet.id, { ...facet, category }])),
 );
 const logKey = "hobby-atlas-click-log";
 let clickLog = JSON.parse(localStorage.getItem(logKey) || "[]");
+
+categoryNav.innerHTML = data.categories.map((category) => {
+  const facetLinks = (category.facets || []).map((facet) => `<a href="#facet/${facet.id}" data-log="Open ${escapeHtml(facet.label)}" data-log-destination="facet/${facet.id}">${escapeHtml(facet.label)}</a>`).join("");
+  return `<div class="category-menu${category.facets ? " has-facets" : ""}">
+    <a class="category-button" href="#category/${category.id}" data-log="Open ${escapeHtml(category.label)}" data-log-destination="category/${category.id}">${escapeHtml(category.label)}</a>
+    ${facetLinks ? `<div class="facet-menu" aria-label="${escapeHtml(category.label)} facets">${facetLinks}</div>` : ""}
+  </div>`;
+}).join("");
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]);
