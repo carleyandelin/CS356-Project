@@ -21,27 +21,22 @@ function hobbyCard(name, view) {
   </a>`;
 }
 
-function groupBlock(group, type) {
-  return `<section class="group-block"><div class="group-heading"><p class="label">${type}</p><h2>${escapeHtml(group.label)}</h2><p>${escapeHtml(group.description || "")}</p></div>
-    <div class="hobby-grid">${group.cards.map((name) => hobbyCard(name, type)).join("")}</div>
-    ${type === "activity" ? `<a class="plain-link" href="#category/${group.id}" data-log="Open ${escapeHtml(group.label)}" data-log-destination="category/${group.id}">Open category [→]</a>` : ""}
-  </section>`;
+function groupBlock(group) {
+  return `<a class="group-block" href="#category/${group.id}" data-log="Open ${escapeHtml(group.label)}" data-log-destination="category/${group.id}"><div class="group-heading"><p class="label">activity</p><h2>${escapeHtml(group.label)}</h2><p>${escapeHtml(group.description || "")}</p></div>
+  </a>`;
 }
 
 function renderBrowse() {
-  app.innerHTML = `<div class="page"><div class="page-heading"><div><p class="label">Home / two views</p><h1>Hobby Atlas</h1><p>One set of 27 cards, organized two ways. Choose an activity category or a PMEST-inspired lens.</p></div><span class="view-label">WIREFRAME / 01</span></div>
-    <section class="wireframe-note"><strong>Click any labeled leaf to reach its end state.</strong><span>Every leaf opens a “you selected” page.</span></section>
-    <div class="view-section"><div class="section-title"><h2>View A: activity categories</h2><p>Primary grouping from repeated card-sort pairings.</p></div><div class="group-list">${data.categories.map((group) => groupBlock(group, "activity")).join("")}</div></div>
-    <!--
-    <div class="view-section"><div class="section-title"><h2>View B: find by lens</h2><p>Alternate PMEST-inspired organization: place, motivation, experience, skill, and time.</p></div><div class="group-list">${data.facetGroups.map((group) => groupBlock(group, "lens")).join("")}</div></div>
-    -->
+  app.innerHTML = `<div class="page"><div class="page-heading"><div><p class="label">Home</p><h1>Hobby Atlas</h1><p>Choose an activity category to explore its hobbies.</p></div><span class="view-label">WIREFRAME / 01</span></div>
+    <section class="wireframe-note"><strong>Choose a category to see its hobbies.</strong><span>Every hobby opens a “you selected” page.</span></section>
+    <div class="view-section"><div class="section-title"><h2>Activity categories</h2><p>Primary grouping from repeated card-sort pairings.</p></div><div class="group-list">${data.categories.map((group) => groupBlock(group)).join("")}</div></div>
   </div>`;
 }
 
 function renderCategory(id) {
   const category = categoryById[id];
   if (!category) return renderBrowse();
-  app.innerHTML = `<div class="page"><a class="plain-link" href="#browse" data-log="Back to two views" data-log-destination="browse">[←] Back to two views</a>
+  app.innerHTML = `<div class="page"><a class="plain-link" href="#browse" data-log="Back to categories" data-log-destination="browse">[←] Back to categories</a>
     <div class="page-heading compact-heading"><div><p class="label">Activity category</p><h1>${escapeHtml(category.label)}</h1><p>${escapeHtml(category.description)}</p></div><span class="view-label">LEVEL 2</span></div>
     <div class="hobby-grid category-grid">${category.cards.map((name) => hobbyCard(name, "activity category")).join("")}</div></div>`;
 }
@@ -50,7 +45,7 @@ function renderHobby(name) {
   const hobby = data.hobbies[name];
   if (!hobby) return renderBrowse();
   const category = categoryById[hobby.category];
-  app.innerHTML = `<div class="page"><a class="plain-link" href="#browse" data-log="Back to two views" data-log-destination="browse">[←] Back to two views</a>
+  app.innerHTML = `<div class="page"><a class="plain-link" href="#browse" data-log="Back to categories" data-log-destination="browse">[←] Back to categories</a>
     <article class="selection-page"><p class="label">Leaf / selected block</p><h1>You selected: ${escapeHtml(name)}</h1><div class="selection-box"><p>${escapeHtml(hobby.blurb)}</p><dl><div><dt>Activity category</dt><dd>${escapeHtml(category.label)}</dd></div><div><dt>Tags</dt><dd>${escapeHtml(hobby.tags.join(" / "))}</dd></div><div><dt>Time to try</dt><dd>${escapeHtml(hobby.time)}</dd></div><div><dt>First step</dt><dd>${escapeHtml(hobby.startingPoint)}</dd></div></dl></div>
     <section class="related-section"><p class="label">Related leaves</p><div class="hobby-grid">${hobby.related.map((related) => hobbyCard(related, "related")).join("")}</div></section></article></div>`;
 }

@@ -77,18 +77,10 @@ const hobbies = {
 
 const allHobbies = [...new Set([...categories.flatMap((category) => category.cards), "Thrifting", "Astronomy"])];
 
-const facetGroups = [
-  { id: "place", label: "Place", description: "Where the activity happens.", cards: ["Camping", "Sailing", "Whitewater Rafting", "Rock Climbing", "Parkour", "Jet Skiing", "Bonsai", "Plant Propagation", "Photography", "Thrifting", "Astronomy"] },
-  { id: "motivation", label: "Motivation", description: "What a person may be seeking.", cards: ["Chess", "Mahjong", "Duo Lingo", "Painting", "Scrapbooking", "Pilates", "Bonsai", "Photography"] },
-  { id: "experience", label: "Experience", description: "The kind of social or solo experience.", cards: ["Chess", "Mahjong", "Escape Rooms", "Cosplay", "Camping", "Sailing", "Whitewater Rafting", "Trampolining", "Guitar", "DJing", "Podcasting"] },
-  { id: "skill", label: "Skill", description: "The primary skill or medium involved.", cards: ["Escape Rooms", "Duo Lingo", "Painting", "Nail Art", "3D Printing", "Cosplay", "Sourdough", "Rock Climbing", "Parkour", "Pilates", "Guitar", "DJing", "Podcasting"] },
-  { id: "time", label: "Time", description: "A small activity or a longer commitment.", cards: ["Duo Lingo", "Nail Art", "Parkour", "Trampolining", "Pilates", "Bonsai", "Plant Propagation", "Guitar", "Photography", "Astronomy", "Sourdough", "Scrapbooking"] },
-];
-
 const sortFindings = [
   { label: "Stable pairings", value: "5", detail: "Chess + Escape Rooms, Guitar + DJing, Bonsai + Plant Propagation, and more" },
   { label: "Card sorts", value: "8", detail: "Repeated sorts helped separate durable relationships from one-off labels" },
   { label: "Ambiguous cards", value: "6", detail: "Sourdough, 3D Printing, Duo Lingo, Astronomy, Thrifting, and Rock Climbing" },
 ];
 
-window.HobbyAtlasData = { allHobbies, categories, facetGroups, hobbies, sortFindings };
+window.HobbyAtlasData = { allHobbies, categories, hobbies, sortFindings };
