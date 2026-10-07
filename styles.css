@@ -48,6 +48,8 @@ button, a { cursor: pointer; }
 .hobby-card span { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-size: 10px; }
 .plain-link { display: inline-block; margin-top: 16px; border-bottom: 1px solid var(--line); font-size: 11px; }
 .category-grid { margin-top: 30px; grid-template-columns: repeat(3, 1fr); }
+.facet-section { margin-top: 30px; }
+.facet-section .section-title { margin-bottom: 14px; }
 .selection-page { max-width: 760px; margin: 54px auto 0; }
 .selection-page h1 { margin: 10px 0 28px; font-size: clamp(32px, 5vw, 56px); font-weight: 400; }
 .selection-box { border: 1px solid var(--line); padding: 24px; }

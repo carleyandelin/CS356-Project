@@ -36,9 +36,12 @@ function renderBrowse() {
 function renderCategory(id) {
   const category = categoryById[id];
   if (!category) return renderBrowse();
+  const hobbyContent = category.facets
+    ? category.facets.map((facet) => `<section class="facet-section"><div class="section-title"><h2>${escapeHtml(facet.label)}</h2></div><div class="hobby-grid">${facet.cards.map((name) => hobbyCard(name, "creative outlet")).join("")}</div></section>`).join("")
+    : `<div class="hobby-grid category-grid">${category.cards.map((name) => hobbyCard(name, "activity category")).join("")}</div>`;
   app.innerHTML = `<div class="page"><a class="plain-link" href="#browse" data-log="Back to categories" data-log-destination="browse">[←] Back to categories</a>
     <div class="page-heading compact-heading"><div><p class="label">Activity category</p><h1>${escapeHtml(category.label)}</h1><p>${escapeHtml(category.description)}</p></div><span class="view-label">LEVEL 2</span></div>
-    <div class="hobby-grid category-grid">${category.cards.map((name) => hobbyCard(name, "activity category")).join("")}</div></div>`;
+    ${hobbyContent}</div>`;
 }
 
 function renderHobby(name) {
