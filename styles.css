@@ -20,6 +20,14 @@ button, a { cursor: pointer; }
 .top-nav { display: flex; gap: 20px; font-size: 12px; }
 .top-nav a { padding: 5px 0; border-bottom: 1px solid transparent; }
 .top-nav a.active, .top-nav a:hover { border-color: var(--line); }
+.category-nav { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.category-menu { position: relative; }
+.category-button { display: block; border: 1px solid var(--line); padding: 7px 8px; white-space: nowrap; }
+.category-button:hover, .category-button:focus-visible { background: var(--ink); color: var(--paper); }
+.facet-menu { display: none; position: absolute; z-index: 2; top: calc(100% + 4px); left: 0; min-width: 130px; border: 1px solid var(--line); background: var(--paper); }
+.category-menu:hover .facet-menu, .category-menu:focus-within .facet-menu { display: grid; }
+.facet-menu a { display: block; padding: 8px 10px; white-space: nowrap; }
+.facet-menu a:hover, .facet-menu a:focus-visible { background: var(--ink); color: var(--paper); }
 .wire-button { display: inline-block; border: 1px solid var(--line); background: var(--paper); padding: 9px 12px; font-size: 11px; }
 .page { padding: 48px 0 80px; }
 .page-heading { display: flex; justify-content: space-between; gap: 24px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
@@ -76,6 +84,8 @@ th { font-weight: 400; }
   .site-header { flex-wrap: wrap; gap: 12px; padding: 14px 0; }
   .brand { margin-right: 0; }
   .top-nav { order: 3; width: 100%; overflow-x: auto; }
+  .category-nav { order: 4; width: 100%; overflow-x: auto; padding-bottom: 2px; }
+  .category-menu { flex: 0 0 auto; }
   .page-heading, .section-title, .wireframe-note { display: block; }
   .view-label { display: block; margin-top: 22px; }
   .section-title p { text-align: left; }
