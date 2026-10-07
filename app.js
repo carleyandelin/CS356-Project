@@ -2,6 +2,9 @@ const data = window.HobbyAtlasData;
 
 const app = document.querySelector("#app");
 const categoryById = Object.fromEntries(data.categories.map((category) => [category.id, category]));
+const facetById = Object.fromEntries(
+  data.categories.flatMap((category) => (category.facets || []).map((facet) => [facet.id, { ...facet, category }])),
+);
 const logKey = "hobby-atlas-click-log";
 let clickLog = JSON.parse(localStorage.getItem(logKey) || "[]");
 
@@ -37,11 +40,19 @@ function renderCategory(id) {
   const category = categoryById[id];
   if (!category) return renderBrowse();
   const hobbyContent = category.facets
-    ? category.facets.map((facet) => `<section class="facet-section"><div class="section-title"><h2>${escapeHtml(facet.label)}</h2></div><div class="hobby-grid">${facet.cards.map((name) => hobbyCard(name, "creative outlet")).join("")}</div></section>`).join("")
+    ? `<div class="group-list facet-list">${category.facets.map((facet) => `<a class="group-block" href="#facet/${facet.id}" data-log="Open ${escapeHtml(facet.label)}" data-log-destination="facet/${facet.id}"><div class="group-heading"><p class="label">facet</p><h2>${escapeHtml(facet.label)}</h2><p>${escapeHtml(facet.description)}</p></div></a>`).join("")}</div>`
     : `<div class="hobby-grid category-grid">${category.cards.map((name) => hobbyCard(name, "activity category")).join("")}</div>`;
   app.innerHTML = `<div class="page"><a class="plain-link" href="#browse" data-log="Back to categories" data-log-destination="browse">[←] Back to categories</a>
     <div class="page-heading compact-heading"><div><p class="label">Activity category</p><h1>${escapeHtml(category.label)}</h1><p>${escapeHtml(category.description)}</p></div><span class="view-label">LEVEL 2</span></div>
     ${hobbyContent}</div>`;
+}
+
+function renderFacet(id) {
+  const facet = facetById[id];
+  if (!facet) return renderBrowse();
+  app.innerHTML = `<div class="page"><a class="plain-link" href="#category/${facet.category.id}" data-log="Back to ${escapeHtml(facet.category.label)}" data-log-destination="category/${facet.category.id}">[←] Back to ${escapeHtml(facet.category.label)}</a>
+    <div class="page-heading compact-heading"><div><p class="label">Creative outlet facet</p><h1>${escapeHtml(facet.label)}</h1><p>${escapeHtml(facet.description)}</p></div><span class="view-label">LEVEL 3</span></div>
+    <div class="hobby-grid category-grid">${facet.cards.map((name) => hobbyCard(name, "creative outlet facet")).join("")}</div></div>`;
 }
 
 function renderHobby(name) {
@@ -79,8 +90,9 @@ function renderLog() {
 
 function render() {
   const [route, value] = location.hash.slice(1).split("/");
-  document.querySelectorAll("[data-view-link]").forEach((link) => link.classList.toggle("active", link.dataset.viewLink === (route === "hobby" || route === "category" ? "browse" : route || "browse")));
-  if (route === "category") renderCategory(decodeURIComponent(value || ""));
+  document.querySelectorAll("[data-view-link]").forEach((link) => link.classList.toggle("active", link.dataset.viewLink === (route === "hobby" || route === "category" || route === "facet" ? "browse" : route || "browse")));
+  if (route === "facet") renderFacet(decodeURIComponent(value || ""));
+  else if (route === "category") renderCategory(decodeURIComponent(value || ""));
   else if (route === "hobby") renderHobby(decodeURIComponent(value || ""));
   else if (route === "about") renderAbout();
   else if (route === "log") renderLog();
