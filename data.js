@@ -6,7 +6,7 @@ const categories = [
     description: "Get outside and find your next adventure.",
     color: "coral",
     icon: "✦",
-    cards: ["Camping", "Sailing", "Whitewater Rafting", "Jet Skiing"],
+    cards: ["Camping", "Fishing", "Jet Skiing", "Hydrofoils", "Boating", "Paddleboarding", "RVing", "Sailing", "Horseback Riding", "Snorkeling", "Fossil Hunting", "Birdwatching", "Snowshoeing", "Skydiving", "Whitewater Rafting", "Freediving", "Hiking/Trail Walking"],
   },
   {
     id: "movement",
@@ -15,7 +15,7 @@ const categories = [
     description: "Build strength, skill, and momentum through active hobbies.",
     color: "lavender",
     icon: "✳",
-    cards: ["Rock Climbing", "Parkour", "Trampolining", "Pilates"],
+    cards: ["Pilates", "Pickleball", "Swimming", "Bowling", "Disc Golf", "Cycling", "Parkour", "Running", "Skateboarding", "Yoga", "Martial Arts", "Rock Climbing", "BMX", "Weightlifting", "Fencing", "Table Tennis", "Trampolining", "Calisthenics"],
   },
   {
     id: "learning",
@@ -24,7 +24,7 @@ const categories = [
     description: "Practice a new skill or follow a question further.",
     color: "mint",
     icon: "↗",
-    cards: ["Duo Lingo", "3D Printing"],
+    cards: ["Duo Lingo", "Coding", "3D Printing", "Astronomy"],
   },
   {
     id: "cultivating",
@@ -33,7 +33,7 @@ const categories = [
     description: "Nurture something patiently and watch it develop.",
     color: "butter",
     icon: "⌁",
-    cards: ["Bonsai", "Plant Propagation", "Sourdough"],
+    cards: ["Gardening", "Plant Propagation", "Canning", "Sourdough", "Beekeeping", "Chicken Keeping", "Meditation", "Candle Making", "Soap Making", "Mocktail Making", "Cake Decorating", "Barbecue/Smoking", "Bonsai"],
   },
   {
     id: "games",
@@ -42,7 +42,7 @@ const categories = [
     description: "Play, solve, and compete with a little friendly strategy.",
     color: "blue",
     icon: "◒",
-    cards: ["Chess", "Mahjong", "Escape Rooms"],
+    cards: ["Mahjong", "Gaming", "Chess", "Paintball", "Puzzles", "Magic", "Escape Rooms", "Trivia", "LEGO Building"],
   },
   {
     id: "creative-outlets",
@@ -52,9 +52,9 @@ const categories = [
     color: "lavender",
     icon: "✳",
     facets: [
-      { id: "art", label: "Art", description: "Make images, designs, and expressive objects.", cards: ["Painting", "Nail Art", "Cosplay"] },
-      { id: "media", label: "Media", description: "Create and share music, stories, and photographs.", cards: ["Guitar", "DJing", "Podcasting", "Photography"] },
-      { id: "collecting", label: "Collecting", description: "Gather, preserve, and give meaning to objects and memories.", cards: ["Scrapbooking", "Thrifting"] },
+      { id: "art", label: "Art", description: "Make images, designs, and expressive objects.", cards: ["Bedazzling", "Painting", "Crochet", "Air dry clay", "Pottery", "Scrapbooking", "Journaling", "Bag charms", "Calligraphy", "Coloring", "Poetry", "Juggling", "Balloon Animals", "Embroidery", "Origami", "Cosplaying", "Quilting", "Resin Art", "Model Kit Building", "Jewelry Making", "Slime Making", "Nail Art", "Makeup Artistry", "Graphic Design", "Flower Pressing", "Tie-Dye"] },
+      { id: "media", label: "Media", description: "Create and share music, stories, and photographs.", cards: ["Concerts", "Photography", "Videography", "Guitar", "Voice lessons", "Beatboxing", "Podcasting", "DJing"] },
+      { id: "collecting", label: "Collecting", description: "Gather, preserve, and give meaning to objects and memories.", cards: ["Watches", "Thrifting/Antiquing", "Bag charms", "Fidget Trading", "Vinyl Records"] },
     ],
   },
 ];
@@ -66,7 +66,7 @@ const hobbies = {
   "Duo Lingo": { category: "learning", blurb: "Build a small language habit through playful daily practice.", tags: ["learning", "solo", "10 minutes"], time: "10 – 20 min", startingPoint: "Choose a language and complete the first five-minute lesson.", related: ["Podcasting", "Chess"] },
   Painting: { category: "creative-outlets", blurb: "Turn color, texture, and a blank surface into a practice of noticing.", tags: ["creative", "solo", "relaxing"], time: "30 min – 3 hrs", startingPoint: "Pick three colors and paint what is in front of you.", related: ["Photography", "Scrapbooking"] },
   "Nail Art": { category: "creative-outlets", blurb: "A tiny canvas for pattern, color, and a little everyday delight.", tags: ["creative", "fashion", "solo"], time: "30 – 90 min", startingPoint: "Try one accent nail with a two-color palette.", related: ["Painting", "Cosplay"] },
-  Scrapbooking: { category: "creative-outlets", blurb: "Collect moments, paper, and stories into a tactile archive.", tags: ["creative", "collecting", "reflective"], time: "1 – 3 hrs", startingPoint: "Make one page from your last favorite day.", related: ["Photography", "Thrifting"] },
+  Scrapbooking: { category: "creative-outlets", blurb: "Collect moments, paper, and stories into a tactile archive.", tags: ["creative", "collecting", "reflective"], time: "1 – 3 hrs", startingPoint: "Make one page from your last favorite day.", related: ["Photography", "Thrifting/Antiquing"] },
   "3D Printing": { category: "learning", blurb: "Design a useful object, then watch an idea become physical.", tags: ["making", "learning", "tech"], time: "1 – 5 hrs", startingPoint: "Print a small, ready-made model from a library.", related: ["Painting", "Sourdough"] },
   Cosplay: { category: "creative-outlets", blurb: "Step into a character through costume, craft, and playful world-building.", tags: ["creative", "fashion", "social"], time: "2 hrs – weeks", startingPoint: "Style a character from pieces you already own.", related: ["Nail Art", "Escape Rooms"] },
   Sourdough: { category: "cultivating", blurb: "A patient kitchen ritual with a delicious, shareable finish.", tags: ["food", "making", "patient"], time: "1 hr + rest", startingPoint: "Start a small jar of beginner-friendly starter.", related: ["Bonsai", "3D Printing"] },
@@ -84,11 +84,33 @@ const hobbies = {
   DJing: { category: "creative-outlets", blurb: "Shape a room’s energy by finding the perfect next track.", tags: ["music", "tech", "social"], time: "30 min – 2 hrs", startingPoint: "Make a 20-minute mix from five songs you love.", related: ["Guitar", "Podcasting"] },
   Podcasting: { category: "creative-outlets", blurb: "Turn curiosity into a conversation, story, or tiny broadcast.", tags: ["media", "learning", "social"], time: "1 – 3 hrs", startingPoint: "Record a five-minute conversation with a friend.", related: ["DJing", "Duo Lingo"] },
   Photography: { category: "creative-outlets", blurb: "Train your eye to notice the light and stories hiding in plain sight.", tags: ["creative", "outdoors", "solo"], time: "20 min – 2 hrs", startingPoint: "Take ten photos of one ordinary object.", related: ["Painting", "Scrapbooking"] },
-  Thrifting: { category: "creative-outlets", blurb: "Search, style, and give a second life to something with a story.", tags: ["fashion", "collecting", "outdoors"], time: "1 – 3 hrs", startingPoint: "Set a $10 challenge at a local secondhand shop.", related: ["Scrapbooking", "Cosplay"] },
+  "Thrifting/Antiquing": { category: "creative-outlets", blurb: "Search, style, and give a second life to something with a story.", tags: ["fashion", "collecting", "outdoors"], time: "1 – 3 hrs", startingPoint: "Set a $10 challenge at a local secondhand shop.", related: ["Scrapbooking", "Cosplaying"] },
   Astronomy: { category: "outdoors", blurb: "Look farther out and make the night sky feel familiar.", tags: ["learning", "outdoors", "reflective"], time: "30 min – 2 hrs", startingPoint: "Use a sky map to find one constellation.", related: ["Camping", "Duo Lingo"] },
 };
 
-const allHobbies = [...new Set([...categories.flatMap((category) => category.cards), "Thrifting", "Astronomy"])];
+const hobbyNames = [...new Set(categories.flatMap((category) => [
+  ...(category.cards || []),
+  ...(category.facets || []).flatMap((facet) => facet.cards),
+]))];
+
+const hobbyCategoryByName = Object.fromEntries(categories.flatMap((category) => [
+  ...(category.cards || []).map((name) => [name, category.id]),
+  ...(category.facets || []).flatMap((facet) => facet.cards.map((name) => [name, category.id])),
+]));
+
+hobbyNames.forEach((name) => {
+  hobbies[name] ||= {
+    category: hobbyCategoryByName[name],
+    blurb: `Explore ${name.toLowerCase()} as a hobby that fits your interests.`,
+    tags: ["hobby", "exploration"],
+    time: "Start at your own pace",
+    startingPoint: `Find a beginner-friendly way to try ${name.toLowerCase()}.`,
+    related: [],
+  };
+  hobbies[name].category = hobbyCategoryByName[name];
+});
+
+const allHobbies = hobbyNames;
 
 const sortFindings = [
   { label: "Stable pairings", value: "5", detail: "Chess + Escape Rooms, Guitar + DJing, Bonsai + Plant Propagation, and more" },
