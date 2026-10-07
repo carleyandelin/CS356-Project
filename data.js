@@ -33,7 +33,10 @@ const categories = [
     description: "Nurture something patiently and watch it develop.",
     color: "butter",
     icon: "⌁",
-    cards: ["Gardening", "Plant Propagation", "Canning", "Sourdough", "Beekeeping", "Chicken Keeping", "Meditation", "Candle Making", "Soap Making", "Mocktail Making", "Cake Decorating", "Barbecue/Smoking", "Bonsai"],
+    cards: ["Gardening", "Plant Propagation", "Meditation", "Bonsai"],
+    facets: [
+      { id: "homestead", label: "Homestead", description: "Build practical home and kitchen skills through patient, hands-on routines.", cards: ["Canning", "Sourdough", "Candle Making", "Soap Making", "Cake Decorating", "Barbecue/Smoking", "Chicken Keeping", "Beekeeping"] },
+    ],
   },
   {
     id: "games",
