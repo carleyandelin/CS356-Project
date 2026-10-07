@@ -52,9 +52,9 @@ const categories = [
     color: "lavender",
     icon: "✳",
     facets: [
-      { label: "Art", cards: ["Painting", "Nail Art", "Cosplay"] },
-      { label: "Media", cards: ["Guitar", "DJing", "Podcasting", "Photography"] },
-      { label: "Collecting", cards: ["Scrapbooking", "Thrifting"] },
+      { id: "art", label: "Art", description: "Make images, designs, and expressive objects.", cards: ["Painting", "Nail Art", "Cosplay"] },
+      { id: "media", label: "Media", description: "Create and share music, stories, and photographs.", cards: ["Guitar", "DJing", "Podcasting", "Photography"] },
+      { id: "collecting", label: "Collecting", description: "Gather, preserve, and give meaning to objects and memories.", cards: ["Scrapbooking", "Thrifting"] },
     ],
   },
 ];
