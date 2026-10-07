@@ -35,7 +35,8 @@ button, a { cursor: pointer; }
 .section-title h2 { margin: 0 0 12px; font-size: 20px; font-weight: 400; }
 .section-title p { margin: 0 0 12px; font-size: 12px; text-align: right; }
 .group-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 14px; }
-.group-block { border: 1px solid var(--line); padding: 18px; }
+.group-block { display: block; border: 1px solid var(--line); padding: 18px; }
+.group-block:hover { outline: 2px solid var(--ink); outline-offset: -2px; }
 .group-heading h2 { margin: 4px 0 8px; font-size: 18px; font-weight: 400; }
 .group-heading p { margin: 0 0 16px; font-size: 12px; }
 .group-heading .label { margin: 0; color: var(--ink); }
