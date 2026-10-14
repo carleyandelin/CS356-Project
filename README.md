@@ -2,4 +2,4 @@
 studies and wireframes for hobby IA
 
 
-see [here](https://carleyandelin.github.io/CS356-Project/) for our wireframe
+See the [wireframe and prototype](https://carleyandelin.github.io/CS356-Project/index.html).
