@@ -48,6 +48,7 @@ let testSessions = JSON.parse(localStorage.getItem(SESSION_KEY) || '[]');
 // phase: "preview"    → task card is showing; timer not yet started
 //        "navigating" → participant is in the tree; timer running
 let activeSession = null;
+let activeSearchQuery = '';
 
 // ─── Build category nav ────────────────────────────────────────────────────
 categoryNav.innerHTML =
@@ -105,8 +106,14 @@ function shuffleArray(arr) {
 }
 
 // ─── Click recording ───────────────────────────────────────────────────────
-function recordClick(label, destination) {
-  const entry = {timestamp: new Date().toISOString(), label, destination};
+function recordClick(label, destination, query = '') {
+  const entry = {
+    timestamp: new Date().toISOString(),
+    type: 'click',
+    label,
+    destination,
+    query: query || null
+  };
   clickLog.push(entry);
   localStorage.setItem(LOG_KEY, JSON.stringify(clickLog));
   // Only log to session path while actively navigating (not during task
@@ -420,18 +427,27 @@ function downloadSessions(format) {
 }
 
 // ─── Normal wireframe views ────────────────────────────────────────────────
-function hobbyCard(name) {
+function contentBlock(name, query = '') {
   const hobby = data.hobbies[name];
   return `<a class="hobby-card" href="#hobby/${
       encodeURIComponent(
           name)}" data-log="${escapeHtml(name)}" data-log-destination="hobby/${
       encodeURIComponent(name)}">
-    <strong>${escapeHtml(name)}</strong><small>${
-      escapeHtml(
-          (hobby?.tags || [])
-              .slice(0, 2)
-              .join(' / '))}</small><span aria-hidden="true">[open]</span>
+    <strong>${escapeHtml(name)}</strong><small>${escapeHtml(
+      hobby?.summary || hobby?.blurb || '')}</small><span aria-hidden="true">→</span>
   </a>`;
+}
+
+function hobbyCard(name) {
+  return contentBlock(name, activeSearchQuery);
+}
+
+function searchForm() {
+  return `<form class="search-form" data-search-form role="search">
+    <label class="sr-only" for="site-search">Search hobbies</label>
+    <input id="site-search" type="search" name="q" placeholder="Search by hobby, mood, or idea" autocomplete="off" />
+    <button type="submit" aria-label="Search">Search</button>
+  </form>`;
 }
 
 function groupBlock(group) {
@@ -445,11 +461,67 @@ function groupBlock(group) {
 
 function renderBrowse() {
   app.innerHTML = `<div class="page">
-    <div class="page-heading"><div><p class="label">Home</p><h1>Hobby Atlas</h1><p>Choose an activity category to explore its hobbies.</p></div><span class="view-label">WIREFRAME / 01</span></div>
-    <section class="wireframe-note"><strong>Choose a category to see its hobbies.</strong><span>Every hobby opens a "you selected" page.</span></section>
-    <div class="view-section"><div class="section-title"><h2>Activity categories</h2><p>Primary grouping from repeated card-sort pairings.</p></div>
+    <div class="page-heading"><div><p class="label">Welcome</p><h1>Hobby Atlas</h1><p>Find something lovely to make, learn, play, or explore.</p>${searchForm()}</div></div>
+    <div class="view-section">
     <div class="group-list">${
       data.categories.map(groupBlock).join('')}</div></div>
+  </div>`;
+}
+
+function searchMatches(query) {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return [];
+  return data.allHobbies.filter((name) => {
+    const hobby = data.hobbies[name];
+    const category = categoryById[hobby.category];
+    const haystack = [
+      name, hobby.summary, hobby.blurb, ...(hobby.tags || []),
+      category?.label, ...(data.searchConcepts[normalized] || [])
+    ].join(' ').toLowerCase();
+    const conceptHits = Object.entries(data.searchConcepts)
+        .filter(([term, synonyms]) =>
+          normalized === term || synonyms.some((synonym) => normalized === synonym))
+        .flatMap(([term, synonyms]) => [term, ...synonyms]);
+    return haystack.includes(normalized) ||
+        conceptHits.some((term) => haystack.includes(term));
+  });
+}
+
+function logSearch(query, resultCount) {
+  const entry = {
+    timestamp: new Date().toISOString(),
+    type: 'search',
+    query,
+    resultCount
+  };
+  clickLog.push(entry);
+  localStorage.setItem(LOG_KEY, JSON.stringify(clickLog));
+}
+
+function renderSearch(query, facetId = '') {
+  activeSearchQuery = query;
+  const results = searchMatches(query).filter((name) => {
+    if (!facetId) return true;
+    return data.hobbies[name].categoryIds.includes(facetId);
+  });
+  const facets = [...new Map(results.map((name) => {
+    const hobby = data.hobbies[name];
+    return hobby.categoryIds.map((categoryId) => [categoryId, categoryById[categoryId]]);
+  }).flat()).values()];
+  app.innerHTML = `<div class="page">
+    <div class="page-heading"><div><p class="label">Search</p><h1>Find a hobby</h1>
+      <p>Showing results for <strong>“${escapeHtml(query)}”</strong>.</p></div>
+      <span class="view-label">VIEW / SEARCH</span></div>
+    <div class="search-facets" aria-label="Narrow search results">
+      <span class="label">Narrow by category</span>
+      ${facets.map((facet) => `<a class="facet-chip" href="#search/${encodeURIComponent(query)}/${facet.id}"
+        data-log="Narrow to ${escapeHtml(facet.label)}" data-log-destination="search/${encodeURIComponent(query)}/${facet.id}">${escapeHtml(facet.label)}</a>`).join('')}
+    </div>
+    ${results.length ? `<div class="search-results"><div class="section-title"><h2>${results.length} matching blocks</h2><p>Literal terms plus the committed concept vocabulary.</p></div>
+      <div class="hobby-grid">${results.map(contentBlock).join('')}</div></div>` :
+      `<section class="no-results"><p class="label">No exact or concept matches</p><h2>Try a nearby idea</h2>
+        <p>Search for “stars,” “bread,” “vintage,” “programming,” or “friends” to explore related vocabulary from the tree test.</p>
+        <a class="wire-button" href="#browse" data-log="Return to explore" data-log-destination="browse">Return to explore</a></section>`}
   </div>`;
 }
 
@@ -477,7 +549,7 @@ function renderCategory(id) {
           category.cards.map(hobbyCard).join('')}</div>`;
 
   app.innerHTML = `<div class="page">
-    <a class="plain-link" href="#browse" data-log="Back to categories" data-log-destination="browse">[←] Back to categories</a>
+    <a class="plain-link back-link" href="#browse" data-log="Back to categories" data-log-destination="browse">← Back to categories</a>
     <div class="page-heading compact-heading"><div><p class="label">Activity category</p><h1>${
       escapeHtml(category.label)}</h1><p>${
       escapeHtml(
@@ -492,10 +564,10 @@ function renderFacet(id) {
   const facet = facetById[id];
   if (!facet) return renderBrowse();
   app.innerHTML = `<div class="page">
-    <a class="plain-link" href="#category/${
+    <a class="plain-link back-link" href="#category/${
       facet.category.id}" data-log="Back to ${
       escapeHtml(facet.category.label)}" data-log-destination="category/${
-      facet.category.id}">[←] Back to ${escapeHtml(facet.category.label)}</a>
+      facet.category.id}">← Back to ${escapeHtml(facet.category.label)}</a>
     <div class="page-heading compact-heading"><div><p class="label">Activity facet</p><h1>${
       escapeHtml(facet.label)}</h1><p>${
       escapeHtml(
@@ -516,10 +588,9 @@ function renderHobby(name) {
   // researcher info)
   if (MODE === 'test') {
     app.innerHTML = `<div class="page">
-      <a class="plain-link" href="#browse" data-log="Back to categories" data-log-destination="browse">[←] Back to categories</a>
+      <a class="plain-link back-link" href="#browse" data-log="Back to categories" data-log-destination="browse">← Back to categories</a>
       <article class="selection-page">
-        <p class="label">Leaf / selected block</p>
-        <h1>You selected: ${escapeHtml(name)}</h1>
+        <h1>${escapeHtml(name)}</h1>
         ${answerButton('hobby/' + name)}
       </article>
     </div>`;
@@ -528,10 +599,9 @@ function renderHobby(name) {
 
   // Normal wireframe view: full detail card
   app.innerHTML = `<div class="page">
-    <a class="plain-link" href="#browse" data-log="Back to categories" data-log-destination="browse">[←] Back to categories</a>
+    <a class="plain-link back-link" href="#browse" data-log="Back to categories" data-log-destination="browse">← Back to categories</a>
     <article class="selection-page">
-      <p class="label">Leaf / selected block</p>
-      <h1>You selected: ${escapeHtml(name)}</h1>
+      <h1>${escapeHtml(name)}</h1>
       <div class="selection-box">
         <p>${escapeHtml(hobby.blurb)}</p>
         <dl>
@@ -567,9 +637,10 @@ function renderAbout() {
 
 function downloadLog(format) {
   const content = format === 'json' ? JSON.stringify(clickLog, null, 2) : [
-    'timestamp,label,destination',
+    'timestamp,type,label,destination,query,resultCount',
     ...clickLog.map(
-        (e) => [e.timestamp, e.label, e.destination]
+        (e) => [e.timestamp, e.type || 'click', e.label, e.destination,
+                e.query, e.resultCount]
                    .map((v) => `"${String(v).replaceAll('"', '""')}"`)
                    .join(','))
   ].join('\n');
@@ -596,15 +667,17 @@ function renderLog() {
       <button class="wire-button" data-clear-log>Clear log</button>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Timestamp</th><th>Clicked label</th><th>Destination</th></tr></thead>
+      <thead><tr><th>Timestamp</th><th>Event</th><th>Label / query</th><th>Destination</th><th>Query</th></tr></thead>
       <tbody>${
       clickLog
           .map(
-              (e) => `<tr><td>${escapeHtml(e.timestamp)}</td><td>${
-                  escapeHtml(
-                      e.label)}</td><td>${escapeHtml(e.destination)}</td></tr>`)
+              (e) => `<tr><td>${escapeHtml(e.timestamp)}</td><td>${escapeHtml(
+                  e.type || 'click')}</td><td>${escapeHtml(
+                  e.label || e.query || '')}</td><td>${escapeHtml(
+                  e.destination || `${e.resultCount} results`)}</td><td>${escapeHtml(
+                  e.query || '—')}</td></tr>`)
           .join('') ||
-      '<tr><td colspan=\'3\'>No clicks recorded yet.</td></tr>'}</tbody>
+      '<tr><td colspan=\'5\'>No events recorded yet.</td></tr>'}</tbody>
     </table></div>
   </div>`;
 }
@@ -627,7 +700,8 @@ function render() {
     }
   }
 
-  const [route, value] = location.hash.slice(1).split('/');
+  const [route, value, facetId] = location.hash.slice(1).split('/');
+  document.body.classList.toggle('browse-route', route === 'browse' || !route);
   document.querySelectorAll('[data-view-link]')
       .forEach(
           (link) => link.classList.toggle(
@@ -645,6 +719,8 @@ function render() {
     renderHobby(decodeURIComponent(value || ''));
   else if (route === 'about')
     renderAbout();
+  else if (route === 'search')
+    renderSearch(decodeURIComponent(value || ''), decodeURIComponent(facetId || ''));
   else if (route === 'log')
     renderLog();
   else
@@ -657,7 +733,8 @@ function render() {
 document.addEventListener('click', (event) => {
   const logTarget = event.target.closest('[data-log]');
   if (logTarget)
-    recordClick(logTarget.dataset.log, logTarget.dataset.logDestination);
+    recordClick(logTarget.dataset.log, logTarget.dataset.logDestination,
+                location.hash.startsWith('#search/') ? activeSearchQuery : '');
 
   // Start session (welcome screen)
   if (event.target.closest('[data-start-test]')) {
@@ -712,6 +789,17 @@ document.addEventListener('click', (event) => {
     localStorage.removeItem(SESSION_KEY);
     renderResults();
   }
+});
+
+document.addEventListener('submit', (event) => {
+  const form = event.target.closest('[data-search-form]');
+  if (!form) return;
+  event.preventDefault();
+  const query = new FormData(form).get('q')?.toString().trim() || '';
+  if (!query) return;
+  const results = searchMatches(query);
+  logSearch(query, results.length);
+  location.hash = `search/${encodeURIComponent(query)}`;
 });
 
 window.addEventListener('hashchange', render);

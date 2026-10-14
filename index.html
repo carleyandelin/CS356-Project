@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Hobby Atlas information architecture wireframe" />
-    <title>Hobby Atlas | IA wireframe</title>
+    <meta name="description" content="Hobby Atlas information architecture prototype" />
+    <title>Hobby Atlas | Explore hobbies</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -12,16 +12,20 @@
       <header class="site-header">
         <a class="brand" href="#browse" aria-label="Hobby Atlas home" data-log="Hobby Atlas home" data-log-destination="browse">
           <span class="brand-mark">HA</span>
-          <span><strong>Hobby Atlas</strong><small>an IA wireframe</small></span>
+          <span><strong>Hobby Atlas</strong><small>make room for wonder</small></span>
         </a>
         <nav class="top-nav" aria-label="Primary navigation">
           <a href="#browse" data-view-link="browse" data-log="Explore" data-log-destination="browse">Explore</a>
-          <a href="#about" data-view-link="about" data-log="Card sort evidence" data-log-destination="about">Card sort evidence</a>
           <a href="#log" data-view-link="log" data-log="Click log" data-log-destination="log">Click log</a>
         </nav>
         <nav class="category-nav" aria-label="Activity categories"></nav>
         <a class="wire-button" href="#browse" data-log="Start over" data-log-destination="browse">Start over</a>
       </header>
+      <form class="search-form header-search" data-search-form role="search">
+        <label class="sr-only" for="header-search">Search hobbies</label>
+        <input id="header-search" type="search" name="q" placeholder="Search hobbies" autocomplete="off" />
+        <button type="submit" aria-label="Search">Search</button>
+      </form>
 
       <!-- Tree test task banner — shown only in ?test mode -->
       <div id="test-banner" class="test-banner" hidden></div>
@@ -29,8 +33,8 @@
       <main id="app" tabindex="-1"></main>
 
       <footer class="site-footer">
-        <span>HOBBY ATLAS / WIREFRAME V1</span>
-        <span>Based on 8 open card sorts · 26 cards</span>
+        <span>HOBBY ATLAS / PROTOTYPE V1</span>
+        <span>Find a little joy in the everyday.</span>
       </footer>
     </div>
     <script src="data.js"></script>
