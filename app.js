@@ -5,8 +5,16 @@ const categoryNav = document.querySelector('.category-nav');
 const testBanner = document.querySelector('#test-banner');
 
 const categoryById = Object.fromEntries(data.categories.map((c) => [c.id, c]));
-const facetById = Object.fromEntries(data.categories.flatMap(
-    (c) => (c.facets || []).map((f) => [f.id, {...f, category: c}])));
+// Recursively build facetById to handle nested facets (e.g. Art > Craft > Needle & Thread)
+function collectAllFacets(category, facets, parentFacetId = null) {
+  return facets.flatMap((f) => [
+    [f.id, { ...f, category, parentFacetId }],
+    ...(f.facets ? collectAllFacets(category, f.facets, f.id) : []),
+  ]);
+}
+const facetById = Object.fromEntries(
+  data.categories.flatMap((c) => collectAllFacets(c, c.facets || []))
+);
 
 // ─── URL mode detection ────────────────────────────────────────────────────
 // ?test    → participant tree test session
@@ -563,19 +571,38 @@ function renderCategory(id) {
 function renderFacet(id) {
   const facet = facetById[id];
   if (!facet) return renderBrowse();
+  // Back link: parent facet if nested, otherwise parent category
+  const backHref = facet.parentFacetId
+    ? `#facet/${facet.parentFacetId}`
+    : `#category/${facet.category.id}`;
+  const backLabel = facet.parentFacetId
+    ? escapeHtml(facetById[facet.parentFacetId]?.label || facet.category.label)
+    : escapeHtml(facet.category.label);
+  const backDest = facet.parentFacetId
+    ? `facet/${facet.parentFacetId}`
+    : `category/${facet.category.id}`;
+  // Content: sub-facets (group list) or hobbies (card grid)
+  const facetContent = facet.facets?.length
+    ? `<div class="group-list facet-list">${
+        facet.facets.map((sub) =>
+          `<a class="group-block" href="#facet/${sub.id}" data-log="Open ${
+            escapeHtml(sub.label)}" data-log-destination="facet/${sub.id}">
+           <div class="group-heading"><p class="label">facet</p><h2>${
+            escapeHtml(sub.label)}</h2><p>${
+            escapeHtml(sub.description)}</p></div></a>`
+        ).join('')
+      }</div>`
+    : `<div class="hobby-grid category-grid">${
+        (facet.cards || []).map(hobbyCard).join('')
+      }</div>`;
   app.innerHTML = `<div class="page">
-    <a class="plain-link back-link" href="#category/${
-      facet.category.id}" data-log="Back to ${
-      escapeHtml(facet.category.label)}" data-log-destination="category/${
-      facet.category.id}">← Back to ${escapeHtml(facet.category.label)}</a>
+    <a class="plain-link back-link" href="${backHref}" data-log="Back to ${
+      backLabel}" data-log-destination="${backDest}">← Back to ${backLabel}</a>
     <div class="page-heading compact-heading"><div><p class="label">Activity facet</p><h1>${
       escapeHtml(facet.label)}</h1><p>${
-      escapeHtml(
-          facet
-              .description)}</p></div><span class="view-label">LEVEL 3</span></div>
+      escapeHtml(facet.description)}</p></div><span class="view-label">LEVEL 3</span></div>
     ${answerButton('facet/' + id)}
-    <div class="hobby-grid category-grid">${
-      facet.cards.map(hobbyCard).join('')}</div>
+    ${facetContent}
   </div>`;
 }
 
