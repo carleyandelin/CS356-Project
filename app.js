@@ -510,7 +510,8 @@ function renderBrowse() {
     },
     {
       label: 'Gaming',
-      key: 'Gaming',
+      key: 'Video Games',
+      destination: 'category/games',
       img: 'https://source.unsplash.com/400x400/?gaming,controller',
       demoStyle: 'split'
     },
@@ -534,11 +535,11 @@ function renderBrowse() {
     },
   ];
 
-  function makeCard({label, key, img, demoStyle}) {
+  function makeCard({label, key, destination, img, demoStyle}) {
     const hobby = data.hobbies[key] || {};
-    const href = `#hobby/${encodeURIComponent(key)}`;
+    const dest = destination || `hobby/${encodeURIComponent(key)}`;
+    const href = `#${dest}`;
     const log = `Open ${escapeHtml(label)}`;
-    const dest = `hobby/${encodeURIComponent(key)}`;
 
     if (demoStyle === 'overlay') {
       return `<a class="hot-card hot-card--overlay" href="${href}"
