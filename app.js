@@ -472,19 +472,69 @@ function groupBlock(group) {
 
 function renderBrowse() {
   const hotList = [
-    { label: 'Mahjong',      key: 'Mahjong',             img: 'https://source.unsplash.com/400x400/?mahjong,tiles',      demoStyle: 'split' },
-    { label: 'Pickleball',   key: 'Pickleball',          img: 'https://source.unsplash.com/400x400/?pickleball,sport',   demoStyle: 'split' },
-    { label: 'Scrapbooking', key: 'Scrapbooking',        img: 'https://source.unsplash.com/400x400/?scrapbooking,craft', demoStyle: 'split' },
-    { label: 'Hiking',       key: 'Hiking/Trail Walking', img: 'https://source.unsplash.com/400x400/?hiking,trail',      demoStyle: 'split' },
-    { label: 'Snowshoeing',  key: 'Snowshoeing',         img: 'https://source.unsplash.com/400x400/?snowshoeing,winter', demoStyle: 'split' },
-    { label: 'Sourdough',    key: 'Sourdough',           img: 'https://source.unsplash.com/400x400/?sourdough,bread',   demoStyle: 'split' },
-    { label: 'Gaming',       key: 'Gaming',              img: 'https://source.unsplash.com/400x400/?gaming,controller',  demoStyle: 'split' },
-    { label: 'Thrifting',    key: 'Thrifting/Antiquing', img: 'https://source.unsplash.com/400x400/?thrift,vintage',    demoStyle: 'split' },
-    { label: 'Photography',  key: 'Photography',         img: 'https://source.unsplash.com/400x400/?photography,camera', demoStyle: 'split' },
-    { label: 'Yoga',         key: 'Yoga',                img: 'https://source.unsplash.com/400x400/?yoga,meditation',   demoStyle: 'split' },
+    {
+      label: 'Mahjong',
+      key: 'Mahjong',
+      img: 'https://source.unsplash.com/400x400/?mahjong,tiles',
+      demoStyle: 'split'
+    },
+    {
+      label: 'Pickleball',
+      key: 'Pickleball',
+      img: 'https://source.unsplash.com/400x400/?pickleball,sport',
+      demoStyle: 'split'
+    },
+    {
+      label: 'Scrapbooking',
+      key: 'Scrapbooking',
+      img: 'https://source.unsplash.com/400x400/?scrapbooking,craft',
+      demoStyle: 'split'
+    },
+    {
+      label: 'Hiking',
+      key: 'Hiking/Trail Walking',
+      img: 'https://source.unsplash.com/400x400/?hiking,trail',
+      demoStyle: 'split'
+    },
+    {
+      label: 'Snowshoeing',
+      key: 'Snowshoeing',
+      img: 'https://source.unsplash.com/400x400/?snowshoeing,winter',
+      demoStyle: 'split'
+    },
+    {
+      label: 'Sourdough',
+      key: 'Sourdough',
+      img: 'https://source.unsplash.com/400x400/?sourdough,bread',
+      demoStyle: 'split'
+    },
+    {
+      label: 'Gaming',
+      key: 'Gaming',
+      img: 'https://source.unsplash.com/400x400/?gaming,controller',
+      demoStyle: 'split'
+    },
+    {
+      label: 'Thrifting',
+      key: 'Thrifting/Antiquing',
+      img: 'https://source.unsplash.com/400x400/?thrift,vintage',
+      demoStyle: 'split'
+    },
+    {
+      label: 'Photography',
+      key: 'Photography',
+      img: 'https://source.unsplash.com/400x400/?photography,camera',
+      demoStyle: 'split'
+    },
+    {
+      label: 'Yoga',
+      key: 'Yoga',
+      img: 'https://source.unsplash.com/400x400/?yoga,meditation',
+      demoStyle: 'split'
+    },
   ];
 
-  function makeCard({ label, key, img, demoStyle }) {
+  function makeCard({label, key, img, demoStyle}) {
     const hobby = data.hobbies[key] || {};
     const href = `#hobby/${encodeURIComponent(key)}`;
     const log = `Open ${escapeHtml(label)}`;
@@ -518,9 +568,10 @@ function renderBrowse() {
     </a>`;
   }
 
-  // Clone buffer: last 3 real cards prepended, first 3 appended — enables seamless infinite loop
+  // Clone buffer: last 3 real cards prepended, first 3 appended — enables
+  // seamless infinite loop
   const CLONE = 3;
-  const realHtml  = hotList.map(makeCard).join('');
+  const realHtml = hotList.map(makeCard).join('');
   const headClone = hotList.slice(-CLONE).map(makeCard).join('');
   const tailClone = hotList.slice(0, CLONE).map(makeCard).join('');
 
@@ -531,20 +582,23 @@ function renderBrowse() {
     <div class="carousel-wrap">
       <button class="carousel-btn carousel-prev" aria-label="Previous hobbies">&#8249;</button>
       <div class="carousel-track" id="carousel-track">
-        <div class="carousel-inner" id="carousel-inner">${headClone}${realHtml}${tailClone}</div>
+        <div class="carousel-inner" id="carousel-inner">${headClone}${
+      realHtml}${tailClone}</div>
       </div>
       <button class="carousel-btn carousel-next" aria-label="Next hobbies">&#8250;</button>
     </div>
-    <div class="hot-list-search-band"><p class="hot-list-search-prompt">Not seeing your thing? Search for it.</p><div class="hot-list-search">${searchForm()}</div></div>
+    <div class="hot-list-search-band"><p class="hot-list-search-prompt">Not seeing your thing? Search for it.</p><div class="hot-list-search">${
+      searchForm()}</div></div>
   </div>`;
 
   // — infinite sliding carousel —
   const PER_PAGE = 4;
   const GAP = 14;
-  const TOTAL = hotList.length;          // 10 real cards
-  const SNAP_LO = CLONE;                 // 3  — first real position
-  const SNAP_HI = CLONE + TOTAL;         // 13 — first position fully in right clone zone
-  let idx = CLONE;                       // start at first real card
+  const TOTAL = hotList.length;  // 10 real cards
+  const SNAP_LO = CLONE;         // 3  — first real position
+  const SNAP_HI =
+      CLONE + TOTAL;  // 13 — first position fully in right clone zone
+  let idx = CLONE;    // start at first real card
   let busy = false;
 
   const trackEl = document.getElementById('carousel-track');
@@ -559,12 +613,13 @@ function renderBrowse() {
 
   function moveTo(newIdx, animate) {
     idx = newIdx;
-    const cardW = parseFloat(getComputedStyle(trackEl).getPropertyValue('--card-w'));
+    const cardW =
+        parseFloat(getComputedStyle(trackEl).getPropertyValue('--card-w'));
     const offset = idx * (cardW + GAP);
     if (!animate) {
       innerEl.style.transition = 'none';
       innerEl.style.transform = `translateX(-${offset}px)`;
-      innerEl.offsetHeight; // force reflow
+      innerEl.offsetHeight;  // force reflow
       innerEl.style.transition = '';
     } else {
       innerEl.style.transform = `translateX(-${offset}px)`;
@@ -577,18 +632,24 @@ function renderBrowse() {
     moveTo(idx + dir, true);
     setTimeout(() => {
       // After animation, snap to real zone if we landed in a clone zone
-      if (idx < SNAP_LO)  moveTo(idx + TOTAL, false);
+      if (idx < SNAP_LO) moveTo(idx + TOTAL, false);
       if (idx >= SNAP_HI) moveTo(idx - TOTAL, false);
       busy = false;
-    }, 370); // just after CSS transition (350ms)
+    }, 370);  // just after CSS transition (350ms)
   }
 
   setCardWidth();
   moveTo(CLONE, false);
-  window.addEventListener('resize', () => { setCardWidth(); moveTo(idx, false); });
+  window.addEventListener('resize', () => {
+    setCardWidth();
+    moveTo(idx, false);
+  });
 
-  prevBtn.addEventListener('click', () => slide(+1)); // left arrow → strip moves left → later cards
-  nextBtn.addEventListener('click', () => slide(-1)); // right arrow → strip moves right → earlier cards
+  prevBtn.addEventListener(
+      'click', () => slide(+1));  // left arrow → strip moves left → later cards
+  nextBtn.addEventListener(
+      'click',
+      () => slide(-1));  // right arrow → strip moves right → earlier cards
 }
 
 function searchMatches(query) {
@@ -874,7 +935,9 @@ function render() {
                        route || 'browse')));
 
   // Mark active category button
-  const activeId = (route === 'category' || route === 'facet') ? decodeURIComponent(value || '') : null;
+  const activeId = (route === 'category' || route === 'facet') ?
+      decodeURIComponent(value || '') :
+      null;
   document.querySelectorAll('.category-button').forEach(btn => {
     const href = btn.getAttribute('href') || '';
     const btnId = decodeURIComponent(href.replace('#category/', ''));
@@ -983,22 +1046,76 @@ document.addEventListener('submit', (event) => {
 
   const e = (name) => encodeURIComponent(name);
   const slogans = [
-    { html: `The ground is overrated. Try <a class="banner-link" href="#hobby/${e('Rock Climbing')}">rock climbing</a>.` },
-    { html: `Your <a class="banner-link" href="#hobby/${e('Sourdough')}">sourdough</a> starter won't feed itself.` },
-    { html: `The moment is already leaving. <a class="banner-link" href="#hobby/${e('Photography')}">Photography</a> catches it.` },
-    { html: `There's a <a class="banner-link" href="#hobby/${e('Hiking/Trail Walking')}">hiking</a> trail with your name on it.` },
-    { html: `The universe has more going on than your inbox. Look up. Try <a class="banner-link" href="#hobby/${e('Astronomy')}">astronomy</a>.` },
-    { html: `Start <a class="banner-link" href="#hobby/${e('Journaling')}">journaling</a>. Your future self will thank you.` },
-    { html: `There's a whole world below the surface. <a class="banner-link" href="#hobby/${e('Freediving')}">Freediving</a> gets you there.` },
-    { html: `Every app you use started with one line of code. <a class="banner-link" href="#hobby/${e('Coding')}">Coding</a> starts the same way.` },
-    { html: `<a class="banner-link" href="#hobby/${e('Yoga')}">Yoga</a> is just stretching until it isn't.` },
-    { html: `Fly <a class="banner-link" href="#hobby/${e('Fishing')}">fishing</a> is just a really good excuse to stand in a river.` },
-    { html: `<a class="banner-link" href="#hobby/${e('Running')}">Running</a> is just walking but angrier. You'll be obsessed in a month.` },
-    { html: `You've never felt cooler than you will on a <a class="banner-link" href="#hobby/${e('Skateboarding')}">skateboard</a> going downhill.` },
-    { html: `<a class="banner-link" href="#hobby/${e('Origami')}">Origami</a> takes five minutes to learn and the rest of your life to master. Start today.` },
-    { html: `The first thing you <a class="banner-link" href="#hobby/${e('Gardening')}">grow</a> yourself will taste better than anything you've bought.` },
-    { html: `You'll be surprised how much you care about <a class="banner-link" href="#hobby/${e('Beekeeping')}">bees</a> once they're yours.` },
-    { html: `Once you learn <a class="banner-link" href="#hobby/${e('Calligraphy')}">calligraphy</a> you'll want to handwrite everything.` },
+    {
+      html: `The ground is overrated. Try <a class="banner-link" href="#hobby/${
+          e('Rock Climbing')}">rock climbing</a>.`
+    },
+    {
+      html: `Your <a class="banner-link" href="#hobby/${
+          e('Sourdough')}">sourdough</a> starter won't feed itself.`
+    },
+    {
+      html:
+          `The moment is already leaving. <a class="banner-link" href="#hobby/${
+              e('Photography')}">Photography</a> catches it.`
+    },
+    {
+      html: `There's a <a class="banner-link" href="#hobby/${
+          e('Hiking/Trail Walking')}">hiking</a> trail with your name on it.`
+    },
+    {
+      html:
+          `The universe has more going on than your inbox. Look up. Try <a class="banner-link" href="#hobby/${
+              e('Astronomy')}">astronomy</a>.`
+    },
+    {
+      html: `Start <a class="banner-link" href="#hobby/${
+          e('Journaling')}">journaling</a>. Your future self will thank you.`
+    },
+    {
+      html:
+          `There's a whole world below the surface. <a class="banner-link" href="#hobby/${
+              e('Freediving')}">Freediving</a> gets you there.`
+    },
+    {
+      html:
+          `Every app you use started with one line of code. <a class="banner-link" href="#hobby/${
+              e('Coding')}">Coding</a> starts the same way.`
+    },
+    {
+      html: `<a class="banner-link" href="#hobby/${
+          e('Yoga')}">Yoga</a> is just stretching until it isn't.`
+    },
+    {
+      html: `Fly <a class="banner-link" href="#hobby/${
+          e('Fishing')}">fishing</a> is just a really good excuse to stand in a river.`
+    },
+    {
+      html: `<a class="banner-link" href="#hobby/${
+          e('Running')}">Running</a> is just walking but angrier. You'll be obsessed in a month.`
+    },
+    {
+      html:
+          `You've never felt cooler than you will on a <a class="banner-link" href="#hobby/${
+              e('Skateboarding')}">skateboard</a> going downhill.`
+    },
+    {
+      html: `<a class="banner-link" href="#hobby/${
+          e('Origami')}">Origami</a> takes five minutes to learn and the rest of your life to master. Start today.`
+    },
+    {
+      html: `The first thing you <a class="banner-link" href="#hobby/${
+          e('Gardening')}">grow</a> yourself will taste better than anything you've bought.`
+    },
+    {
+      html:
+          `You'll be surprised how much you care about <a class="banner-link" href="#hobby/${
+              e('Beekeeping')}">bees</a> once they're yours.`
+    },
+    {
+      html: `Once you learn <a class="banner-link" href="#hobby/${
+          e('Calligraphy')}">calligraphy</a> you'll want to handwrite everything.`
+    },
   ];
 
   let index = 0;
