@@ -11,18 +11,21 @@ const categories = [
         id: "on-the-water",
         label: "On the Water",
         description: "Water-based adventures and aquatic hobbies.",
+        img: "https://source.unsplash.com/800x500/?kayak,ocean,water",
         cards: ["Fishing","Jet Skiing","Hydrofoils","Boating","Paddleboarding","Sailing","Snorkeling","Freediving","Whitewater Rafting"],
       },
       {
         id: "on-land-trails",
         label: "On Land & Trails",
         description: "Explore the outdoors on foot, trail, or road.",
+        img: "https://source.unsplash.com/800x500/?hiking,trail,forest",
         cards: ["Camping","RVing","Horseback Riding","Snowshoeing","Hiking/Trail Walking","Fossil Hunting","Birdwatching"],
       },
       {
         id: "air-thrill",
         label: "Air & Thrill",
         description: "High-altitude and adrenaline-fueled adventures.",
+        img: "https://source.unsplash.com/800x500/?skydiving,mountain,sky",
         cards: ["Skydiving","Astronomy"],
       },
     ],
@@ -102,7 +105,20 @@ const categories = [
     description: "Play, solve, and compete with a little friendly strategy.",
     color: "blue",
     icon: "\u25d2",
-    cards: ["Mahjong","Gaming","Chess","Paintball","Puzzles","Magic","Escape Rooms","Trivia","LEGO Building"],
+    facets: [
+      {
+        id: "strategy-mind",
+        label: "Strategy & Mind",
+        description: "Games of patience, skill, and concentration.",
+        cards: ["Mahjong","Video Games","Chess","Puzzles","LEGO Building"],
+      },
+      {
+        id: "social-live-play",
+        label: "Social & Live Play",
+        description: "Get a group together for an event-style good time.",
+        cards: ["Trivia","Paintball","Escape Rooms","Magic"],
+      },
+    ],
   },
   {
     id: "creative-outlets",
@@ -264,7 +280,7 @@ const hobbies = {
   "Barbecue/Smoking": { blurb: "Cook food slowly over smoke or live fire.", tags: ["food","outdoors","patient"], time: "4 – 8 hrs", startingPoint: "Smoke one small batch of chicken.", related: ["Camping","Canning"] },
   "Chicken Keeping": { blurb: "Care for backyard chickens and collect fresh eggs.", tags: ["animals","home","patient"], time: "20 – 30 min/day", startingPoint: "Visit a coop and learn the daily routine.", related: ["Gardening","Beekeeping"] },
   Beekeeping: { blurb: "Maintain bee colonies and learn how honey is made.", tags: ["animals","outdoors","patient"], time: "1 – 2 hrs", startingPoint: "Tour a local apiary with a beekeeper.", related: ["Gardening","Chicken Keeping"] },
-  Gaming: { blurb: "Play video or tabletop games for challenge and fun.", tags: ["indoor","strategy","social"], time: "30 min – 2 hrs", startingPoint: "Play one beginner-friendly game for 30 minutes.", related: ["Puzzles","Chess"] },
+  "Video Games": { blurb: "Play video or tabletop games for challenge and fun.", tags: ["indoor","strategy","social"], time: "30 min – 2 hrs", startingPoint: "Play one beginner-friendly game for 30 minutes.", related: ["Puzzles","Chess"] },
   Puzzles: { blurb: "Solve pieces, clues, or patterns to complete a larger challenge.", tags: ["indoor","solo","patient"], time: "1 – 3 hrs", startingPoint: "Complete a 100-piece puzzle.", related: ["Escape Rooms","Chess"] },
   Magic: { blurb: "Learn illusions and techniques that create surprising effects.", tags: ["skill","social","performance"], time: "15 – 30 min", startingPoint: "Learn one simple card trick.", related: ["Juggling","Balloon Animals"] },
   Trivia: { blurb: "Test your knowledge by answering questions across many topics.", tags: ["social","learning","indoor"], time: "1 – 2 hrs", startingPoint: "Join a local trivia night.", related: ["Chess","Escape Rooms"] },
@@ -296,7 +312,7 @@ const hobbies = {
   "Voice lessons": { blurb: "Develop singing technique, pitch, and breath control.", tags: ["music","skill","performance"], time: "30 – 60 min", startingPoint: "Practice one song with a vocal warm-up.", related: ["Guitar","Beatboxing"] },
   Beatboxing: { blurb: "Make rhythmic sounds and musical beats with your voice.", tags: ["music","skill","performance"], time: "15 – 30 min", startingPoint: "Practice a basic kick-and-snare pattern.", related: ["Voice lessons","DJing"] },
   Watches: { blurb: "Study, collect, or repair timepieces and their mechanisms.", tags: ["collecting","learning","patient"], time: "30 – 60 min", startingPoint: "Learn the parts of one favorite watch.", related: ["Vinyl Records","Thrifting/Antiquing"] },
-  "Fidget Trading": { blurb: "Collect and exchange small tactile toys with other people.", tags: ["collecting","social","playful"], time: "15 – 30 min", startingPoint: "Trade one fidget with a friend.", related: ["Bag charms","Gaming"] },
+  "Fidget Trading": { blurb: "Collect and exchange small tactile toys with other people.", tags: ["collecting","social","playful"], time: "15 – 30 min", startingPoint: "Trade one fidget with a friend.", related: ["Bag charms","Video Games"] },
   "Vinyl Records": { blurb: "Collect and listen to music on physical vinyl records.", tags: ["collecting","music","patient"], time: "30 – 60 min", startingPoint: "Play one record from start to finish.", related: ["Concerts","DJing"] },
 };
 
