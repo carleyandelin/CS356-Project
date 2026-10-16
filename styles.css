@@ -289,10 +289,11 @@ th { font-weight: 400; }
   background: var(--teal-base);
   text-decoration: none;
   color: var(--ink);
-  transition: box-shadow .2s ease;
+  transition: border-color .2s ease, box-shadow .2s ease;
   cursor: pointer;
 }
 .hot-card:hover {
+  border-color: var(--tint);
   box-shadow: 0 4px 14px rgba(0,0,0,.09);
 }
 

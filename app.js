@@ -646,10 +646,10 @@ function renderBrowse() {
   });
 
   prevBtn.addEventListener(
-      'click', () => slide(+1));  // left arrow → strip moves left → later cards
+      'click', () => slide(-1));  // left arrow → strip moves right → earlier cards
   nextBtn.addEventListener(
       'click',
-      () => slide(-1));  // right arrow → strip moves right → earlier cards
+      () => slide(+1));  // right arrow → strip moves left → later cards
 }
 
 function searchMatches(query) {
