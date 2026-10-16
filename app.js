@@ -727,39 +727,135 @@ function renderSearch(query, facetId = '') {
 }
 
 function renderCategory(id) {
-  const category = categoryById[id];
+  var category = categoryById[id];
   if (!category) return renderBrowse();
-  const hobbyContent = category.facets ?
-      `${
-          category.cards?.length ?
-              `<div class="hobby-grid category-grid">${
-                  category.cards.map(hobbyCard).join('')}</div>` :
-              ''}
-       <div class="group-list facet-list">${
-          category.facets
-              .map(
-                  (facet) => `<a class="group-block" href="#facet/${
-                      facet.id}" data-log="Open ${
-                      escapeHtml(facet.label)}" data-log-destination="facet/${
-                      facet.id}">
-           <div class="group-heading"><p class="label">facet</p><h2>${
-                      escapeHtml(facet.label)}</h2><p>${
-                      escapeHtml(facet.description)}</p></div></a>`)
-              .join('')}</div>` :
-      `<div class="hobby-grid category-grid">${
-          category.cards.map(hobbyCard).join('')}</div>`;
 
-  app.innerHTML = `<div class="page">
-    <a class="plain-link back-link" href="#browse" data-log="Back to categories" data-log-destination="browse">← Back to categories</a>
-    <div class="page-heading compact-heading"><div><p class="label">Activity category</p><h1>${
-      escapeHtml(category.label)}</h1><p>${
-      escapeHtml(
-          category
-              .description)}</p></div><span class="view-label">LEVEL 2</span></div>
-    ${answerButton('category/' + id)}
-    ${hobbyContent}
-  </div>`;
+  // ── Visual layout for all main categories (any with an eyebrow field) ──
+  if (category.eyebrow) {
+
+    // Recursively collect cards from facets, assigning each to its top-level facet id
+    function collectCards(facets, rootFacetId) {
+      var result = [];
+      (facets || []).forEach(function(facet) {
+        var assignedId = rootFacetId || facet.id;
+        if (facet.cards && facet.cards.length) {
+          facet.cards.forEach(function(name) {
+            result.push({ name: name, facetId: assignedId, hobby: data.hobbies[name] || {} });
+          });
+        }
+        if (facet.facets) {
+          collectCards(facet.facets, assignedId).forEach(function(item) { result.push(item); });
+        }
+      });
+      return result;
+    }
+
+    var allCards = category.facets
+      ? collectCards(category.facets, null)
+      : (category.cards || []).map(function(name) {
+          return { name: name, facetId: 'all', hobby: data.hobbies[name] || {} };
+        });
+
+    // Hero header
+    var hero = '<div class="category-hero">'
+      + '<p class="label category-hero__eyebrow">' + escapeHtml(category.eyebrow) + '</p>'
+      + '<h1 class="category-hero__title">' + escapeHtml(category.label) + '</h1>'
+      + '<p class="category-hero__desc">' + escapeHtml(category.description) + '</p>'
+      + '<span class="view-label">LEVEL 2</span>'
+      + '</div>';
+
+    // Filter chips (only when top-level facets exist) + right-aligned search bar
+    var hasFacets = category.facets && category.facets.length;
+    var chipsHtml = '<div class="facet-filter-row" id="cat-chips">';
+    if (hasFacets) {
+      chipsHtml += '<button class="facet-chip-btn active" data-facet="all">All</button>';
+      category.facets.forEach(function(facet) {
+        chipsHtml += '<button class="facet-chip-btn" data-facet="' + facet.id + '">' + escapeHtml(facet.label) + '</button>';
+      });
+    }
+    chipsHtml += '<label class="outdoors-search" aria-label="Search ' + escapeHtml(category.label) + '">'
+      + '<svg class="outdoors-search__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>'
+      + '<input id="cat-search-input" type="search" placeholder="Search ' + escapeHtml(category.label.toLowerCase()) + '…" autocomplete="off" />'
+      + '</label>'
+      + '</div>';
+
+    // Hobby cards grid
+    var cardsHtml = '<div class="outdoors-grid" id="cat-grid">';
+    allCards.forEach(function(item) {
+      var kwRaw = item.name.replace(/\/.*/, '').trim();
+      var kw    = encodeURIComponent(kwRaw);
+      var img   = 'https://source.unsplash.com/400x400/?' + kw;
+      var href  = '#hobby/' + encodeURIComponent(item.name);
+      var blurb = item.hobby.blurb || '';
+      cardsHtml += '<a class="hot-card hot-card--split outdoors-card"'
+        + ' href="' + href + '"'
+        + ' data-facet="' + item.facetId + '"'
+        + ' data-name="' + item.name.toLowerCase() + '"'
+        + ' data-log="Open ' + escapeHtml(item.name) + '"'
+        + ' data-log-destination="hobby/' + encodeURIComponent(item.name) + '">'
+        + '<div class="hot-card__img" style="background-image:url(' + "'" + img + "'" + ')"></div>'
+        + '<div class="hot-card__text">'
+        + '<p class="label hot-card-label">' + escapeHtml(item.name) + '</p>'
+        + '<p class="hot-card-blurb">' + escapeHtml(blurb) + '</p>'
+        + '</div></a>';
+    });
+    cardsHtml += '</div>';
+
+    app.innerHTML = '<div class="page outdoors-page">'
+      + hero
+      + answerButton('category/' + id)
+      + chipsHtml
+      + cardsHtml
+      + '</div>';
+
+    // Filter function — combines facet chip state and search query
+    function applyCatFilter() {
+      var activeFacet = (document.querySelector('#cat-chips .facet-chip-btn.active') || {}).dataset.facet || 'all';
+      var query = (document.getElementById('cat-search-input').value || '').toLowerCase().trim();
+      document.querySelectorAll('#cat-grid .outdoors-card').forEach(function(card) {
+        var facetOk = activeFacet === 'all' || card.dataset.facet === activeFacet;
+        var nameOk  = !query || card.dataset.name.includes(query);
+        card.style.display = (facetOk && nameOk) ? '' : 'none';
+      });
+    }
+
+    // Facet chip clicks
+    document.getElementById('cat-chips').addEventListener('click', function(e) {
+      var btn = e.target.closest('.facet-chip-btn');
+      if (!btn) return;
+      document.querySelectorAll('#cat-chips .facet-chip-btn').forEach(function(b) {
+        b.classList.toggle('active', b === btn);
+      });
+      applyCatFilter();
+    });
+
+    // Live search
+    document.getElementById('cat-search-input').addEventListener('input', applyCatFilter);
+
+    return;
+  }
+
+  // ── Default layout for all other categories ──────────────────────────────
+  const hobbyContent = category.facets
+    ? (category.cards && category.cards.length
+        ? '<div class="hobby-grid category-grid">' + category.cards.map(hobbyCard).join('') + '</div>'
+        : '')
+      + '<div class="group-list facet-list">'
+      + category.facets.map(function(f) {
+          return '<a class="group-block" href="#facet/' + f.id + '" data-log="Open ' + escapeHtml(f.label) + '" data-log-destination="facet/' + f.id + '">'
+            + '<div class="group-heading"><p class="label">facet</p><h2>' + escapeHtml(f.label) + '</h2><p>' + escapeHtml(f.description) + '</p></div></a>';
+        }).join('')
+      + '</div>'
+    : '<div class="hobby-grid category-grid">' + category.cards.map(hobbyCard).join('') + '</div>';
+
+  app.innerHTML = '<div class="page">'
+    + '<a class="plain-link back-link" href="#browse" data-log="Back to categories" data-log-destination="browse">← Back to categories</a>'
+    + '<div class="page-heading compact-heading"><div><p class="label">Activity category</p><h1>' + escapeHtml(category.label) + '</h1><p>' + escapeHtml(category.description) + '</p></div><span class="view-label">LEVEL 2</span></div>'
+    + answerButton('category/' + id)
+    + hobbyContent
+    + '</div>';
 }
+
 
 function renderFacet(id) {
   const facet = facetById[id];
@@ -925,6 +1021,7 @@ function render() {
 
   const [route, value, facetId] = location.hash.slice(1).split('/');
   document.body.classList.toggle('browse-route', route === 'browse' || !route);
+  document.body.classList.toggle('category-route', route === 'category' || route === 'facet');
   document.querySelectorAll('[data-view-link]')
       .forEach(
           (link) => link.classList.toggle(
