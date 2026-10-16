@@ -66,10 +66,10 @@ categoryNav.innerHTML =
           const facetLinks =
               (category.facets || [])
                   .map(
-                      (facet) => `<a href="#facet/${facet.id}" data-log="Open ${
+                      (facet) => `<a href="#category/${category.id}/${facet.id}" data-log="Open ${
                           escapeHtml(
-                              facet.label)}" data-log-destination="facet/${
-                          facet.id}">${escapeHtml(facet.label)}</a>`)
+                              facet.label)}" data-log-destination="category/${
+                          category.id}/${facet.id}">${escapeHtml(facet.label)}</a>`)
                   .join('');
           return `<div class="category-menu${
               category.facets ? ' has-facets' : ''}">
@@ -726,7 +726,7 @@ function renderSearch(query, facetId = '') {
   </div>`;
 }
 
-function renderCategory(id) {
+function renderCategory(id, preselectedFacet) {
   var category = categoryById[id];
   if (!category) return renderBrowse();
 
@@ -831,6 +831,17 @@ function renderCategory(id) {
 
     // Live search
     document.getElementById('cat-search-input').addEventListener('input', applyCatFilter);
+
+    // Pre-select facet from URL (e.g. navigated here via nav dropdown)
+    if (preselectedFacet) {
+      var preBtn = document.querySelector('#cat-chips .facet-chip-btn[data-facet="' + preselectedFacet + '"]');
+      if (preBtn) {
+        document.querySelectorAll('#cat-chips .facet-chip-btn').forEach(function(b) {
+          b.classList.toggle('active', b === preBtn);
+        });
+        applyCatFilter();
+      }
+    }
 
     return;
   }
@@ -1044,7 +1055,7 @@ function render() {
   if (route === 'facet')
     renderFacet(decodeURIComponent(value || ''));
   else if (route === 'category')
-    renderCategory(decodeURIComponent(value || ''));
+    renderCategory(decodeURIComponent(value || ''), decodeURIComponent(facetId || ''));
   else if (route === 'hobby')
     renderHobby(decodeURIComponent(value || ''));
   else if (route === 'about')
