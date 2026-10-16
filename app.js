@@ -810,7 +810,8 @@ function renderCategory(id, preselectedFacet) {
 
     // Filter function — combines facet chip state and search query
     function applyCatFilter() {
-      var activeFacet = (document.querySelector('#cat-chips .facet-chip-btn.active') || {}).dataset.facet || 'all';
+      var activeBtn = document.querySelector('#cat-chips .facet-chip-btn.active');
+      var activeFacet = activeBtn ? activeBtn.dataset.facet : 'all';
       var query = (document.getElementById('cat-search-input').value || '').toLowerCase().trim();
       document.querySelectorAll('#cat-grid .outdoors-card').forEach(function(card) {
         var facetOk = activeFacet === 'all' || card.dataset.facet === activeFacet;
