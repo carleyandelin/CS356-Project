@@ -122,7 +122,7 @@ const categories = [
   },
   {
     id: "creative-outlets",
-    label: "Creative outlets",
+    label: "Creative Outlets",
     eyebrow: "Art + media + collecting",
     description: "Make, document, share, and collect things that matter to you.",
     color: "lavender",

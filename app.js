@@ -17,6 +17,30 @@ function collectAllFacets(category, facets, parentFacetId = null) {
 const facetById = Object.fromEntries(
     data.categories.flatMap((c) => collectAllFacets(c, c.facets || [])));
 
+// Build hobby → top-level facet reverse map for search result chips.
+// For categories with facets, maps each hobby to its direct child-of-category facet.
+// For flat categories (no facets), maps the hobby to the category itself as the chip.
+var hobbyTopFacetMap = {}; // name → [{id, label, categoryId}]
+data.categories.forEach(function(cat) {
+  if (cat.facets && cat.facets.length) {
+    cat.facets.forEach(function(facet) {
+      collectFacetCards(facet).forEach(function(name) {
+        if (!hobbyTopFacetMap[name]) hobbyTopFacetMap[name] = [];
+        if (!hobbyTopFacetMap[name].some(function(f) { return f.id === facet.id; })) {
+          hobbyTopFacetMap[name].push({ id: facet.id, label: facet.label, categoryId: cat.id });
+        }
+      });
+    });
+  } else {
+    (cat.cards || []).forEach(function(name) {
+      if (!hobbyTopFacetMap[name]) hobbyTopFacetMap[name] = [];
+      if (!hobbyTopFacetMap[name].some(function(f) { return f.id === cat.id; })) {
+        hobbyTopFacetMap[name].push({ id: cat.id, label: cat.label, categoryId: cat.id });
+      }
+    });
+  }
+});
+
 // ─── URL mode detection ────────────────────────────────────────────────────
 // ?test    → participant tree test session
 // ?results → researcher results view
@@ -436,28 +460,12 @@ function downloadSessions(format) {
 }
 
 // ─── Normal wireframe views ────────────────────────────────────────────────
-function contentBlock(name, query = '') {
-  const hobby = data.hobbies[name];
-  return `<a class="hobby-card" href="#hobby/${
-      encodeURIComponent(
-          name)}" data-log="${escapeHtml(name)}" data-log-destination="hobby/${
-      encodeURIComponent(name)}">
-    <strong>${escapeHtml(name)}</strong><small>${
-      escapeHtml(
-          hobby?.summary || hobby?.blurb ||
-          '')}</small><span aria-hidden="true">→</span>
-  </a>`;
-}
-
-function hobbyCard(name) {
-  return contentBlock(name, activeSearchQuery);
-}
 
 function searchForm() {
   return `<form class="search-form" data-search-form role="search">
     <label class="sr-only" for="site-search">Search hobbies</label>
     <input id="site-search" type="search" name="q" placeholder="Try “creative,” “outdoorsy,” or “relaxing”…" autocomplete="off" />
-    <button type="submit" aria-label="Search">Search</button>
+    <button type="submit" class="search-form__icon-btn" aria-label="Search"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg></button>
   </form>`;
 }
 
@@ -470,72 +478,41 @@ function groupBlock(group) {
   </a>`;
 }
 
+// — typo card names are sized via CSS (26px); this function is a no-op kept
+// for call-site compatibility in renderBrowse / renderCategory / renderSearch.
+function fitTypoNames() {}
+
+// ── Shared typographic card template (used by all views) ──────────────────
+// extraAttrs: optional string of extra HTML attributes, e.g. data-f1="..." data-name="..."
+function typoCard(name, href, blurb, extraAttrs) {
+  var attrs = extraAttrs ? (' ' + extraAttrs) : '';
+  var dest  = href.replace(/^#/, '');
+  return '<a class="hot-card hot-card--typo"' + attrs
+    + ' href="' + href + '"'
+    + ' data-log="Open ' + escapeHtml(name) + '"'
+    + ' data-log-destination="' + escapeHtml(dest) + '">'
+    + '<p class="hot-card-typo__eyebrow"></p>'
+    + '<p class="hot-card-typo__name">' + escapeHtml(name) + '</p>'
+    + '<p class="hot-card-blurb hot-card-typo__blurb">' + escapeHtml(blurb) + '</p>'
+    + '</a>';
+}
+
+
 function renderBrowse() {
   const hotList = [
-    {
-      label: 'Mahjong',
-      key: 'Mahjong',
-      img: 'https://source.unsplash.com/400x400/?mahjong,tiles',
-      demoStyle: 'split'
-    },
-    {
-      label: 'Pickleball',
-      key: 'Pickleball',
-      img: 'https://source.unsplash.com/400x400/?pickleball,sport',
-      demoStyle: 'split'
-    },
-    {
-      label: 'Scrapbooking',
-      key: 'Scrapbooking',
-      img: 'https://source.unsplash.com/400x400/?scrapbooking,craft',
-      demoStyle: 'split'
-    },
-    {
-      label: 'Hiking',
-      key: 'Hiking/Trail Walking',
-      img: 'https://source.unsplash.com/400x400/?hiking,trail',
-      demoStyle: 'split'
-    },
-    {
-      label: 'Snowshoeing',
-      key: 'Snowshoeing',
-      img: 'https://source.unsplash.com/400x400/?snowshoeing,winter',
-      demoStyle: 'split'
-    },
-    {
-      label: 'Sourdough',
-      key: 'Sourdough',
-      img: 'https://source.unsplash.com/400x400/?sourdough,bread',
-      demoStyle: 'split'
-    },
-    {
-      label: 'Gaming',
-      key: 'Video Games',
-      destination: 'category/games',
-      img: 'https://source.unsplash.com/400x400/?gaming,controller',
-      demoStyle: 'split'
-    },
-    {
-      label: 'Thrifting',
-      key: 'Thrifting/Antiquing',
-      img: 'https://source.unsplash.com/400x400/?thrift,vintage',
-      demoStyle: 'split'
-    },
-    {
-      label: 'Photography',
-      key: 'Photography',
-      img: 'https://source.unsplash.com/400x400/?photography,camera',
-      demoStyle: 'split'
-    },
-    {
-      label: 'Yoga',
-      key: 'Yoga',
-      img: 'https://source.unsplash.com/400x400/?yoga,meditation',
-      demoStyle: 'split'
-    },
+    { label: 'Mahjong',      key: 'Mahjong',             rank: 'No. 01', demoStyle: 'typo' },
+    { label: 'Pickleball',   key: 'Pickleball',           rank: 'No. 02', demoStyle: 'typo' },
+    { label: 'Scrapbooking', key: 'Scrapbooking',         rank: 'No. 03', demoStyle: 'typo' },
+    { label: 'Hiking',       key: 'Hiking/Trail Walking', rank: 'No. 04', demoStyle: 'typo' },
+    { label: 'Snowshoeing',  key: 'Snowshoeing',          rank: 'No. 05', demoStyle: 'typo' },
+    { label: 'Sourdough',    key: 'Sourdough',            rank: 'No. 06', demoStyle: 'typo' },
+    { label: 'Gaming',       key: 'Video Games', destination: 'category/games', rank: 'No. 07', demoStyle: 'typo' },
+    { label: 'Thrifting',    key: 'Thrifting/Antiquing',  rank: 'No. 08', demoStyle: 'typo' },
+    { label: 'Photography',  key: 'Photography',          rank: 'No. 09', demoStyle: 'typo' },
+    { label: 'Yoga',         key: 'Yoga',                 rank: 'No. 10', demoStyle: 'typo' },
   ];
 
-  function makeCard({label, key, destination, img, demoStyle}) {
+  function makeCard({label, key, destination, rank, demoStyle}) {
     const hobby = data.hobbies[key] || {};
     const dest = destination || `hobby/${encodeURIComponent(key)}`;
     const href = `#${dest}`;
@@ -548,6 +525,15 @@ function renderBrowse() {
         <div class="hot-card__scrim"></div>
         <p class="label hot-card-label">${escapeHtml(label)}</p>
         <p class="hot-card-blurb">${escapeHtml(hobby.blurb || '')}</p>
+      </a>`;
+    }
+
+    if (demoStyle === 'typo') {
+      return `<a class="hot-card hot-card--typo" href="${href}"
+        data-log="${log}" data-log-destination="${dest}">
+        <p class="label hot-card-label hot-card-typo__eyebrow">${escapeHtml(rank || '')}</p>
+        <p class="hot-card-typo__name">${escapeHtml(label)}</p>
+        <p class="hot-card-blurb hot-card-typo__blurb">${escapeHtml(hobby.blurb || '')}</p>
       </a>`;
     }
 
@@ -591,6 +577,8 @@ function renderBrowse() {
     <div class="hot-list-search-band"><p class="hot-list-search-prompt">Not seeing your thing? Search for it.</p><div class="hot-list-search">${
       searchForm()}</div></div>
   </div>`;
+
+  // fitTypoNames is defined at module level — called below after layout
 
   // — infinite sliding carousel —
   const PER_PAGE = 4;
@@ -641,9 +629,11 @@ function renderBrowse() {
 
   setCardWidth();
   moveTo(CLONE, false);
+  requestAnimationFrame(function() { fitTypoNames(app, true); }); // run after layout so clientWidth is real
   window.addEventListener('resize', () => {
     setCardWidth();
     moveTo(idx, false);
+    requestAnimationFrame(function() { fitTypoNames(app, true); });
   });
 
   prevBtn.addEventListener(
@@ -681,91 +671,142 @@ function logSearch(query, resultCount) {
   localStorage.setItem(LOG_KEY, JSON.stringify(clickLog));
 }
 
-function renderSearch(query, facetId = '') {
+function renderSearch(query, facetId) {
+  if (facetId === undefined) facetId = '';
   activeSearchQuery = query;
-  const results = searchMatches(query).filter((name) => {
+  var allResults = searchMatches(query);
+  // Filter by top-level facet (or category for flat categories), not by category
+  var results = allResults.filter(function(name) {
     if (!facetId) return true;
-    return data.hobbies[name].categoryIds.includes(facetId);
+    var facets = hobbyTopFacetMap[name] || [];
+    return facets.some(function(f) { return f.id === facetId; });
   });
-  const facets =
-      [...new Map(
-           results
-               .map((name) => {
-                 const hobby = data.hobbies[name];
-                 return hobby.categoryIds.map(
-                     (categoryId) => [categoryId, categoryById[categoryId]]);
-               })
-               .flat())
-           .values()];
-  app.innerHTML = `<div class="page">
-    <div class="page-heading"><div><p class="label">Search</p><h1>Find a hobby</h1>
-      <p>Showing results for <strong>“${escapeHtml(query)}”</strong>.</p></div>
-      <span class="view-label">VIEW / SEARCH</span></div>
-    <div class="search-facets" aria-label="Narrow search results">
-      <span class="label">Narrow by category</span>
-      ${
-      facets
-          .map(
-              (facet) => `<a class="facet-chip" href="#search/${
-                  encodeURIComponent(query)}/${facet.id}"
-        data-log="Narrow to ${
-                  escapeHtml(facet.label)}" data-log-destination="search/${
-                  encodeURIComponent(
-                      query)}/${facet.id}">${escapeHtml(facet.label)}</a>`)
-          .join('')}
-    </div>
-    ${
-      results.length ?
-          `<div class="search-results"><div class="section-title"><h2>${
-              results
-                  .length} matching blocks</h2><p>Literal terms plus the committed concept vocabulary.</p></div>
-      <div class="hobby-grid">${
-              results.map(contentBlock).join('')}</div></div>` :
-          `<section class="no-results"><p class="label">No exact or concept matches</p><h2>Try a nearby idea</h2>
-        <p>Search for “stars,” “bread,” “vintage,” “programming,” or “friends” to explore related vocabulary from the tree test.</p>
-        <a class="wire-button" href="#browse" data-log="Return to explore" data-log-destination="browse">Return to explore</a></section>`}
-  </div>`;
+
+  // Collect unique top-level facets represented in ALL results for filter chips
+  var seenFacets = {};
+  var chips = [];
+  allResults.forEach(function(name) {
+    (hobbyTopFacetMap[name] || []).forEach(function(f) {
+      if (!seenFacets[f.id]) {
+        seenFacets[f.id] = true;
+        chips.push(f);
+      }
+    });
+  });
+
+  // Hero
+  var hero = '<div class="category-hero">'
+    + '<h1 class="category-hero__title">“' + escapeHtml(query) + '”</h1>'
+    + '</div>';
+
+  // Filter chips by top-level facet (or category for flat categories)
+  var chipsHtml = '<div class="facet-filter-row">';
+  chipsHtml += '<a class="facet-chip-btn' + (!facetId ? ' active' : '') + '" href="#search/' + encodeURIComponent(query) + '">All</a>';
+  chips.forEach(function(chip) {
+    chipsHtml += '<a class="facet-chip-btn' + (facetId === chip.id ? ' active' : '') + '" href="#search/'
+      + encodeURIComponent(query) + '/' + chip.id + '">' + escapeHtml(chip.label) + '</a>';
+  });
+  chipsHtml += '<label class="outdoors-search" aria-label="Filter these results">'
+    + '<svg class="outdoors-search__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>'
+    + '<input id="sr-filter-input" type="search" placeholder="Filter results\u2026" autocomplete="off" />'
+    + '</label>'
+    + '</div>';
+
+  // Cards grid using hot-card--split (same template as category pages)
+  var cardsHtml = '';
+  if (results.length) {
+    cardsHtml = '<div class="outdoors-grid">';
+    results.forEach(function(name) {
+      var hobby = data.hobbies[name] || {};
+      var kwRaw = name.replace(/\/.*/, '').trim();
+      var kw    = encodeURIComponent(kwRaw);
+      var img   = 'https://source.unsplash.com/400x400/?' + kw;
+      var href  = '#hobby/' + encodeURIComponent(name);
+      var blurb = hobby.blurb || '';
+      cardsHtml += typoCard(name, href, blurb, 'data-name="' + name.toLowerCase() + '" class="outdoors-card"').replace('class="hot-card hot-card--typo"', 'class="hot-card hot-card--typo outdoors-card"');
+    });
+    cardsHtml += '</div>';
+  } else {
+    cardsHtml = '<section class="no-results">'
+      + '<p class="label">No exact or concept matches</p>'
+      + '<h2>Try a nearby idea</h2>'
+      + '<p>Search for &ldquo;stars,&rdquo; &ldquo;bread,&rdquo; &ldquo;vintage,&rdquo; &ldquo;programming,&rdquo; or &ldquo;friends&rdquo; to explore the concept vocabulary.</p>'
+      + '<a class="wire-button" href="#browse" data-log="Return to explore" data-log-destination="browse">Return to explore</a>'
+      + '</section>';
+  }
+
+  app.innerHTML = '<div class="page outdoors-page">'
+    + hero
+    + answerButton('search/' + encodeURIComponent(query))
+    + chipsHtml
+    + cardsHtml
+    + '</div>';
+
+  requestAnimationFrame(function() { fitTypoNames(app, false); });
+
+  var srInput = document.getElementById('sr-filter-input');
+  if (srInput) {
+    srInput.addEventListener('input', function() {
+      var q = srInput.value.toLowerCase().trim();
+      document.querySelectorAll('.outdoors-card').forEach(function(card) {
+        card.style.display = (!q || card.dataset.name.includes(q)) ? '' : 'none';
+      });
+    });
+  }
 }
 
-function renderCategory(id, preselectedFacet) {
+function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
   var category = categoryById[id];
   if (!category) return renderBrowse();
 
   // ── Visual layout for all main categories (any with an eyebrow field) ──
   if (category.eyebrow) {
 
-    // Recursively collect cards from facets, assigning each to its top-level facet id
-    function collectCards(facets, rootFacetId) {
+    // Map facetId → child facet array (any depth)
+    var facetChildMap = {};
+    function buildFacetChildMap(facets) {
+      (facets || []).forEach(function(f) {
+        if (f.facets && f.facets.length) {
+          facetChildMap[f.id] = f.facets;
+          buildFacetChildMap(f.facets);
+        }
+      });
+    }
+    buildFacetChildMap(category.facets);
+
+    // Collect cards with three-level ancestry (f1=top, f2=mid, f3=leaf)
+    function collectCards(facets, ancestors) {
       var result = [];
       (facets || []).forEach(function(facet) {
-        var assignedId = rootFacetId || facet.id;
+        var anc = ancestors.concat(facet.id);
         if (facet.cards && facet.cards.length) {
           facet.cards.forEach(function(name) {
-            result.push({ name: name, facetId: assignedId, hobby: data.hobbies[name] || {} });
+            result.push({
+              name: name,
+              f1: anc[0] || facet.id,
+              f2: anc[1] || anc[0] || facet.id,
+              f3: anc[2] || anc[1] || anc[0] || facet.id,
+              hobby: data.hobbies[name] || {}
+            });
           });
         }
-        if (facet.facets) {
-          collectCards(facet.facets, assignedId).forEach(function(item) { result.push(item); });
-        }
+        if (facet.facets) collectCards(facet.facets, anc).forEach(function(i) { result.push(i); });
       });
       return result;
     }
 
     var allCards = category.facets
-      ? collectCards(category.facets, null)
+      ? collectCards(category.facets, [])
       : (category.cards || []).map(function(name) {
-          return { name: name, facetId: 'all', hobby: data.hobbies[name] || {} };
+          return { name: name, f1: 'all', f2: 'all', f3: 'all', hobby: data.hobbies[name] || {} };
         });
 
-    // Hero header
+    // Hero
     var hero = '<div class="category-hero">'
-      + '<p class="label category-hero__eyebrow">' + escapeHtml(category.eyebrow) + '</p>'
       + '<h1 class="category-hero__title">' + escapeHtml(category.label) + '</h1>'
-      + '<p class="category-hero__desc">' + escapeHtml(category.description) + '</p>'
-      + '<span class="view-label">LEVEL 2</span>'
       + '</div>';
 
-    // Filter chips (only when top-level facets exist) + right-aligned search bar
+    // Level-1 chip row + search bar + hidden sub-rows
     var hasFacets = category.facets && category.facets.length;
     var chipsHtml = '<div class="facet-filter-row" id="cat-chips">';
     if (hasFacets) {
@@ -776,29 +817,20 @@ function renderCategory(id, preselectedFacet) {
     }
     chipsHtml += '<label class="outdoors-search" aria-label="Search ' + escapeHtml(category.label) + '">'
       + '<svg class="outdoors-search__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>'
-      + '<input id="cat-search-input" type="search" placeholder="Search ' + escapeHtml(category.label.toLowerCase()) + '…" autocomplete="off" />'
+      + '<input id="cat-search-input" type="search" placeholder="Search ' + escapeHtml(category.label.toLowerCase()) + '\u2026" autocomplete="off" />'
       + '</label>'
       + '</div>';
+    chipsHtml += '<div class="facet-filter-row facet-sub-chips" id="sub-chips" hidden></div>';
+    chipsHtml += '<div class="facet-filter-row facet-sub-chips" id="sub-sub-chips" hidden></div>';
 
-    // Hobby cards grid
+    // Cards grid — f1/f2/f3 data attributes for multi-level filtering
     var cardsHtml = '<div class="outdoors-grid" id="cat-grid">';
     allCards.forEach(function(item) {
-      var kwRaw = item.name.replace(/\/.*/, '').trim();
-      var kw    = encodeURIComponent(kwRaw);
-      var img   = 'https://source.unsplash.com/400x400/?' + kw;
       var href  = '#hobby/' + encodeURIComponent(item.name);
       var blurb = item.hobby.blurb || '';
-      cardsHtml += '<a class="hot-card hot-card--split outdoors-card"'
-        + ' href="' + href + '"'
-        + ' data-facet="' + item.facetId + '"'
-        + ' data-name="' + item.name.toLowerCase() + '"'
-        + ' data-log="Open ' + escapeHtml(item.name) + '"'
-        + ' data-log-destination="hobby/' + encodeURIComponent(item.name) + '">'
-        + '<div class="hot-card__img" style="background-image:url(' + "'" + img + "'" + ')"></div>'
-        + '<div class="hot-card__text">'
-        + '<p class="label hot-card-label">' + escapeHtml(item.name) + '</p>'
-        + '<p class="hot-card-blurb">' + escapeHtml(blurb) + '</p>'
-        + '</div></a>';
+      cardsHtml += typoCard(item.name, '#hobby/' + encodeURIComponent(item.name), item.hobby.blurb || '',
+        'data-f1="' + item.f1 + '" data-f2="' + item.f2 + '" data-f3="' + item.f3 + '" data-name="' + item.name.toLowerCase() + '" class="outdoors-card"')
+        .replace('class="hot-card hot-card--typo"', 'class="hot-card hot-card--typo outdoors-card"');
     });
     cardsHtml += '</div>';
 
@@ -807,107 +839,166 @@ function renderCategory(id, preselectedFacet) {
       + answerButton('category/' + id)
       + chipsHtml
       + cardsHtml
+      + '<div id="see-more-container"></div>'
       + '</div>';
 
-    // Filter function — combines facet chip state and search query
-    function applyCatFilter() {
-      var activeBtn = document.querySelector('#cat-chips .facet-chip-btn.active');
-      var activeFacet = activeBtn ? activeBtn.dataset.facet : 'all';
-      var query = (document.getElementById('cat-search-input').value || '').toLowerCase().trim();
-      document.querySelectorAll('#cat-grid .outdoors-card').forEach(function(card) {
-        var facetOk = activeFacet === 'all' || card.dataset.facet === activeFacet;
-        var nameOk  = !query || card.dataset.name.includes(query);
-        card.style.display = (facetOk && nameOk) ? '' : 'none';
-      });
+    requestAnimationFrame(function() { fitTypoNames(app, false); });
+    requestAnimationFrame(function() { applyCatFilter(false); });
+
+    var COLLAPSE_PAGE = 8;
+    var showCount = COLLAPSE_PAGE;
+
+    // Populate a sub-chip row from a facet's children, or hide it
+    function setSubChips(rowId, facetId, parentLabel) {
+      var row = document.getElementById(rowId);
+      var children = facetId !== 'all' && facetChildMap[facetId];
+      if (children) {
+        var allLabel = parentLabel ? 'All ' + parentLabel : 'All';
+        var html = '<button class="facet-chip-btn active" data-facet="all">' + allLabel + '</button>';
+        children.forEach(function(f) {
+          html += '<button class="facet-chip-btn" data-facet="' + f.id + '">' + escapeHtml(f.label) + '</button>';
+        });
+        row.innerHTML = html;
+        row.hidden = false;
+      } else {
+        row.innerHTML = '';
+        row.hidden = true;
+      }
     }
 
-    // Facet chip clicks
+    function applyCatFilter(resetCollapse) {
+      var btn1 = document.querySelector('#cat-chips .facet-chip-btn.active');
+      var btn2 = document.querySelector('#sub-chips .facet-chip-btn.active');
+      var btn3 = document.querySelector('#sub-sub-chips .facet-chip-btn.active');
+      var a1 = btn1 ? btn1.dataset.facet : 'all';
+      var a2 = btn2 ? btn2.dataset.facet : 'all';
+      var a3 = btn3 ? btn3.dataset.facet : 'all';
+      var query = (document.getElementById('cat-search-input').value || '').toLowerCase().trim();
+      var cards = Array.from(document.querySelectorAll('#cat-grid .outdoors-card'));
+
+      var passing = cards.filter(function(card) {
+        return (a1 === 'all' || card.dataset.f1 === a1)
+            && (a2 === 'all' || card.dataset.f2 === a2)
+            && (a3 === 'all' || card.dataset.f3 === a3)
+            && (!query || card.dataset.name.includes(query));
+      });
+
+      if (resetCollapse) showCount = COLLAPSE_PAGE;
+      cards.forEach(function(card) { card.style.display = 'none'; });
+      passing.forEach(function(card, i) { card.style.display = i < showCount ? '' : 'none'; });
+
+      var remaining = passing.length - showCount;
+      var container = document.getElementById('see-more-container');
+      if (remaining > 0) {
+        var nextBatch = Math.min(COLLAPSE_PAGE, remaining);
+        container.innerHTML = '<button class="see-more-btn">See ' + nextBatch + ' more</button>';
+        container.querySelector('.see-more-btn').onclick = function() {
+          showCount += COLLAPSE_PAGE;
+          applyCatFilter(false);
+        };
+      } else {
+        container.innerHTML = '';
+      }
+    }
+
+    // Level-1 clicks — populate or hide sub-chip row
     document.getElementById('cat-chips').addEventListener('click', function(e) {
       var btn = e.target.closest('.facet-chip-btn');
       if (!btn) return;
       document.querySelectorAll('#cat-chips .facet-chip-btn').forEach(function(b) {
         b.classList.toggle('active', b === btn);
       });
-      applyCatFilter();
+      setSubChips('sub-chips', btn.dataset.facet, btn.textContent.trim());
+      var ss = document.getElementById('sub-sub-chips');
+      ss.innerHTML = ''; ss.hidden = true;
+      history.replaceState(null, '', '#category/' + id + '/' + btn.dataset.facet);
+      applyCatFilter(true);
+    });
+
+    // Level-2 clicks — populate or hide sub-sub-chip row
+    document.getElementById('sub-chips').addEventListener('click', function(e) {
+      var btn = e.target.closest('.facet-chip-btn');
+      if (!btn) return;
+      document.querySelectorAll('#sub-chips .facet-chip-btn').forEach(function(b) {
+        b.classList.toggle('active', b === btn);
+      });
+      setSubChips('sub-sub-chips', btn.dataset.facet, btn.textContent.trim());
+      var _a1 = (document.querySelector('#cat-chips .facet-chip-btn.active') || {dataset:{facet:'all'}}).dataset.facet;
+      history.replaceState(null, '', '#category/' + id + '/' + _a1 + '/' + btn.dataset.facet);
+      applyCatFilter(true);
+    });
+
+    // Level-3 clicks
+    document.getElementById('sub-sub-chips').addEventListener('click', function(e) {
+      var btn = e.target.closest('.facet-chip-btn');
+      if (!btn) return;
+      document.querySelectorAll('#sub-sub-chips .facet-chip-btn').forEach(function(b) {
+        b.classList.toggle('active', b === btn);
+      });
+      var _a1b = (document.querySelector('#cat-chips .facet-chip-btn.active') || {dataset:{facet:'all'}}).dataset.facet;
+      var _a2b = (document.querySelector('#sub-chips .facet-chip-btn.active') || {dataset:{facet:'all'}}).dataset.facet;
+      history.replaceState(null, '', '#category/' + id + '/' + _a1b + '/' + _a2b + '/' + btn.dataset.facet);
+      applyCatFilter(true);
     });
 
     // Live search
-    document.getElementById('cat-search-input').addEventListener('input', applyCatFilter);
+    document.getElementById('cat-search-input').addEventListener('input', function() { applyCatFilter(true); });
 
-    // Pre-select facet from URL (e.g. navigated here via nav dropdown)
-    if (preselectedFacet) {
-      var preBtn = document.querySelector('#cat-chips .facet-chip-btn[data-facet="' + preselectedFacet + '"]');
-      if (preBtn) {
+    // Pre-select facets from URL (up to three levels)
+    if (preselectedF1 && preselectedF1 !== 'all') {
+      var preBtn1 = document.querySelector('#cat-chips .facet-chip-btn[data-facet="' + preselectedF1 + '"]');
+      if (preBtn1) {
         document.querySelectorAll('#cat-chips .facet-chip-btn').forEach(function(b) {
-          b.classList.toggle('active', b === preBtn);
+          b.classList.toggle('active', b === preBtn1);
         });
-        applyCatFilter();
+        setSubChips('sub-chips', preselectedF1, preBtn1.textContent.trim());
+        if (preselectedF2 && preselectedF2 !== 'all') {
+          var preBtn2 = document.querySelector('#sub-chips .facet-chip-btn[data-facet="' + preselectedF2 + '"]');
+          if (preBtn2) {
+            document.querySelectorAll('#sub-chips .facet-chip-btn').forEach(function(b) {
+              b.classList.toggle('active', b === preBtn2);
+            });
+            setSubChips('sub-sub-chips', preselectedF2, preBtn2.textContent.trim());
+            if (preselectedF3 && preselectedF3 !== 'all') {
+              var preBtn3 = document.querySelector('#sub-sub-chips .facet-chip-btn[data-facet="' + preselectedF3 + '"]');
+              if (preBtn3) {
+                document.querySelectorAll('#sub-sub-chips .facet-chip-btn').forEach(function(b) {
+                  b.classList.toggle('active', b === preBtn3);
+                });
+              }
+            }
+          }
+        }
+        applyCatFilter(true);
       }
     }
 
     return;
   }
 
-  // ── Default layout for all other categories ──────────────────────────────
-  const hobbyContent = category.facets
-    ? (category.cards && category.cards.length
-        ? '<div class="hobby-grid category-grid">' + category.cards.map(hobbyCard).join('') + '</div>'
-        : '')
-      + '<div class="group-list facet-list">'
-      + category.facets.map(function(f) {
-          return '<a class="group-block" href="#facet/' + f.id + '" data-log="Open ' + escapeHtml(f.label) + '" data-log-destination="facet/' + f.id + '">'
-            + '<div class="group-heading"><p class="label">facet</p><h2>' + escapeHtml(f.label) + '</h2><p>' + escapeHtml(f.description) + '</p></div></a>';
-        }).join('')
-      + '</div>'
-    : '<div class="hobby-grid category-grid">' + category.cards.map(hobbyCard).join('') + '</div>';
-
+  // All main categories use the eyebrow (visual layout) path above.
+  // This fallback renders a simple card grid for any category without eyebrow.
+  var fallbackCards = '';  // legacy fallback (no longer used)
   app.innerHTML = '<div class="page">'
     + '<a class="plain-link back-link" href="#browse" data-log="Back to categories" data-log-destination="browse">← Back to categories</a>'
     + '<div class="page-heading compact-heading"><div><p class="label">Activity category</p><h1>' + escapeHtml(category.label) + '</h1><p>' + escapeHtml(category.description) + '</p></div><span class="view-label">LEVEL 2</span></div>'
     + answerButton('category/' + id)
-    + hobbyContent
+    + '<div class="hobby-grid category-grid">' + fallbackCards + '</div>'
     + '</div>';
 }
 
 
+// renderFacet removed — sub-facet pages are no longer linked from navigation.
+// Deep facet data is retained in data.js for collectCards() to flatten into
+// category pages. Any stale #facet/ URL redirects to browse.
 function renderFacet(id) {
   const facet = facetById[id];
-  if (!facet) return renderBrowse();
-  // Back link: parent facet if nested, otherwise parent category
-  const backHref = facet.parentFacetId ? `#facet/${facet.parentFacetId}` :
-                                         `#category/${facet.category.id}`;
-  const backLabel = facet.parentFacetId ?
-      escapeHtml(
-          facetById[facet.parentFacetId]?.label || facet.category.label) :
-      escapeHtml(facet.category.label);
-  const backDest = facet.parentFacetId ? `facet/${facet.parentFacetId}` :
-                                         `category/${facet.category.id}`;
-  // Content: sub-facets (group list) or hobbies (card grid)
-  const facetContent = facet.facets?.length ?
-      `<div class="group-list facet-list">${
-          facet.facets
-              .map(
-                  (sub) => `<a class="group-block" href="#facet/${
-                      sub.id}" data-log="Open ${
-                      escapeHtml(
-                          sub.label)}" data-log-destination="facet/${sub.id}">
-           <div class="group-heading"><p class="label">facet</p><h2>${
-                      escapeHtml(sub.label)}</h2><p>${
-                      escapeHtml(sub.description)}</p></div></a>`)
-              .join('')}</div>` :
-      `<div class="hobby-grid category-grid">${
-          (facet.cards || []).map(hobbyCard).join('')}</div>`;
-  app.innerHTML = `<div class="page">
-    <a class="plain-link back-link" href="${backHref}" data-log="Back to ${
-      backLabel}" data-log-destination="${backDest}">← Back to ${backLabel}</a>
-    <div class="page-heading compact-heading"><div><p class="label">Activity facet</p><h1>${
-      escapeHtml(facet.label)}</h1><p>${
-      escapeHtml(
-          facet
-              .description)}</p></div><span class="view-label">LEVEL 3</span></div>
-    ${answerButton('facet/' + id)}
-    ${facetContent}
-  </div>`;
+  // Redirect to the parent category page, pre-filtered to the top-level facet
+  if (facet && facet.category) {
+    window.location.replace('#category/' + facet.category.id);
+  } else {
+    renderBrowse();
+  }
 }
 
 function renderHobby(name) {
@@ -915,11 +1006,10 @@ function renderHobby(name) {
   if (!hobby) return renderBrowse();
   const category = categoryById[hobby.category];
 
-  // In test mode: show only the name + answer button (no detail table — that's
-  // researcher info)
+  // In test mode: show only the name + answer button
   if (MODE === 'test') {
     app.innerHTML = `<div class="page">
-      <a class="plain-link back-link" href="#browse" data-log="Back to categories" data-log-destination="browse">← Back to categories</a>
+      <button class="back-arrow" onclick="history.back()" aria-label="Go back">←</button>
       <article class="selection-page">
         <h1>${escapeHtml(name)}</h1>
         ${answerButton('hobby/' + name)}
@@ -928,24 +1018,28 @@ function renderHobby(name) {
     return;
   }
 
-  // Normal wireframe view: full detail card
-  app.innerHTML = `<div class="page">
-    <a class="plain-link back-link" href="#browse" data-log="Back to categories" data-log-destination="browse">← Back to categories</a>
-    <article class="selection-page">
-      <h1>${escapeHtml(name)}</h1>
-      <div class="selection-box">
-        <p>${escapeHtml(hobby.blurb)}</p>
-        <dl>
-          <div><dt>Activity category</dt><dd>${
-      escapeHtml(category?.label || '')}</dd></div>
-          <div><dt>Tags</dt><dd>${escapeHtml(hobby.tags.join(' / '))}</dd></div>
-          <div><dt>Time to try</dt><dd>${escapeHtml(hobby.time)}</dd></div>
-          <div><dt>First step</dt><dd>${
-      escapeHtml(hobby.startingPoint)}</dd></div>
-        </dl>
-      </div>
-      <section class="related-section"><p class="label">Related leaves</p>
-        <div class="hobby-grid">${hobby.related.map(hobbyCard).join('')}</div>
+  // Related cards using the unified typographic card style
+  const relatedCards = (hobby.related || []).map(function(relName) {
+    const rel = data.hobbies[relName] || {};
+    const href = '#hobby/' + encodeURIComponent(relName);
+    return typoCard(relName, href, rel.blurb || '');
+  }).join('');
+
+  // Normal view: redesigned hobby detail
+  app.innerHTML = `<div class="page hobby-page">
+    <button class="back-arrow" onclick="history.back()" aria-label="Go back">←</button>
+    <section class="hobby-hero">
+      <h1 class="hobby-hero__title">${escapeHtml(name)}</h1>
+    </section>
+    <article class="hobby-detail">
+      <p class="hobby-detail__blurb">${escapeHtml(hobby.blurb)}</p>
+      <dl class="hobby-detail__meta">
+        <div><dt>Time to try</dt><dd>${escapeHtml(hobby.time)}</dd></div>
+        <div><dt>First step</dt><dd>${escapeHtml(hobby.startingPoint)}</dd></div>
+      </dl>
+      <section class="hobby-related">
+        <p class="hobby-related__heading">You may also like...</p>
+        <div class="outdoors-grid hobby-related__grid">${relatedCards}</div>
       </section>
     </article>
   </div>`;
@@ -1032,9 +1126,11 @@ function render() {
     }
   }
 
-  const [route, value, facetId] = location.hash.slice(1).split('/');
+  const _hashParts = location.hash.slice(1).split('/');
+  const [route, value, facetId, facetId2, facetId3] = _hashParts;
   document.body.classList.toggle('browse-route', route === 'browse' || !route);
   document.body.classList.toggle('category-route', route === 'category' || route === 'facet');
+  document.body.classList.toggle('search-route', route === 'search');
   document.querySelectorAll('[data-view-link]')
       .forEach(
           (link) => link.classList.toggle(
@@ -1057,7 +1153,7 @@ function render() {
   if (route === 'facet')
     renderFacet(decodeURIComponent(value || ''));
   else if (route === 'category')
-    renderCategory(decodeURIComponent(value || ''), decodeURIComponent(facetId || ''));
+    renderCategory(decodeURIComponent(value || ''), decodeURIComponent(facetId || ''), decodeURIComponent(facetId2 || ''), decodeURIComponent(facetId3 || ''));
   else if (route === 'hobby')
     renderHobby(decodeURIComponent(value || ''));
   else if (route === 'about')
@@ -1245,3 +1341,50 @@ document.addEventListener('submit', (event) => {
 
 window.addEventListener('hashchange', render);
 render();
+
+// ─── Nav search icon expand/collapse ──────────────────────────────────────
+(function() {
+  var toggle  = document.getElementById('nav-search-toggle');
+  var bar     = document.getElementById('nav-search-bar');
+  var input   = document.getElementById('nav-search-input');
+  var closeBtn = document.getElementById('nav-search-close');
+  if (!toggle || !bar || !input) return;
+
+  function openSearch() {
+    bar.hidden = false;
+    toggle.setAttribute('aria-expanded', 'true');
+    toggle.setAttribute('aria-label', 'Close search');
+    input.focus();
+  }
+
+  function closeSearch() {
+    bar.hidden = true;
+    input.value = '';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open search');
+  }
+
+  toggle.addEventListener('click', function() {
+    if (bar.hidden) {
+      openSearch();
+    } else {
+      closeSearch();
+    }
+  });
+
+  closeBtn.addEventListener('click', closeSearch);
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeSearch(); toggle.focus(); }
+  });
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      var q = input.value.trim();
+      if (q) {
+        closeSearch();
+        window.location.hash = '#search/' + encodeURIComponent(q);
+      }
+    }
+  });
+})();

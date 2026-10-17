@@ -23,12 +23,18 @@
         </nav>
         <nav class="category-nav" aria-label="Activity categories"></nav>
         <a class="wire-button" href="#browse" data-log="Start over" data-log-destination="browse">Start over</a>
+        <div class="nav-search" id="nav-search">
+          <button class="nav-search__icon-btn" id="nav-search-toggle" aria-label="Open search" aria-expanded="false">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>
+          </button>
+          <div class="nav-search__bar" id="nav-search-bar" hidden>
+            <input class="nav-search__input" id="nav-search-input" type="search" placeholder="Search hobbies…" autocomplete="off" aria-label="Search hobbies" />
+            <button class="nav-search__close" id="nav-search-close" aria-label="Close search" type="button">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>
+            </button>
+          </div>
+        </div>
       </header>
-      <form class="search-form header-search" data-search-form role="search">
-        <label class="sr-only" for="header-search">Search hobbies</label>
-        <input id="header-search" type="search" name="q" placeholder="Search hobbies" autocomplete="off" />
-        <button type="submit" aria-label="Search">Search</button>
-      </form>
 
       <!-- Tree test task banner — shown only in ?test mode -->
       <div id="test-banner" class="test-banner" hidden></div>
