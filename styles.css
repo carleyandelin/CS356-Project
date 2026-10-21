@@ -19,7 +19,7 @@ a { color: inherit; text-decoration: none; }
 button, input { font: inherit; }
 button, a { cursor: pointer; }
 .app-shell { width: 100%; min-height: 100vh; padding: 0 32px; box-sizing: border-box; }
-.site-header { display: flex; align-items: center; gap: 28px; min-height: 96px; position: relative; } .site-header::after { content: ""; position: absolute; bottom: 0; left: -32px; right: -32px; height: 1px; background: var(--teal-shade); }
+.site-header { display: flex; align-items: center; gap: 28px; min-height: 96px; position: relative; background: var(--paper); margin: 0 -32px; padding: 0 32px; } .site-header::after { content: ""; position: absolute; bottom: 0; left: -32px; right: -32px; height: 1px; background: var(--teal-shade); }
 .brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
 .brand-mark { display: block; width: 46px; height: 46px; object-fit: contain; }
 .brand strong, .brand small { display: block; }
