@@ -574,7 +574,7 @@ function renderBrowse() {
     },
     {
       label: 'Thrifting',
-      key: 'Thrifting/Antiquing',
+      key: 'Thrifting',
       rank: 'No. 08',
       demoStyle: 'typo'
     },
@@ -592,6 +592,10 @@ function renderBrowse() {
     const dest = destination || `hobby/${encodeURIComponent(key)}`;
     const href = `#${dest}`;
     const log = `Open ${escapeHtml(label)}`;
+
+    if (hobby.img) {
+      return photoCard(label, href, hobby.blurb || '', hobby.img);
+    }
 
     if (demoStyle === 'overlay') {
       return `<a class="hot-card hot-card--overlay" href="${href}"
