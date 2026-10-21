@@ -649,9 +649,11 @@ function renderBrowse() {
     </div>
     <div class="carousel-wrap">
       <button class="carousel-btn carousel-prev" aria-label="Previous hobbies">&#8249;</button>
-      <div class="carousel-track" id="carousel-track">
-        <div class="carousel-inner" id="carousel-inner">${headClone}${
+      <div class="carousel-viewport">
+        <div class="carousel-track" id="carousel-track">
+          <div class="carousel-inner" id="carousel-inner">${headClone}${
       realHtml}${tailClone}</div>
+        </div>
       </div>
       <button class="carousel-btn carousel-next" aria-label="Next hobbies">&#8250;</button>
     </div>
@@ -676,8 +678,10 @@ function renderBrowse() {
   const prevBtn = app.querySelector('.carousel-prev');
   const nextBtn = app.querySelector('.carousel-next');
 
+  const PEEK = 40;  // px of adjacent card visible on each edge
+
   function setCardWidth() {
-    const cardW = (trackEl.offsetWidth - GAP * (PER_PAGE - 1)) / PER_PAGE;
+    const cardW = (trackEl.offsetWidth - GAP * (PER_PAGE - 1) - 2 * PEEK) / PER_PAGE;
     trackEl.style.setProperty('--card-w', cardW + 'px');
   }
 
@@ -685,7 +689,7 @@ function renderBrowse() {
     idx = newIdx;
     const cardW =
         parseFloat(getComputedStyle(trackEl).getPropertyValue('--card-w'));
-    const offset = idx * (cardW + GAP);
+    const offset = idx * (cardW + GAP) - PEEK;
     if (!animate) {
       innerEl.style.transition = 'none';
       innerEl.style.transform = `translateX(-${offset}px)`;
@@ -727,6 +731,46 @@ function renderBrowse() {
   nextBtn.addEventListener(
       'click',
       () => slide(+1));  // right arrow → strip moves left → later cards
+
+  // ── Trackpad horizontal swipe (wheel events) ───────────────────────────
+  let wheelAccum = 0;
+  let wheelTimer = null;
+
+  trackEl.addEventListener('wheel', (e) => {
+    // Only handle predominantly horizontal scroll (trackpad swipe)
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    e.preventDefault();
+
+    wheelAccum += e.deltaX;
+
+    // Reset accumulator after swipe gesture ends
+    clearTimeout(wheelTimer);
+    wheelTimer = setTimeout(() => { wheelAccum = 0; }, 200);
+
+    const threshold = 80;
+    if (wheelAccum > threshold) {
+      wheelAccum = 0;
+      slide(+1);
+    } else if (wheelAccum < -threshold) {
+      wheelAccum = 0;
+      slide(-1);
+    }
+  }, { passive: false });
+
+  // ── Touch swipe (mobile) ─────────────────────────────────────────────────
+  let touchStartX = null;
+
+  trackEl.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+
+  trackEl.addEventListener('touchend', (e) => {
+    if (touchStartX === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    touchStartX = null;
+    if (Math.abs(dx) < 40) return;
+    slide(dx < 0 ? +1 : -1);
+  });
 }
 
 function searchMatches(query) {
@@ -1443,79 +1487,30 @@ document.addEventListener('submit', (event) => {
   const el = document.getElementById('banner-phrase');
   if (!el) return;
 
-  const e = (name) => encodeURIComponent(name);
-  const slogans = [
-    {
-      html: `The ground is overrated. Try <a class="banner-link" href="#hobby/${
-          e('Rock Climbing')}">rock climbing</a>.`
-    },
-    {
-      html: `Your <a class="banner-link" href="#hobby/${
-          e('Sourdough')}">sourdough</a> starter won't feed itself.`
-    },
-    {
-      html:
-          `The moment is already leaving. <a class="banner-link" href="#hobby/${
-              e('Photography')}">Photography</a> catches it.`
-    },
-    {
-      html: `There's a <a class="banner-link" href="#hobby/${
-          e('Hiking/Trail Walking')}">hiking</a> trail with your name on it.`
-    },
-    {
-      html:
-          `The universe has more going on than your inbox. Look up. Try <a class="banner-link" href="#hobby/${
-              e('Astronomy')}">astronomy</a>.`
-    },
-    {
-      html: `Start <a class="banner-link" href="#hobby/${
-          e('Journaling')}">journaling</a>. Your future self will thank you.`
-    },
-    {
-      html:
-          `There's a whole world below the surface. <a class="banner-link" href="#hobby/${
-              e('Freediving')}">Freediving</a> gets you there.`
-    },
-    {
-      html:
-          `Every app you use started with one line of code. <a class="banner-link" href="#hobby/${
-              e('Coding')}">Coding</a> starts the same way.`
-    },
-    {
-      html: `<a class="banner-link" href="#hobby/${
-          e('Yoga')}">Yoga</a> is just stretching until it isn't.`
-    },
-    {
-      html: `Fly <a class="banner-link" href="#hobby/${
-          e('Fishing')}">fishing</a> is just a really good excuse to stand in a river.`
-    },
-    {
-      html: `<a class="banner-link" href="#hobby/${
-          e('Running')}">Running</a> is just walking but angrier. You'll be obsessed in a month.`
-    },
-    {
-      html:
-          `You've never felt cooler than you will on a <a class="banner-link" href="#hobby/${
-              e('Skateboarding')}">skateboard</a> going downhill.`
-    },
-    {
-      html: `<a class="banner-link" href="#hobby/${
-          e('Origami')}">Origami</a> takes five minutes to learn and the rest of your life to master. Start today.`
-    },
-    {
-      html: `The first thing you <a class="banner-link" href="#hobby/${
-          e('Gardening')}">grow</a> yourself will taste better than anything you've bought.`
-    },
-    {
-      html:
-          `You'll be surprised how much you care about <a class="banner-link" href="#hobby/${
-              e('Beekeeping')}">bees</a> once they're yours.`
-    },
-    {
-      html: `Once you learn <a class="banner-link" href="#hobby/${
-          e('Calligraphy')}">calligraphy</a> you'll want to handwrite everything.`
-    },
+  // Build one slogan per hobby in data.hobbies, cycling through templates
+  const hobbyKeys = Object.keys(data.hobbies);
+  const tmpl = [
+    (_n, l) => `Your ${l} era starts now.`,
+    (_n, l) => `Less scrolling. More ${l}.`,
+    (_n, l) => `Give ${l} one afternoon. See what happens.`,
+    (_n, l) => `${l} — you'll wonder what took you so long.`,
+    (_n, l) => `The version of you that tries ${l} is cooler than you think.`,
+    (_n, l) => `${l} is one click away. The rest is just showing up.`,
+    (_n, l) => `${l}: underrated, until it isn't.`,
+    (_n, l) => `What if ${l} was your thing this year?`,
+    (_n, l) => `${l} doesn't care how busy you are. Give it an hour.`,
+    (_n, l) => `No experience needed. ${l} starts somewhere.`,
+    (_n, l) => `Turns out you're exactly the kind of person who would love ${l}.`,
+    (_n, l) => `${l} has been waiting for you this whole time.`,
   ];
+
+  // Shuffle so order varies each session
+  const shuffled = hobbyKeys.slice().sort(() => Math.random() - 0.5);
+  const slogans = shuffled.map((key, i) => {
+    const name = key;
+    const link = `<a class="banner-link" href="#hobby/${encodeURIComponent(key)}">${name}</a>`;
+    return { html: tmpl[i % tmpl.length](name, link) };
+  });
 
   let index = 0;
 

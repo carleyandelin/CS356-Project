@@ -295,11 +295,14 @@ th { font-weight: 400; }
   gap: 10px;
   margin-bottom: 36px;
 }
-.carousel-track {
+.carousel-viewport {
   flex: 1;
   overflow: hidden;
-  padding-block: 20px; /* vertical room for hover shadow — horizontal unchanged so card-width calc stays correct */
+  padding-block: 20px; /* vertical room for hover shadow */
   margin-block: -20px;
+}
+.carousel-track {
+  overflow: visible;
 }
 .carousel-inner {
   display: flex;
@@ -604,9 +607,9 @@ th { font-weight: 400; }
 .site-header .wire-button:hover, .site-header .wire-button:focus-visible { background: var(--accent); }
 /* ─── Hobby ticker banner ──────────────────────────────────────────────────── */
 .hobby-ticker-wrap {
-  background: var(--teal-tint);
-  border-bottom: 1px solid var(--teal-base);
-  height: 36px;
+  background: var(--ink);
+  border-bottom: 2px solid var(--accent);
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -615,8 +618,10 @@ th { font-weight: 400; }
 }
 .banner-phrase {
   margin: 0;
-  font-size: 12px;
-  color: var(--teal-muted);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.88);
   text-align: center;
   white-space: nowrap;
   opacity: 1;
@@ -624,12 +629,13 @@ th { font-weight: 400; }
 }
 .banner-phrase.fading { opacity: 0; }
 .banner-link {
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
   cursor: pointer;
+  transition: opacity .15s ease;
 }
-.banner-link:hover { color: var(--accent); }
+.banner-link:hover { opacity: 0.75; }
 
 /* ─── Tree test banner ─────────────────────────────────────────────────────── */
 .test-banner { border-bottom: 2px solid var(--line); background: var(--paper); }
