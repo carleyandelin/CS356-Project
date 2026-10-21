@@ -478,6 +478,47 @@ function groupBlock(group) {
   </a>`;
 }
 
+const hobbyImageAliases = {
+  'Air dry clay': 'air-dry-clay.jpg',
+  'Astronomy': 'astronomy.jpg',
+  'Barbecue/Smoking': 'barbequing.jpg',
+  'Balloon Animals': 'balloon-animal.jpg',
+  'Birdwatching': 'bird-watching.jpg',
+  '3D Printing': '3d-printing.jpg',
+  'Bedazzling': 'bedazzling.jpeg.avif',
+  'Duo Lingo': 'duo-lingo.png',
+  'Escape Rooms': 'escape-room.jpg',
+  'Fidget Trading': 'figdet-trading.jpg',
+  'Freediving': 'free-diving.jpg',
+  'Gaming': 'video-game.jpg',
+  'Hiking': 'hiking.jpg',
+  'Hiking/Trail Walking': 'hiking.jpg',
+  'Horseback Riding': 'horseback-riding.jpg',
+  'Jet Skiing': 'jet-skiing.jpg',
+  'LEGO Building': 'lego-building.jpg',
+  'Makeup Artistry': 'make-up-artistry.jpg',
+  'Model Kit Building': 'model-kit-building.jpg',
+  'Paddleboarding': 'paddle-boarding.jpg',
+  'Plant Propagation': 'plant-propogation.jpg',
+  'Rock Climbing': 'rock-climbing.jpg',
+  'RVing': 'RVing.jpg',
+  'Table Tennis': 'table-tennish.jpg',
+  'Thrifting/Antiquing': 'thrifting.jpg',
+  'Video Games': 'video-game.jpg',
+  'Voice lessons': 'voice-lessons.jpg',
+  'Whitewater Rafting': 'whitewater-rafting.jpg',
+};
+
+function hobbyImage(name) {
+  if (hobbyImageAliases[name]) return `images/${hobbyImageAliases[name]}`;
+  const slug = name.toLowerCase()
+      .replace(/\/.*/, '')
+      .replace(/&/g, 'and')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  return `images/${slug}.jpg`;
+}
+
 // — typo card names are sized via CSS (26px); this function is a no-op kept
 // for call-site compatibility in renderBrowse / renderCategory / renderSearch.
 function fitTypoNames() {}
@@ -491,6 +532,8 @@ function typoCard(name, href, blurb, extraAttrs) {
     + ' href="' + href + '"'
     + ' data-log="Open ' + escapeHtml(name) + '"'
     + ' data-log-destination="' + escapeHtml(dest) + '">'
+    + '<img class="hot-card__photo" src="' + hobbyImage(name) + '" alt="" loading="lazy">'
+    + '<span class="hot-card__scrim"></span>'
     + '<p class="hot-card-typo__eyebrow"></p>'
     + '<p class="hot-card-typo__name">' + escapeHtml(name) + '</p>'
     + '<p class="hot-card-blurb hot-card-typo__blurb">' + escapeHtml(blurb) + '</p>'
@@ -517,6 +560,7 @@ function renderBrowse() {
     const dest = destination || `hobby/${encodeURIComponent(key)}`;
     const href = `#${dest}`;
     const log = `Open ${escapeHtml(label)}`;
+    const img = hobbyImage(key);
 
     if (demoStyle === 'overlay') {
       return `<a class="hot-card hot-card--overlay" href="${href}"
@@ -531,6 +575,8 @@ function renderBrowse() {
     if (demoStyle === 'typo') {
       return `<a class="hot-card hot-card--typo" href="${href}"
         data-log="${log}" data-log-destination="${dest}">
+        <img class="hot-card__photo" src="${img}" alt="" loading="lazy">
+        <span class="hot-card__scrim"></span>
         <p class="label hot-card-label hot-card-typo__eyebrow">${escapeHtml(rank || '')}</p>
         <p class="hot-card-typo__name">${escapeHtml(label)}</p>
         <p class="hot-card-blurb hot-card-typo__blurb">${escapeHtml(hobby.blurb || '')}</p>
@@ -555,92 +601,78 @@ function renderBrowse() {
     </a>`;
   }
 
-  // Clone buffer: last 3 real cards prepended, first 3 appended — enables
-  // seamless infinite loop
   const CLONE = 3;
   const realHtml = hotList.map(makeCard).join('');
   const headClone = hotList.slice(-CLONE).map(makeCard).join('');
   const tailClone = hotList.slice(0, CLONE).map(makeCard).join('');
+  const categoryCards = data.categories.map(groupBlock).join('');
 
   app.innerHTML = `<div class="page hot-list-page">
     <div class="hot-list-header">
+      <p class="label">Hobby Atlas</p>
       <h1 class="hot-list-title">Your next hobby is in here.</h1>
+      <p class="hot-list-intro">A small place to find something new to make, learn, move through, or enjoy.</p>
     </div>
     <div class="carousel-wrap">
       <button class="carousel-btn carousel-prev" aria-label="Previous hobbies">&#8249;</button>
       <div class="carousel-track" id="carousel-track">
-        <div class="carousel-inner" id="carousel-inner">${headClone}${
-      realHtml}${tailClone}</div>
+        <div class="carousel-inner" id="carousel-inner">${headClone}${realHtml}${tailClone}</div>
       </div>
       <button class="carousel-btn carousel-next" aria-label="Next hobbies">&#8250;</button>
     </div>
+    <section class="home-categories">
+      <div class="section-title"><h2>Explore all categories</h2><p>Start with a feeling, then follow your curiosity.</p></div>
+      <div class="group-list">${categoryCards}</div>
+    </section>
     <div class="hot-list-search-band"><p class="hot-list-search-prompt">Not seeing your thing? Search for it.</p><div class="hot-list-search">${
       searchForm()}</div></div>
   </div>`;
-
-  // fitTypoNames is defined at module level — called below after layout
-
-  // — infinite sliding carousel —
   const PER_PAGE = 4;
   const GAP = 14;
-  const TOTAL = hotList.length;  // 10 real cards
-  const SNAP_LO = CLONE;         // 3  — first real position
-  const SNAP_HI =
-      CLONE + TOTAL;  // 13 — first position fully in right clone zone
-  let idx = CLONE;    // start at first real card
+  const TOTAL = hotList.length;
+  const SNAP_LO = CLONE;
+  const SNAP_HI = CLONE + TOTAL;
+  let idx = CLONE;
   let busy = false;
-
   const trackEl = document.getElementById('carousel-track');
   const innerEl = document.getElementById('carousel-inner');
   const prevBtn = app.querySelector('.carousel-prev');
   const nextBtn = app.querySelector('.carousel-next');
-
   function setCardWidth() {
     const cardW = (trackEl.offsetWidth - GAP * (PER_PAGE - 1)) / PER_PAGE;
     trackEl.style.setProperty('--card-w', cardW + 'px');
   }
-
   function moveTo(newIdx, animate) {
     idx = newIdx;
-    const cardW =
-        parseFloat(getComputedStyle(trackEl).getPropertyValue('--card-w'));
+    const cardW = parseFloat(getComputedStyle(trackEl).getPropertyValue('--card-w'));
     const offset = idx * (cardW + GAP);
     if (!animate) {
       innerEl.style.transition = 'none';
       innerEl.style.transform = `translateX(-${offset}px)`;
-      innerEl.offsetHeight;  // force reflow
+      innerEl.offsetHeight;
       innerEl.style.transition = '';
     } else {
       innerEl.style.transform = `translateX(-${offset}px)`;
     }
   }
-
   function slide(dir) {
     if (busy) return;
     busy = true;
     moveTo(idx + dir, true);
     setTimeout(() => {
-      // After animation, snap to real zone if we landed in a clone zone
       if (idx < SNAP_LO) moveTo(idx + TOTAL, false);
       if (idx >= SNAP_HI) moveTo(idx - TOTAL, false);
       busy = false;
-    }, 370);  // just after CSS transition (350ms)
+    }, 370);
   }
-
   setCardWidth();
   moveTo(CLONE, false);
-  requestAnimationFrame(function() { fitTypoNames(app, true); }); // run after layout so clientWidth is real
   window.addEventListener('resize', () => {
     setCardWidth();
     moveTo(idx, false);
-    requestAnimationFrame(function() { fitTypoNames(app, true); });
   });
-
-  prevBtn.addEventListener(
-      'click', () => slide(-1));  // left arrow → strip moves right → earlier cards
-  nextBtn.addEventListener(
-      'click',
-      () => slide(+1));  // right arrow → strip moves left → later cards
+  prevBtn.addEventListener('click', () => slide(-1));
+  nextBtn.addEventListener('click', () => slide(1));
 }
 
 function searchMatches(query) {
@@ -718,9 +750,6 @@ function renderSearch(query, facetId) {
     cardsHtml = '<div class="outdoors-grid">';
     results.forEach(function(name) {
       var hobby = data.hobbies[name] || {};
-      var kwRaw = name.replace(/\/.*/, '').trim();
-      var kw    = encodeURIComponent(kwRaw);
-      var img   = 'https://source.unsplash.com/400x400/?' + kw;
       var href  = '#hobby/' + encodeURIComponent(name);
       var blurb = hobby.blurb || '';
       cardsHtml += typoCard(name, href, blurb, 'data-name="' + name.toLowerCase() + '" class="outdoors-card"').replace('class="hot-card hot-card--typo"', 'class="hot-card hot-card--typo outdoors-card"');
@@ -1029,6 +1058,7 @@ function renderHobby(name) {
   app.innerHTML = `<div class="page hobby-page">
     <button class="back-arrow" onclick="history.back()" aria-label="Go back">←</button>
     <section class="hobby-hero">
+      <img class="hobby-hero__image" src="${hobbyImage(name)}" alt="${escapeHtml(name)}" />
       <h1 class="hobby-hero__title">${escapeHtml(name)}</h1>
     </section>
     <article class="hobby-detail">

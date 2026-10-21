@@ -118,7 +118,8 @@ button, a { cursor: pointer; }
 .selection-page { margin: 54px 0 0; }
 .selection-page h1 { margin: 10px 0 28px; font-size: clamp(32px, 5vw, 56px); font-weight: 400; }
 /* ─── Hobby Detail Page ─────────────────────────────────────────────────── */
-.hobby-hero { padding: 36px 0 28px; border-bottom: 1px solid var(--line); margin-bottom: 36px; }
+.hobby-hero { display: grid; grid-template-columns: minmax(180px, 280px) 1fr; align-items: end; gap: 28px; padding: 36px 0 28px; border-bottom: 1px solid var(--line); margin-bottom: 36px; }
+.hobby-hero__image { width: 100%; aspect-ratio: 1.35; object-fit: cover; border-radius: 18px; }
 .hobby-hero__title { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(24px, 4vw, 38px); font-weight: 400; line-height: 1.1; color: var(--ink); }
 .hobby-detail__blurb { margin: 0 0 32px; font-size: 15px; line-height: 1.65; color: var(--ink); opacity: 0.75; max-width: 54ch; }
 .hobby-detail__meta { margin: 0 0 44px; display: flex; flex-direction: column; gap: 0; }
@@ -281,6 +282,7 @@ th { font-weight: 400; }
 /* ─── Hot List + Carousel ─────────────────────────────────────────────────── */
 .hot-list-page { padding-top: 32px; }
 .hot-list-header { margin-top: 48px; margin-bottom: 80px; text-align: center; }
+.hot-list-header .label { margin: 0 0 14px; color: var(--teal-shade); }
 .hot-list-title {
   margin: 0;
   font-family: Georgia, 'Times New Roman', serif;
@@ -288,26 +290,13 @@ th { font-weight: 400; }
   font-weight: 400;
   line-height: 1.1;
 }
+.hot-list-intro { max-width: 38rem; margin: 18px auto 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.home-categories { margin: 82px 0 0; }
+.home-categories .group-list { grid-template-columns: repeat(3, 1fr); }
+.carousel-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 36px; }
+.carousel-track { flex: 1; overflow: hidden; padding-block: 20px; margin-block: -20px; }
+.carousel-inner { display: flex; gap: 14px; transition: transform .35s ease; will-change: transform; align-items: stretch; }
 
-.carousel-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 36px;
-}
-.carousel-track {
-  flex: 1;
-  overflow: hidden;
-  padding-block: 20px; /* vertical room for hover shadow — horizontal unchanged so card-width calc stays correct */
-  margin-block: -20px;
-}
-.carousel-inner {
-  display: flex;
-  gap: 14px;
-  transition: transform 0.35s ease;
-  will-change: transform;
-  align-items: stretch;
-}
 .hot-card {
   flex: 0 0 var(--card-w, 33%);
   width: var(--card-w, 33%);
@@ -383,6 +372,28 @@ th { font-weight: 400; }
   gap: 0;
   position: relative; /* allows blurb to be pinned to bottom */
 }
+.hot-card__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transition: transform .35s ease;
+}
+.hot-card--typo .hot-card__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: linear-gradient(to top, rgba(0,0,0,.78), rgba(0,0,0,.12) 75%);
+}
+.hot-card--typo .hot-card-typo__eyebrow,
+.hot-card--typo .hot-card-typo__name,
+.hot-card--typo .hot-card-typo__blurb { z-index: 2; color: #fff; }
+.hot-card--typo .hot-card-typo__eyebrow { opacity: .78; }
+.hot-card--typo .hot-card-typo__blurb { opacity: .88; }
+.hot-card--typo:hover .hot-card__photo { transform: scale(1.05); }
 .hot-card-typo__eyebrow {
   margin: 0;
   font-size: 11px;
@@ -425,20 +436,10 @@ th { font-weight: 400; }
 }
 .hot-card-label { margin: 0 0 10px; font-size: 14px; }
 .hot-card-blurb { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
-
 .carousel-btn {
-  flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 26px;
-  line-height: 1;
-  color: var(--ink);
-  cursor: pointer;
-  transition: background .15s ease;
-  padding: 0;
+  flex-shrink: 0; width: 38px; height: 38px; background: var(--paper);
+  border: 1px solid var(--line); border-radius: 999px; font-size: 26px;
+  line-height: 1; color: var(--ink); cursor: pointer; padding: 0;
 }
 .carousel-btn:hover:not(:disabled) { background: var(--accent); }
 .carousel-btn:disabled { opacity: .3; cursor: default; }
@@ -480,9 +481,12 @@ th { font-weight: 400; }
   .view-label { display: block; margin-top: 22px; }
   .section-title p { text-align: left; }
   .group-list, .category-grid, .findings-grid { grid-template-columns: 1fr; }
+  .home-categories .group-list { grid-template-columns: 1fr; }
   .hobby-grid { grid-template-columns: 1fr; }
   dl div { grid-template-columns: 1fr; gap: 6px; }
   .site-footer { flex-direction: column; }
+  .hobby-hero { grid-template-columns: 1fr; gap: 20px; }
+  .hobby-hero__image { max-height: 260px; }
 }
 
 
@@ -588,4 +592,3 @@ th { font-weight: 400; }
   transition: opacity 0.15s;
 }
 .nav-search__close:hover { opacity: 1; }
-
