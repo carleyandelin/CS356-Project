@@ -523,20 +523,36 @@ function hobbyImage(name) {
 // for call-site compatibility in renderBrowse / renderCategory / renderSearch.
 function fitTypoNames() {}
 
-// ── Shared typographic card template (used by all views) ──────────────────
+function photoCard(name, href, blurb, imgUrl, extraAttrs) {
+  var attrs = extraAttrs ? (' ' + extraAttrs) : '';
+  var dest = href.replace(/^#/, '');
+  return '<a class="hot-card hot-card--photo"' + attrs + ' href="' + href +
+      '" data-log="Open ' + escapeHtml(name) + '"' +
+      ' data-log-destination="' + escapeHtml(dest) + '">' +
+      '<img class="card-img" src="' + escapeHtml(imgUrl) + '" alt="' +
+      escapeHtml(name) + '" loading="lazy">' +
+      '<div class="card-scrim"></div>' +
+      '<div class="card-text"><p class="card-name">' + escapeHtml(name) +
+      '</p><p class="card-blurb-photo">' + escapeHtml(blurb) + '</p></div>' +
+      '<div class="card-explore"><span>Try ' + escapeHtml(name) +
+      '</span><span class="card-explore-arrow">→</span></div></a>';
+}
+
+// ── Shared photo card template (used by all views) ────────────────────────
 // extraAttrs: optional string of extra HTML attributes, e.g. data-f1="..." data-name="..."
 function typoCard(name, href, blurb, extraAttrs) {
   var attrs = extraAttrs ? (' ' + extraAttrs) : '';
   var dest  = href.replace(/^#/, '');
-  return '<a class="hot-card hot-card--typo"' + attrs
+  return '<a class="hot-card hot-card--photo"' + attrs
     + ' href="' + href + '"'
     + ' data-log="Open ' + escapeHtml(name) + '"'
     + ' data-log-destination="' + escapeHtml(dest) + '">'
     + '<img class="hot-card__photo" src="' + hobbyImage(name) + '" alt="" loading="lazy">'
-    + '<span class="hot-card__scrim"></span>'
-    + '<p class="hot-card-typo__eyebrow"></p>'
-    + '<p class="hot-card-typo__name">' + escapeHtml(name) + '</p>'
-    + '<p class="hot-card-blurb hot-card-typo__blurb">' + escapeHtml(blurb) + '</p>'
+    + '<div class="card-scrim"></div>'
+    + '<div class="card-text"><p class="card-name">' + escapeHtml(name) + '</p>'
+    + '<p class="card-blurb-photo">' + escapeHtml(blurb) + '</p></div>'
+    + '<div class="card-explore"><span>Try ' + escapeHtml(name)
+    + '</span><span class="card-explore-arrow">→</span></div>'
     + '</a>';
 }
 
@@ -573,14 +589,7 @@ function renderBrowse() {
     }
 
     if (demoStyle === 'typo') {
-      return `<a class="hot-card hot-card--typo" href="${href}"
-        data-log="${log}" data-log-destination="${dest}">
-        <img class="hot-card__photo" src="${img}" alt="" loading="lazy">
-        <span class="hot-card__scrim"></span>
-        <p class="label hot-card-label hot-card-typo__eyebrow">${escapeHtml(rank || '')}</p>
-        <p class="hot-card-typo__name">${escapeHtml(label)}</p>
-        <p class="hot-card-blurb hot-card-typo__blurb">${escapeHtml(hobby.blurb || '')}</p>
-      </a>`;
+      return photoCard(label, href, hobby.blurb || '', img);
     }
 
     if (demoStyle === 'split') {
@@ -621,7 +630,7 @@ function renderBrowse() {
       <button class="carousel-btn carousel-next" aria-label="Next hobbies">&#8250;</button>
     </div>
     <section class="home-categories">
-      <div class="section-title"><h2>Explore all categories</h2><p>Start with a feeling, then follow your curiosity.</p></div>
+      <div class="section-title"><h2>Explore all categories</h2><a class="section-action" href="#category/outdoors">Browse categories <span>→</span></a></div>
       <div class="group-list">${categoryCards}</div>
     </section>
     <div class="hot-list-search-band"><p class="hot-list-search-prompt">Not seeing your thing? Search for it.</p><div class="hot-list-search">${
@@ -752,7 +761,7 @@ function renderSearch(query, facetId) {
       var hobby = data.hobbies[name] || {};
       var href  = '#hobby/' + encodeURIComponent(name);
       var blurb = hobby.blurb || '';
-      cardsHtml += typoCard(name, href, blurb, 'data-name="' + name.toLowerCase() + '" class="outdoors-card"').replace('class="hot-card hot-card--typo"', 'class="hot-card hot-card--typo outdoors-card"');
+      cardsHtml += typoCard(name, href, blurb, 'data-name="' + name.toLowerCase() + '"').replace('class="hot-card hot-card--photo"', 'class="hot-card hot-card--photo outdoors-card"');
     });
     cardsHtml += '</div>';
   } else {
@@ -858,8 +867,8 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
       var href  = '#hobby/' + encodeURIComponent(item.name);
       var blurb = item.hobby.blurb || '';
       cardsHtml += typoCard(item.name, '#hobby/' + encodeURIComponent(item.name), item.hobby.blurb || '',
-        'data-f1="' + item.f1 + '" data-f2="' + item.f2 + '" data-f3="' + item.f3 + '" data-name="' + item.name.toLowerCase() + '" class="outdoors-card"')
-        .replace('class="hot-card hot-card--typo"', 'class="hot-card hot-card--typo outdoors-card"');
+        'data-f1="' + item.f1 + '" data-f2="' + item.f2 + '" data-f3="' + item.f3 + '" data-name="' + item.name.toLowerCase() + '"')
+        .replace('class="hot-card hot-card--photo"', 'class="hot-card hot-card--photo outdoors-card"');
     });
     cardsHtml += '</div>';
 
@@ -1058,14 +1067,24 @@ function renderHobby(name) {
   app.innerHTML = `<div class="page hobby-page">
     <button class="back-arrow" onclick="history.back()" aria-label="Go back">←</button>
     <section class="hobby-hero">
-      <img class="hobby-hero__image" src="${hobbyImage(name)}" alt="${escapeHtml(name)}" />
-      <h1 class="hobby-hero__title">${escapeHtml(name)}</h1>
+      <div class="hobby-hero__image-wrap">
+        <img class="hobby-hero__image" src="${hobbyImage(name)}" alt="${escapeHtml(name)}" />
+        <span class="hobby-hero__image-label">Hobby Atlas</span>
+      </div>
+      <div class="hobby-hero__copy">
+        <a class="hobby-category-link" href="#category/${encodeURIComponent(category.id)}">${escapeHtml(category.label)}</a>
+        <h1 class="hobby-hero__title">${escapeHtml(name)}</h1>
+        <p class="hobby-hero__tagline">Make a little room for something new.</p>
+        <div class="hobby-detail__intro">
+          <p class="label">Why try it?</p>
+          <p class="hobby-detail__blurb">${escapeHtml(hobby.blurb)}</p>
+        </div>
+      </div>
     </section>
     <article class="hobby-detail">
-      <p class="hobby-detail__blurb">${escapeHtml(hobby.blurb)}</p>
       <dl class="hobby-detail__meta">
-        <div><dt>Time to try</dt><dd>${escapeHtml(hobby.time)}</dd></div>
-        <div><dt>First step</dt><dd>${escapeHtml(hobby.startingPoint)}</dd></div>
+        <div><dt>Time to try</dt><dd><span class="meta-icon">◷</span>${escapeHtml(hobby.time)}</dd></div>
+        <div><dt>First step</dt><dd><span class="meta-icon">✦</span>${escapeHtml(hobby.startingPoint)}</dd></div>
       </dl>
       <section class="hobby-related">
         <p class="hobby-related__heading">You may also like...</p>
