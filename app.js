@@ -18,24 +18,31 @@ const facetById = Object.fromEntries(
     data.categories.flatMap((c) => collectAllFacets(c, c.facets || [])));
 
 // Build hobby → top-level facet reverse map for search result chips.
-// For categories with facets, maps each hobby to its direct child-of-category facet.
-// For flat categories (no facets), maps the hobby to the category itself as the chip.
-var hobbyTopFacetMap = {}; // name → [{id, label, categoryId}]
+// For categories with facets, maps each hobby to its direct child-of-category
+// facet. For flat categories (no facets), maps the hobby to the category itself
+// as the chip.
+var hobbyTopFacetMap = {};  // name → [{id, label, categoryId}]
 data.categories.forEach(function(cat) {
   if (cat.facets && cat.facets.length) {
     cat.facets.forEach(function(facet) {
       collectFacetCards(facet).forEach(function(name) {
         if (!hobbyTopFacetMap[name]) hobbyTopFacetMap[name] = [];
-        if (!hobbyTopFacetMap[name].some(function(f) { return f.id === facet.id; })) {
-          hobbyTopFacetMap[name].push({ id: facet.id, label: facet.label, categoryId: cat.id });
+        if (!hobbyTopFacetMap[name].some(function(f) {
+              return f.id === facet.id;
+            })) {
+          hobbyTopFacetMap[name].push(
+              {id: facet.id, label: facet.label, categoryId: cat.id});
         }
       });
     });
   } else {
     (cat.cards || []).forEach(function(name) {
       if (!hobbyTopFacetMap[name]) hobbyTopFacetMap[name] = [];
-      if (!hobbyTopFacetMap[name].some(function(f) { return f.id === cat.id; })) {
-        hobbyTopFacetMap[name].push({ id: cat.id, label: cat.label, categoryId: cat.id });
+      if (!hobbyTopFacetMap[name].some(function(f) {
+            return f.id === cat.id;
+          })) {
+        hobbyTopFacetMap[name].push(
+            {id: cat.id, label: cat.label, categoryId: cat.id});
       }
     });
   }
@@ -90,10 +97,12 @@ categoryNav.innerHTML =
           const facetLinks =
               (category.facets || [])
                   .map(
-                      (facet) => `<a href="#category/${category.id}/${facet.id}" data-log="Open ${
+                      (facet) => `<a href="#category/${category.id}/${
+                          facet.id}" data-log="Open ${
                           escapeHtml(
                               facet.label)}" data-log-destination="category/${
-                          category.id}/${facet.id}">${escapeHtml(facet.label)}</a>`)
+                          category.id}/${facet.id}">${
+                          escapeHtml(facet.label)}</a>`)
                   .join('');
           return `<div class="category-menu${
               category.facets ? ' has-facets' : ''}">
@@ -483,33 +492,99 @@ function groupBlock(group) {
 function fitTypoNames() {}
 
 // ── Shared typographic card template (used by all views) ──────────────────
-// extraAttrs: optional string of extra HTML attributes, e.g. data-f1="..." data-name="..."
+// extraAttrs: optional string of extra HTML attributes, e.g. data-f1="..."
+// data-name="..."
 function typoCard(name, href, blurb, extraAttrs) {
   var attrs = extraAttrs ? (' ' + extraAttrs) : '';
-  var dest  = href.replace(/^#/, '');
-  return '<a class="hot-card hot-card--typo"' + attrs
-    + ' href="' + href + '"'
-    + ' data-log="Open ' + escapeHtml(name) + '"'
-    + ' data-log-destination="' + escapeHtml(dest) + '">'
-    + '<p class="hot-card-typo__eyebrow"></p>'
-    + '<p class="hot-card-typo__name">' + escapeHtml(name) + '</p>'
-    + '<p class="hot-card-blurb hot-card-typo__blurb">' + escapeHtml(blurb) + '</p>'
-    + '</a>';
+  var dest = href.replace(/^#/, '');
+  return '<a class="hot-card hot-card--typo"' + attrs + ' href="' + href + '"' +
+      ' data-log="Open ' + escapeHtml(name) + '"' +
+      ' data-log-destination="' + escapeHtml(dest) + '">' +
+      '<p class="hot-card-typo__eyebrow"></p>' +
+      '<p class="hot-card-typo__name">' + escapeHtml(name) + '</p>' +
+      '<p class="hot-card-blurb hot-card-typo__blurb">' + escapeHtml(blurb) +
+      '</p>' +
+      '</a>';
 }
 
 
+// ── Photo card template (hobby has an img URL) ───────────────────────────
+// LQIP swap: called by onload on the tiny placeholder img.
+// Loads the full image off-screen, then swaps src and removes blur.
+function _lqipLoad(img) {
+  var full = img.dataset.src;
+  if (!full) return;
+  delete img.dataset.src;
+  var loader = new Image();
+  loader.onload = function() {
+    img.src = full;
+    img.classList.add('card-img--loaded');
+  };
+  loader.src = full;
+}
+
+function photoCard(name, href, blurb, imgUrl, extraAttrs) {
+  var attrs = extraAttrs ? (' ' + extraAttrs) : '';
+  var dest = href.replace(/^#/, '');
+  // LQIP: tiny 20px blurred version loads instantly (~300 bytes)
+  var lqipUrl = imgUrl.replace('f_auto,q_auto,w_600,h_600,c_fill', 'f_auto,q_10,w_20,h_20,c_fill,e_blur:500');
+  return '<a class="hot-card hot-card--photo"' + attrs
+    + ' href="' + href + '"'
+    + ' data-log="Open ' + escapeHtml(name) + '"'
+    + ' data-log-destination="' + escapeHtml(dest) + '">'
+    + '<img class="card-img" src="' + escapeHtml(lqipUrl) + '" data-src="' + escapeHtml(imgUrl) + '" alt="' + escapeHtml(name) + '" onload="_lqipLoad(this)">'
+    + '<div class="card-scrim"></div>'
+    + '<div class="card-text">'
+    + '<p class="card-name">' + escapeHtml(name) + '</p>'
+    + '<p class="card-blurb-photo">' + escapeHtml(blurb) + '</p>'
+    + '</div>'
+    + '<div class="card-explore"><span>Try ' + escapeHtml(name) + '</span><span class="card-explore-arrow">→</span></div>'
+    + '</a>';
+}
+
 function renderBrowse() {
   const hotList = [
-    { label: 'Mahjong',      key: 'Mahjong',             rank: 'No. 01', demoStyle: 'typo' },
-    { label: 'Pickleball',   key: 'Pickleball',           rank: 'No. 02', demoStyle: 'typo' },
-    { label: 'Scrapbooking', key: 'Scrapbooking',         rank: 'No. 03', demoStyle: 'typo' },
-    { label: 'Hiking',       key: 'Hiking/Trail Walking', rank: 'No. 04', demoStyle: 'typo' },
-    { label: 'Snowshoeing',  key: 'Snowshoeing',          rank: 'No. 05', demoStyle: 'typo' },
-    { label: 'Sourdough',    key: 'Sourdough',            rank: 'No. 06', demoStyle: 'typo' },
-    { label: 'Gaming',       key: 'Video Games', destination: 'category/games', rank: 'No. 07', demoStyle: 'typo' },
-    { label: 'Thrifting',    key: 'Thrifting/Antiquing',  rank: 'No. 08', demoStyle: 'typo' },
-    { label: 'Photography',  key: 'Photography',          rank: 'No. 09', demoStyle: 'typo' },
-    { label: 'Yoga',         key: 'Yoga',                 rank: 'No. 10', demoStyle: 'typo' },
+    {label: 'Mahjong', key: 'Mahjong', rank: 'No. 01', demoStyle: 'typo'},
+    {label: 'Pickleball', key: 'Pickleball', rank: 'No. 02', demoStyle: 'typo'},
+    {
+      label: 'Scrapbooking',
+      key: 'Scrapbooking',
+      rank: 'No. 03',
+      demoStyle: 'typo'
+    },
+    {
+      label: 'Hiking',
+      key: 'Hiking/Trail Walking',
+      rank: 'No. 04',
+      demoStyle: 'typo'
+    },
+    {
+      label: 'Snowshoeing',
+      key: 'Snowshoeing',
+      rank: 'No. 05',
+      demoStyle: 'typo'
+    },
+    {label: 'Sourdough', key: 'Sourdough', rank: 'No. 06', demoStyle: 'typo'},
+    {
+      label: 'Gaming',
+      key: 'Video Games',
+      destination: 'category/games',
+      rank: 'No. 07',
+      demoStyle: 'typo'
+    },
+    {
+      label: 'Thrifting',
+      key: 'Thrifting/Antiquing',
+      rank: 'No. 08',
+      demoStyle: 'typo'
+    },
+    {
+      label: 'Photography',
+      key: 'Photography',
+      rank: 'No. 09',
+      demoStyle: 'typo'
+    },
+    {label: 'Yoga', key: 'Yoga', rank: 'No. 10', demoStyle: 'typo'},
   ];
 
   function makeCard({label, key, destination, rank, demoStyle}) {
@@ -531,9 +606,11 @@ function renderBrowse() {
     if (demoStyle === 'typo') {
       return `<a class="hot-card hot-card--typo" href="${href}"
         data-log="${log}" data-log-destination="${dest}">
-        <p class="label hot-card-label hot-card-typo__eyebrow">${escapeHtml(rank || '')}</p>
+        <p class="label hot-card-label hot-card-typo__eyebrow">${
+          escapeHtml(rank || '')}</p>
         <p class="hot-card-typo__name">${escapeHtml(label)}</p>
-        <p class="hot-card-blurb hot-card-typo__blurb">${escapeHtml(hobby.blurb || '')}</p>
+        <p class="hot-card-blurb hot-card-typo__blurb">${
+          escapeHtml(hobby.blurb || '')}</p>
       </a>`;
     }
 
@@ -629,15 +706,20 @@ function renderBrowse() {
 
   setCardWidth();
   moveTo(CLONE, false);
-  requestAnimationFrame(function() { fitTypoNames(app, true); }); // run after layout so clientWidth is real
+  requestAnimationFrame(function() {
+    fitTypoNames(app, true);
+  });  // run after layout so clientWidth is real
   window.addEventListener('resize', () => {
     setCardWidth();
     moveTo(idx, false);
-    requestAnimationFrame(function() { fitTypoNames(app, true); });
+    requestAnimationFrame(function() {
+      fitTypoNames(app, true);
+    });
   });
 
   prevBtn.addEventListener(
-      'click', () => slide(-1));  // left arrow → strip moves right → earlier cards
+      'click',
+      () => slide(-1));  // left arrow → strip moves right → earlier cards
   nextBtn.addEventListener(
       'click',
       () => slide(+1));  // right arrow → strip moves left → later cards
@@ -675,11 +757,14 @@ function renderSearch(query, facetId) {
   if (facetId === undefined) facetId = '';
   activeSearchQuery = query;
   var allResults = searchMatches(query);
-  // Filter by top-level facet (or category for flat categories), not by category
+  // Filter by top-level facet (or category for flat categories), not by
+  // category
   var results = allResults.filter(function(name) {
     if (!facetId) return true;
     var facets = hobbyTopFacetMap[name] || [];
-    return facets.some(function(f) { return f.id === facetId; });
+    return facets.some(function(f) {
+      return f.id === facetId;
+    });
   });
 
   // Collect unique top-level facets represented in ALL results for filter chips
@@ -695,22 +780,26 @@ function renderSearch(query, facetId) {
   });
 
   // Hero
-  var hero = '<div class="category-hero">'
-    + '<h1 class="category-hero__title">“' + escapeHtml(query) + '”</h1>'
-    + '</div>';
+  var hero = '<div class="category-hero">' +
+      '<h1 class="category-hero__title">“' + escapeHtml(query) + '”</h1>' +
+      '</div>';
 
   // Filter chips by top-level facet (or category for flat categories)
   var chipsHtml = '<div class="facet-filter-row">';
-  chipsHtml += '<a class="facet-chip-btn' + (!facetId ? ' active' : '') + '" href="#search/' + encodeURIComponent(query) + '">All</a>';
+  chipsHtml += '<a class="facet-chip-btn' + (!facetId ? ' active' : '') +
+      '" href="#search/' + encodeURIComponent(query) + '">All</a>';
   chips.forEach(function(chip) {
-    chipsHtml += '<a class="facet-chip-btn' + (facetId === chip.id ? ' active' : '') + '" href="#search/'
-      + encodeURIComponent(query) + '/' + chip.id + '">' + escapeHtml(chip.label) + '</a>';
+    chipsHtml += '<a class="facet-chip-btn' +
+        (facetId === chip.id ? ' active' : '') + '" href="#search/' +
+        encodeURIComponent(query) + '/' + chip.id + '">' +
+        escapeHtml(chip.label) + '</a>';
   });
-  chipsHtml += '<label class="outdoors-search" aria-label="Filter these results">'
-    + '<svg class="outdoors-search__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>'
-    + '<input id="sr-filter-input" type="search" placeholder="Filter results\u2026" autocomplete="off" />'
-    + '</label>'
-    + '</div>';
+  chipsHtml +=
+      '<label class="outdoors-search" aria-label="Filter these results">' +
+      '<svg class="outdoors-search__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>' +
+      '<input id="sr-filter-input" type="search" placeholder="Filter results\u2026" autocomplete="off" />' +
+      '</label>' +
+      '</div>';
 
   // Cards grid using hot-card--split (same template as category pages)
   var cardsHtml = '';
@@ -719,37 +808,51 @@ function renderSearch(query, facetId) {
     results.forEach(function(name) {
       var hobby = data.hobbies[name] || {};
       var kwRaw = name.replace(/\/.*/, '').trim();
-      var kw    = encodeURIComponent(kwRaw);
-      var img   = 'https://source.unsplash.com/400x400/?' + kw;
-      var href  = '#hobby/' + encodeURIComponent(name);
+      var kw = encodeURIComponent(kwRaw);
+      var img = 'https://source.unsplash.com/400x400/?' + kw;
+      var href = '#hobby/' + encodeURIComponent(name);
       var blurb = hobby.blurb || '';
-      cardsHtml += typoCard(name, href, blurb, 'data-name="' + name.toLowerCase() + '" class="outdoors-card"').replace('class="hot-card hot-card--typo"', 'class="hot-card hot-card--typo outdoors-card"');
+      if (hobby.img) {
+        cardsHtml += photoCard(
+            name, href, blurb, hobby.img,
+            'data-name="' + name.toLowerCase() + '" class="outdoors-card"')
+            .replace('class="hot-card hot-card--photo"',
+                     'class="hot-card hot-card--photo outdoors-card"');
+      } else {
+        cardsHtml +=
+            typoCard(
+                name, href, blurb,
+                'data-name="' + name.toLowerCase() + '" class="outdoors-card"')
+                .replace(
+                    'class="hot-card hot-card--typo"',
+                    'class="hot-card hot-card--typo outdoors-card"');
+      }
     });
     cardsHtml += '</div>';
   } else {
-    cardsHtml = '<section class="no-results">'
-      + '<p class="label">No exact or concept matches</p>'
-      + '<h2>Try a nearby idea</h2>'
-      + '<p>Search for &ldquo;stars,&rdquo; &ldquo;bread,&rdquo; &ldquo;vintage,&rdquo; &ldquo;programming,&rdquo; or &ldquo;friends&rdquo; to explore the concept vocabulary.</p>'
-      + '<a class="wire-button" href="#browse" data-log="Return to explore" data-log-destination="browse">Return to explore</a>'
-      + '</section>';
+    cardsHtml = '<section class="no-results">' +
+        '<p class="label">No exact or concept matches</p>' +
+        '<h2>Try a nearby idea</h2>' +
+        '<p>Search for &ldquo;stars,&rdquo; &ldquo;bread,&rdquo; &ldquo;vintage,&rdquo; &ldquo;programming,&rdquo; or &ldquo;friends&rdquo; to explore the concept vocabulary.</p>' +
+        '<a class="wire-button" href="#browse" data-log="Return to explore" data-log-destination="browse">Return to explore</a>' +
+        '</section>';
   }
 
-  app.innerHTML = '<div class="page outdoors-page">'
-    + hero
-    + answerButton('search/' + encodeURIComponent(query))
-    + chipsHtml
-    + cardsHtml
-    + '</div>';
+  app.innerHTML = '<div class="page outdoors-page">' + hero +
+      answerButton('search/' + encodeURIComponent(query)) + chipsHtml +
+      cardsHtml + '</div>';
 
-  requestAnimationFrame(function() { fitTypoNames(app, false); });
+  requestAnimationFrame(function() {
+    fitTypoNames(app, false);
+  });
 
   var srInput = document.getElementById('sr-filter-input');
   if (srInput) {
     srInput.addEventListener('input', function() {
       var q = srInput.value.toLowerCase().trim();
       document.querySelectorAll('.outdoors-card').forEach(function(card) {
-        card.style.display = (!q || card.dataset.name.includes(q)) ? '' : 'none';
+        card.style.display =
+            (!q || card.dataset.name.includes(q)) ? '' : 'none';
       });
     });
   }
@@ -761,7 +864,6 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
 
   // ── Visual layout for all main categories (any with an eyebrow field) ──
   if (category.eyebrow) {
-
     // Map facetId → child facet array (any depth)
     var facetChildMap = {};
     function buildFacetChildMap(facets) {
@@ -790,60 +892,91 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
             });
           });
         }
-        if (facet.facets) collectCards(facet.facets, anc).forEach(function(i) { result.push(i); });
+        if (facet.facets)
+          collectCards(facet.facets, anc).forEach(function(i) {
+            result.push(i);
+          });
       });
       return result;
     }
 
-    var allCards = category.facets
-      ? collectCards(category.facets, [])
-      : (category.cards || []).map(function(name) {
-          return { name: name, f1: 'all', f2: 'all', f3: 'all', hobby: data.hobbies[name] || {} };
-        });
+    var allCards = category.facets ? collectCards(category.facets, []) :
+                                     (category.cards || []).map(function(name) {
+                                       return {
+                                         name: name,
+                                         f1: 'all',
+                                         f2: 'all',
+                                         f3: 'all',
+                                         hobby: data.hobbies[name] || {}
+                                       };
+                                     });
 
     // Hero
-    var hero = '<div class="category-hero">'
-      + '<h1 class="category-hero__title">' + escapeHtml(category.label) + '</h1>'
-      + '</div>';
+    var hero = '<div class="category-hero">' +
+        '<h1 class="category-hero__title">' + escapeHtml(category.label) +
+        '</h1>' +
+        '</div>';
 
     // Level-1 chip row + search bar + hidden sub-rows
     var hasFacets = category.facets && category.facets.length;
     var chipsHtml = '<div class="facet-filter-row" id="cat-chips">';
     if (hasFacets) {
-      chipsHtml += '<button class="facet-chip-btn active" data-facet="all">All</button>';
+      chipsHtml +=
+          '<button class="facet-chip-btn active" data-facet="all">All</button>';
       category.facets.forEach(function(facet) {
-        chipsHtml += '<button class="facet-chip-btn" data-facet="' + facet.id + '">' + escapeHtml(facet.label) + '</button>';
+        chipsHtml += '<button class="facet-chip-btn" data-facet="' + facet.id +
+            '">' + escapeHtml(facet.label) + '</button>';
       });
     }
-    chipsHtml += '<label class="outdoors-search" aria-label="Search ' + escapeHtml(category.label) + '">'
-      + '<svg class="outdoors-search__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>'
-      + '<input id="cat-search-input" type="search" placeholder="Search ' + escapeHtml(category.label.toLowerCase()) + '\u2026" autocomplete="off" />'
-      + '</label>'
-      + '</div>';
-    chipsHtml += '<div class="facet-filter-row facet-sub-chips" id="sub-chips" hidden></div>';
-    chipsHtml += '<div class="facet-filter-row facet-sub-chips" id="sub-sub-chips" hidden></div>';
+    chipsHtml += '<label class="outdoors-search" aria-label="Search ' +
+        escapeHtml(category.label) + '">' +
+        '<svg class="outdoors-search__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>' +
+        '<input id="cat-search-input" type="search" placeholder="Search ' +
+        escapeHtml(category.label.toLowerCase()) +
+        '\u2026" autocomplete="off" />' +
+        '</label>' +
+        '</div>';
+    chipsHtml +=
+        '<div class="facet-filter-row facet-sub-chips" id="sub-chips" hidden></div>';
+    chipsHtml +=
+        '<div class="facet-filter-row facet-sub-chips" id="sub-sub-chips" hidden></div>';
 
     // Cards grid — f1/f2/f3 data attributes for multi-level filtering
     var cardsHtml = '<div class="outdoors-grid" id="cat-grid">';
     allCards.forEach(function(item) {
-      var href  = '#hobby/' + encodeURIComponent(item.name);
+      var href = '#hobby/' + encodeURIComponent(item.name);
       var blurb = item.hobby.blurb || '';
-      cardsHtml += typoCard(item.name, '#hobby/' + encodeURIComponent(item.name), item.hobby.blurb || '',
-        'data-f1="' + item.f1 + '" data-f2="' + item.f2 + '" data-f3="' + item.f3 + '" data-name="' + item.name.toLowerCase() + '" class="outdoors-card"')
-        .replace('class="hot-card hot-card--typo"', 'class="hot-card hot-card--typo outdoors-card"');
+      var _extraAttrs = 'data-f1="' + item.f1 + '" data-f2="' + item.f2 +
+          '" data-f3="' + item.f3 + '" data-name="' + item.name.toLowerCase() + '"';
+      if (item.hobby.img) {
+        cardsHtml += photoCard(
+            item.name, '#hobby/' + encodeURIComponent(item.name),
+            item.hobby.blurb || '', item.hobby.img,
+            _extraAttrs + ' class="outdoors-card"')
+            .replace('class="hot-card hot-card--photo"',
+                     'class="hot-card hot-card--photo outdoors-card"');
+      } else {
+        cardsHtml += typoCard(
+            item.name, '#hobby/' + encodeURIComponent(item.name),
+            item.hobby.blurb || '',
+            _extraAttrs + ' class="outdoors-card"')
+            .replace('class="hot-card hot-card--typo"',
+                     'class="hot-card hot-card--typo outdoors-card"');
+      }
     });
     cardsHtml += '</div>';
 
-    app.innerHTML = '<div class="page outdoors-page">'
-      + hero
-      + answerButton('category/' + id)
-      + chipsHtml
-      + cardsHtml
-      + '<div id="see-more-container"></div>'
-      + '</div>';
+    app.innerHTML = '<div class="page outdoors-page">' + hero +
+        answerButton('category/' + id) + chipsHtml + cardsHtml +
+        '<div id="see-more-container"></div>' +
+        '</div>';
 
-    requestAnimationFrame(function() { fitTypoNames(app, false); });
-    requestAnimationFrame(function() { applyCatFilter(false); });
+    requestAnimationFrame(function() {
+      fitTypoNames(app, false);
+    });
+    requestAnimationFrame(function() {
+      applyCatFilter(false);
+    });
 
     var COLLAPSE_PAGE = 8;
     var showCount = COLLAPSE_PAGE;
@@ -854,9 +987,11 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
       var children = facetId !== 'all' && facetChildMap[facetId];
       if (children) {
         var allLabel = parentLabel ? 'All ' + parentLabel : 'All';
-        var html = '<button class="facet-chip-btn active" data-facet="all">' + allLabel + '</button>';
+        var html = '<button class="facet-chip-btn active" data-facet="all">' +
+            allLabel + '</button>';
         children.forEach(function(f) {
-          html += '<button class="facet-chip-btn" data-facet="' + f.id + '">' + escapeHtml(f.label) + '</button>';
+          html += '<button class="facet-chip-btn" data-facet="' + f.id + '">' +
+              escapeHtml(f.label) + '</button>';
         });
         row.innerHTML = html;
         row.hidden = false;
@@ -869,29 +1004,38 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
     function applyCatFilter(resetCollapse) {
       var btn1 = document.querySelector('#cat-chips .facet-chip-btn.active');
       var btn2 = document.querySelector('#sub-chips .facet-chip-btn.active');
-      var btn3 = document.querySelector('#sub-sub-chips .facet-chip-btn.active');
+      var btn3 =
+          document.querySelector('#sub-sub-chips .facet-chip-btn.active');
       var a1 = btn1 ? btn1.dataset.facet : 'all';
       var a2 = btn2 ? btn2.dataset.facet : 'all';
       var a3 = btn3 ? btn3.dataset.facet : 'all';
-      var query = (document.getElementById('cat-search-input').value || '').toLowerCase().trim();
-      var cards = Array.from(document.querySelectorAll('#cat-grid .outdoors-card'));
+      var query = (document.getElementById('cat-search-input').value || '')
+                      .toLowerCase()
+                      .trim();
+      var cards =
+          Array.from(document.querySelectorAll('#cat-grid .outdoors-card'));
 
       var passing = cards.filter(function(card) {
-        return (a1 === 'all' || card.dataset.f1 === a1)
-            && (a2 === 'all' || card.dataset.f2 === a2)
-            && (a3 === 'all' || card.dataset.f3 === a3)
-            && (!query || card.dataset.name.includes(query));
+        return (a1 === 'all' || card.dataset.f1 === a1) &&
+            (a2 === 'all' || card.dataset.f2 === a2) &&
+            (a3 === 'all' || card.dataset.f3 === a3) &&
+            (!query || card.dataset.name.includes(query));
       });
 
       if (resetCollapse) showCount = COLLAPSE_PAGE;
-      cards.forEach(function(card) { card.style.display = 'none'; });
-      passing.forEach(function(card, i) { card.style.display = i < showCount ? '' : 'none'; });
+      cards.forEach(function(card) {
+        card.style.display = 'none';
+      });
+      passing.forEach(function(card, i) {
+        card.style.display = i < showCount ? '' : 'none';
+      });
 
       var remaining = passing.length - showCount;
       var container = document.getElementById('see-more-container');
       if (remaining > 0) {
         var nextBatch = Math.min(COLLAPSE_PAGE, remaining);
-        container.innerHTML = '<button class="see-more-btn">See ' + nextBatch + ' more</button>';
+        container.innerHTML =
+            '<button class="see-more-btn">See ' + nextBatch + ' more</button>';
         container.querySelector('.see-more-btn').onclick = function() {
           showCount += COLLAPSE_PAGE;
           applyCatFilter(false);
@@ -905,13 +1049,16 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
     document.getElementById('cat-chips').addEventListener('click', function(e) {
       var btn = e.target.closest('.facet-chip-btn');
       if (!btn) return;
-      document.querySelectorAll('#cat-chips .facet-chip-btn').forEach(function(b) {
-        b.classList.toggle('active', b === btn);
-      });
+      document.querySelectorAll('#cat-chips .facet-chip-btn')
+          .forEach(function(b) {
+            b.classList.toggle('active', b === btn);
+          });
       setSubChips('sub-chips', btn.dataset.facet, btn.textContent.trim());
       var ss = document.getElementById('sub-sub-chips');
-      ss.innerHTML = ''; ss.hidden = true;
-      history.replaceState(null, '', '#category/' + id + '/' + btn.dataset.facet);
+      ss.innerHTML = '';
+      ss.hidden = true;
+      history.replaceState(
+          null, '', '#category/' + id + '/' + btn.dataset.facet);
       applyCatFilter(true);
     });
 
@@ -919,52 +1066,79 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
     document.getElementById('sub-chips').addEventListener('click', function(e) {
       var btn = e.target.closest('.facet-chip-btn');
       if (!btn) return;
-      document.querySelectorAll('#sub-chips .facet-chip-btn').forEach(function(b) {
-        b.classList.toggle('active', b === btn);
-      });
+      document.querySelectorAll('#sub-chips .facet-chip-btn')
+          .forEach(function(b) {
+            b.classList.toggle('active', b === btn);
+          });
       setSubChips('sub-sub-chips', btn.dataset.facet, btn.textContent.trim());
-      var _a1 = (document.querySelector('#cat-chips .facet-chip-btn.active') || {dataset:{facet:'all'}}).dataset.facet;
-      history.replaceState(null, '', '#category/' + id + '/' + _a1 + '/' + btn.dataset.facet);
+      var _a1 =
+          (document.querySelector('#cat-chips .facet-chip-btn.active') || {
+            dataset: {facet: 'all'}
+          }).dataset.facet;
+      history.replaceState(
+          null, '', '#category/' + id + '/' + _a1 + '/' + btn.dataset.facet);
       applyCatFilter(true);
     });
 
     // Level-3 clicks
-    document.getElementById('sub-sub-chips').addEventListener('click', function(e) {
-      var btn = e.target.closest('.facet-chip-btn');
-      if (!btn) return;
-      document.querySelectorAll('#sub-sub-chips .facet-chip-btn').forEach(function(b) {
-        b.classList.toggle('active', b === btn);
-      });
-      var _a1b = (document.querySelector('#cat-chips .facet-chip-btn.active') || {dataset:{facet:'all'}}).dataset.facet;
-      var _a2b = (document.querySelector('#sub-chips .facet-chip-btn.active') || {dataset:{facet:'all'}}).dataset.facet;
-      history.replaceState(null, '', '#category/' + id + '/' + _a1b + '/' + _a2b + '/' + btn.dataset.facet);
-      applyCatFilter(true);
-    });
+    document.getElementById('sub-sub-chips')
+        .addEventListener('click', function(e) {
+          var btn = e.target.closest('.facet-chip-btn');
+          if (!btn) return;
+          document.querySelectorAll('#sub-sub-chips .facet-chip-btn')
+              .forEach(function(b) {
+                b.classList.toggle('active', b === btn);
+              });
+          var _a1b =
+              (document.querySelector('#cat-chips .facet-chip-btn.active') || {
+                dataset: {facet: 'all'}
+              }).dataset.facet;
+          var _a2b =
+              (document.querySelector('#sub-chips .facet-chip-btn.active') || {
+                dataset: {facet: 'all'}
+              }).dataset.facet;
+          history.replaceState(
+              null, '',
+              '#category/' + id + '/' + _a1b + '/' + _a2b + '/' +
+                  btn.dataset.facet);
+          applyCatFilter(true);
+        });
 
     // Live search
-    document.getElementById('cat-search-input').addEventListener('input', function() { applyCatFilter(true); });
+    document.getElementById('cat-search-input')
+        .addEventListener('input', function() {
+          applyCatFilter(true);
+        });
 
     // Pre-select facets from URL (up to three levels)
     if (preselectedF1 && preselectedF1 !== 'all') {
-      var preBtn1 = document.querySelector('#cat-chips .facet-chip-btn[data-facet="' + preselectedF1 + '"]');
+      var preBtn1 = document.querySelector(
+          '#cat-chips .facet-chip-btn[data-facet="' + preselectedF1 + '"]');
       if (preBtn1) {
-        document.querySelectorAll('#cat-chips .facet-chip-btn').forEach(function(b) {
-          b.classList.toggle('active', b === preBtn1);
-        });
+        document.querySelectorAll('#cat-chips .facet-chip-btn')
+            .forEach(function(b) {
+              b.classList.toggle('active', b === preBtn1);
+            });
         setSubChips('sub-chips', preselectedF1, preBtn1.textContent.trim());
         if (preselectedF2 && preselectedF2 !== 'all') {
-          var preBtn2 = document.querySelector('#sub-chips .facet-chip-btn[data-facet="' + preselectedF2 + '"]');
+          var preBtn2 = document.querySelector(
+              '#sub-chips .facet-chip-btn[data-facet="' + preselectedF2 + '"]');
           if (preBtn2) {
-            document.querySelectorAll('#sub-chips .facet-chip-btn').forEach(function(b) {
-              b.classList.toggle('active', b === preBtn2);
-            });
-            setSubChips('sub-sub-chips', preselectedF2, preBtn2.textContent.trim());
-            if (preselectedF3 && preselectedF3 !== 'all') {
-              var preBtn3 = document.querySelector('#sub-sub-chips .facet-chip-btn[data-facet="' + preselectedF3 + '"]');
-              if (preBtn3) {
-                document.querySelectorAll('#sub-sub-chips .facet-chip-btn').forEach(function(b) {
-                  b.classList.toggle('active', b === preBtn3);
+            document.querySelectorAll('#sub-chips .facet-chip-btn')
+                .forEach(function(b) {
+                  b.classList.toggle('active', b === preBtn2);
                 });
+            setSubChips(
+                'sub-sub-chips', preselectedF2, preBtn2.textContent.trim());
+            if (preselectedF3 && preselectedF3 !== 'all') {
+              var preBtn3 = document.querySelector(
+                  '#sub-sub-chips .facet-chip-btn[data-facet="' +
+                  preselectedF3 + '"]');
+              if (preBtn3) {
+                document.querySelectorAll('#sub-sub-chips .facet-chip-btn')
+                    .forEach(function(b) {
+                      b.classList.toggle('active', b === preBtn3);
+                    });
               }
             }
           }
@@ -979,12 +1153,15 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
   // All main categories use the eyebrow (visual layout) path above.
   // This fallback renders a simple card grid for any category without eyebrow.
   var fallbackCards = '';  // legacy fallback (no longer used)
-  app.innerHTML = '<div class="page">'
-    + '<a class="plain-link back-link" href="#browse" data-log="Back to categories" data-log-destination="browse">← Back to categories</a>'
-    + '<div class="page-heading compact-heading"><div><p class="label">Activity category</p><h1>' + escapeHtml(category.label) + '</h1><p>' + escapeHtml(category.description) + '</p></div><span class="view-label">LEVEL 2</span></div>'
-    + answerButton('category/' + id)
-    + '<div class="hobby-grid category-grid">' + fallbackCards + '</div>'
-    + '</div>';
+  app.innerHTML = '<div class="page">' +
+      '<a class="plain-link back-link" href="#browse" data-log="Back to categories" data-log-destination="browse">← Back to categories</a>' +
+      '<div class="page-heading compact-heading"><div><p class="label">Activity category</p><h1>' +
+      escapeHtml(category.label) + '</h1><p>' +
+      escapeHtml(category.description) +
+      '</p></div><span class="view-label">LEVEL 2</span></div>' +
+      answerButton('category/' + id) +
+      '<div class="hobby-grid category-grid">' + fallbackCards + '</div>' +
+      '</div>';
 }
 
 
@@ -1019,11 +1196,14 @@ function renderHobby(name) {
   }
 
   // Related cards using the unified typographic card style
-  const relatedCards = (hobby.related || []).map(function(relName) {
-    const rel = data.hobbies[relName] || {};
-    const href = '#hobby/' + encodeURIComponent(relName);
-    return typoCard(relName, href, rel.blurb || '');
-  }).join('');
+  const relatedCards = (hobby.related || [])
+                           .map(function(relName) {
+                             const rel = data.hobbies[relName] || {};
+                             const href =
+                                 '#hobby/' + encodeURIComponent(relName);
+                             return typoCard(relName, href, rel.blurb || '');
+                           })
+                           .join('');
 
   // Normal view: redesigned hobby detail
   app.innerHTML = `<div class="page hobby-page">
@@ -1035,7 +1215,8 @@ function renderHobby(name) {
       <p class="hobby-detail__blurb">${escapeHtml(hobby.blurb)}</p>
       <dl class="hobby-detail__meta">
         <div><dt>Time to try</dt><dd>${escapeHtml(hobby.time)}</dd></div>
-        <div><dt>First step</dt><dd>${escapeHtml(hobby.startingPoint)}</dd></div>
+        <div><dt>First step</dt><dd>${
+      escapeHtml(hobby.startingPoint)}</dd></div>
       </dl>
       <section class="hobby-related">
         <p class="hobby-related__heading">You may also like...</p>
@@ -1129,7 +1310,8 @@ function render() {
   const _hashParts = location.hash.slice(1).split('/');
   const [route, value, facetId, facetId2, facetId3] = _hashParts;
   document.body.classList.toggle('browse-route', route === 'browse' || !route);
-  document.body.classList.toggle('category-route', route === 'category' || route === 'facet');
+  document.body.classList.toggle(
+      'category-route', route === 'category' || route === 'facet');
   document.body.classList.toggle('search-route', route === 'search');
   document.querySelectorAll('[data-view-link]')
       .forEach(
@@ -1153,7 +1335,9 @@ function render() {
   if (route === 'facet')
     renderFacet(decodeURIComponent(value || ''));
   else if (route === 'category')
-    renderCategory(decodeURIComponent(value || ''), decodeURIComponent(facetId || ''), decodeURIComponent(facetId2 || ''), decodeURIComponent(facetId3 || ''));
+    renderCategory(
+        decodeURIComponent(value || ''), decodeURIComponent(facetId || ''),
+        decodeURIComponent(facetId2 || ''), decodeURIComponent(facetId3 || ''));
   else if (route === 'hobby')
     renderHobby(decodeURIComponent(value || ''));
   else if (route === 'about')
@@ -1344,47 +1528,50 @@ render();
 
 // ─── Nav search icon expand/collapse ──────────────────────────────────────
 (function() {
-  var toggle  = document.getElementById('nav-search-toggle');
-  var bar     = document.getElementById('nav-search-bar');
-  var input   = document.getElementById('nav-search-input');
-  var closeBtn = document.getElementById('nav-search-close');
-  if (!toggle || !bar || !input) return;
+var toggle = document.getElementById('nav-search-toggle');
+var bar = document.getElementById('nav-search-bar');
+var input = document.getElementById('nav-search-input');
+var closeBtn = document.getElementById('nav-search-close');
+if (!toggle || !bar || !input) return;
 
-  function openSearch() {
-    bar.hidden = false;
-    toggle.setAttribute('aria-expanded', 'true');
-    toggle.setAttribute('aria-label', 'Close search');
-    input.focus();
+function openSearch() {
+  bar.hidden = false;
+  toggle.setAttribute('aria-expanded', 'true');
+  toggle.setAttribute('aria-label', 'Close search');
+  input.focus();
+}
+
+function closeSearch() {
+  bar.hidden = true;
+  input.value = '';
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-label', 'Open search');
+}
+
+toggle.addEventListener('click', function() {
+  if (bar.hidden) {
+    openSearch();
+  } else {
+    closeSearch();
   }
+});
 
-  function closeSearch() {
-    bar.hidden = true;
-    input.value = '';
-    toggle.setAttribute('aria-expanded', 'false');
-    toggle.setAttribute('aria-label', 'Open search');
+closeBtn.addEventListener('click', closeSearch);
+
+input.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeSearch();
+    toggle.focus();
   }
+});
 
-  toggle.addEventListener('click', function() {
-    if (bar.hidden) {
-      openSearch();
-    } else {
+input.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    var q = input.value.trim();
+    if (q) {
       closeSearch();
+      window.location.hash = '#search/' + encodeURIComponent(q);
     }
-  });
-
-  closeBtn.addEventListener('click', closeSearch);
-
-  input.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') { closeSearch(); toggle.focus(); }
-  });
-
-  input.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      var q = input.value.trim();
-      if (q) {
-        closeSearch();
-        window.location.hash = '#search/' + encodeURIComponent(q);
-      }
-    }
-  });
+  }
+});
 })();

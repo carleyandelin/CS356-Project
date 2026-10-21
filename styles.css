@@ -18,11 +18,11 @@ a { color: inherit; text-decoration: none; }
 button, input { font: inherit; }
 button, a { cursor: pointer; }
 .app-shell { width: 100%; min-height: 100vh; padding: 0 32px; box-sizing: border-box; }
-.site-header { display: flex; align-items: stretch; gap: 28px; min-height: 74px; position: relative; } .site-header::after { content: ""; position: absolute; bottom: 0; left: -32px; right: -32px; height: 1px; background: var(--teal-shade); }
+.site-header { display: flex; align-items: center; gap: 28px; min-height: 96px; position: relative; } .site-header::after { content: ""; position: absolute; bottom: 0; left: -32px; right: -32px; height: 1px; background: var(--teal-shade); }
 .brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
-.brand-mark { display: block; width: 38px; height: 38px; object-fit: contain; }
+.brand-mark { display: block; width: 46px; height: 46px; object-fit: contain; }
 .brand strong, .brand small { display: block; }
-.brand strong { font-size: 14px; }
+.brand strong { font-size: 18px; }
 .brand small { margin-top: 3px; font-size: 10px; }
 .top-nav { display: flex; align-items: stretch; gap: 20px; font-size: 14px; }
 .top-nav a {
@@ -44,14 +44,14 @@ button, a { cursor: pointer; }
   transition: background .15s ease;
 }
 .top-nav a.active::after, .top-nav a:hover::after { background: var(--teal-shade); }
-.category-nav { display: flex; align-items: stretch; gap: 6px; font-size: 14px; }
+.category-nav { display: flex; align-items: stretch; align-self: stretch; gap: 6px; font-size: 16px; }
 .category-menu { position: relative; display: flex; align-items: stretch; }
 .category-button {
   display: flex;
   align-items: center;
   padding: 0 10px;
   position: relative;
-  font-size: 14px;
+  font-size: 16px;
   text-decoration: none;
   border: none;
   background: none;
@@ -424,6 +424,101 @@ th { font-weight: 400; }
   box-shadow: 0 6px 24px rgba(0,0,0,.13);
 }
 .hot-card-label { margin: 0 0 10px; font-size: 14px; }
+
+/* Style 4: photo card — full-bleed image, hover-reveal text ──────────── */
+.hot-card--photo {
+  padding: 0;
+  border: none;
+  background: var(--teal-shade);
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.22s cubic-bezier(.25,.46,.45,.94),
+    box-shadow 0.22s cubic-bezier(.25,.46,.45,.94);
+}
+.hot-card--photo:hover {
+  border-color: transparent;
+  transform: translateY(-6px) scale(1.02);
+  box-shadow:
+    0 20px 48px rgba(0,0,0,.22),
+    0  6px 16px rgba(0,0,0,.12);
+}
+.hot-card--photo .card-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* LQIP blur-up: blurred until full image swaps in */
+  filter: blur(12px);
+  transform: scale(1.08);
+  transition: filter 0.35s ease, transform 0.35s ease;
+}
+.hot-card--photo .card-img.card-img--loaded {
+  filter: none;
+  transform: scale(1);
+}
+/* gradient scrim — always visible */
+.hot-card--photo .card-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,.72) 0%, rgba(0,0,0,0) 50%),
+    linear-gradient(to top,    rgba(0,0,0,.68) 0%, rgba(0,0,0,0) 50%);
+}
+/* text — always visible at top-left */
+.hot-card--photo .card-text {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 18px 20px;
+  z-index: 2;
+}
+.hot-card--photo .card-name {
+  font-size: 19px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  margin: 0 0 5px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.35);
+}
+.hot-card--photo .card-blurb-photo {
+  font-size: 10.5px;
+  color: rgba(255,255,255,.85);
+  line-height: 1.45;
+  text-shadow: 0 1px 3px rgba(0,0,0,.3);
+  margin: 0;
+}
+/* "Explore →" CTA — bottom-right, slides in on hover */
+.hot-card--photo .card-explore {
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px rgba(0,0,0,.4);
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity .22s ease, transform .22s ease;
+  pointer-events: none;
+}
+.hot-card--photo:hover .card-explore {
+  opacity: 1;
+  transform: translateX(0);
+}
+.hot-card--photo .card-explore-arrow {
+  font-size: 14px;
+  line-height: 1;
+}
 .hot-card-blurb { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
 
 .carousel-btn {

@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Hobby Atlas information architecture prototype" />
     <title>Hobby Atlas | Explore hobbies</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://res.cloudinary.com">
+  <link rel="dns-prefetch" href="https://res.cloudinary.com">
+  <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="hobby-ticker-wrap">
@@ -17,12 +19,8 @@
           <img class="brand-mark" src="logo.png" alt="Hobby Atlas logo" />
           <span><strong>Hobby Atlas</strong></span>
         </a>
-        <nav class="top-nav" aria-label="Primary navigation">
-          <a href="#browse" data-view-link="browse" data-log="Explore" data-log-destination="browse">Explore</a>
-          <a href="#log" data-view-link="log" data-log="Click log" data-log-destination="log">Click log</a>
-        </nav>
+
         <nav class="category-nav" aria-label="Activity categories"></nav>
-        <a class="wire-button" href="#browse" data-log="Start over" data-log-destination="browse">Start over</a>
         <div class="nav-search" id="nav-search">
           <button class="nav-search__icon-btn" id="nav-search-toggle" aria-label="Open search" aria-expanded="false">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>
