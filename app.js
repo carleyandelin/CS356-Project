@@ -527,19 +527,24 @@ function photoCard(name, href, blurb, imgUrl, extraAttrs) {
   var attrs = extraAttrs ? (' ' + extraAttrs) : '';
   var dest = href.replace(/^#/, '');
   // LQIP: tiny 20px blurred version loads instantly (~300 bytes)
-  var lqipUrl = imgUrl.replace('f_auto,q_auto,w_600,h_600,c_fill', 'f_auto,q_10,w_20,h_20,c_fill,e_blur:500');
-  return '<a class="hot-card hot-card--photo"' + attrs
-    + ' href="' + href + '"'
-    + ' data-log="Open ' + escapeHtml(name) + '"'
-    + ' data-log-destination="' + escapeHtml(dest) + '">'
-    + '<img class="card-img" src="' + escapeHtml(lqipUrl) + '" data-src="' + escapeHtml(imgUrl) + '" alt="' + escapeHtml(name) + '" onload="_lqipLoad(this)">'
-    + '<div class="card-scrim"></div>'
-    + '<div class="card-text">'
-    + '<p class="card-name">' + escapeHtml(name) + '</p>'
-    + '<p class="card-blurb-photo">' + escapeHtml(blurb) + '</p>'
-    + '</div>'
-    + '<div class="card-explore"><span>Try ' + escapeHtml(name) + '</span><span class="card-explore-arrow">→</span></div>'
-    + '</a>';
+  var lqipUrl = imgUrl.replace(
+      'f_auto,q_auto,w_600,h_600,c_fill',
+      'f_auto,q_10,w_20,h_20,c_fill,e_blur:500');
+  return '<a class="hot-card hot-card--photo"' + attrs + ' href="' + href +
+      '"' +
+      ' data-log="Open ' + escapeHtml(name) + '"' +
+      ' data-log-destination="' + escapeHtml(dest) + '">' +
+      '<img class="card-img" src="' + escapeHtml(lqipUrl) + '" data-src="' +
+      escapeHtml(imgUrl) + '" alt="' + escapeHtml(name) +
+      '" onload="_lqipLoad(this)">' +
+      '<div class="card-scrim"></div>' +
+      '<div class="card-text">' +
+      '<p class="card-name">' + escapeHtml(name) + '</p>' +
+      '<p class="card-blurb-photo">' + escapeHtml(blurb) + '</p>' +
+      '</div>' +
+      '<div class="card-explore"><span>Try ' + escapeHtml(name) +
+      '</span><span class="card-explore-arrow">→</span></div>' +
+      '</a>';
 }
 
 function renderBrowse() {
@@ -572,12 +577,7 @@ function renderBrowse() {
       rank: 'No. 07',
       demoStyle: 'typo'
     },
-    {
-      label: 'Thrifting',
-      key: 'Thrifting',
-      rank: 'No. 08',
-      demoStyle: 'typo'
-    },
+    {label: 'Thrifting', key: 'Thrifting', rank: 'No. 08', demoStyle: 'typo'},
     {
       label: 'Photography',
       key: 'Photography',
@@ -817,11 +817,13 @@ function renderSearch(query, facetId) {
       var href = '#hobby/' + encodeURIComponent(name);
       var blurb = hobby.blurb || '';
       if (hobby.img) {
-        cardsHtml += photoCard(
-            name, href, blurb, hobby.img,
-            'data-name="' + name.toLowerCase() + '" class="outdoors-card"')
-            .replace('class="hot-card hot-card--photo"',
-                     'class="hot-card hot-card--photo outdoors-card"');
+        cardsHtml +=
+            photoCard(
+                name, href, blurb, hobby.img,
+                'data-name="' + name.toLowerCase() + '" class="outdoors-card"')
+                .replace(
+                    'class="hot-card hot-card--photo"',
+                    'class="hot-card hot-card--photo outdoors-card"');
       } else {
         cardsHtml +=
             typoCard(
@@ -951,21 +953,24 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
       var href = '#hobby/' + encodeURIComponent(item.name);
       var blurb = item.hobby.blurb || '';
       var _extraAttrs = 'data-f1="' + item.f1 + '" data-f2="' + item.f2 +
-          '" data-f3="' + item.f3 + '" data-name="' + item.name.toLowerCase() + '"';
+          '" data-f3="' + item.f3 + '" data-name="' + item.name.toLowerCase() +
+          '"';
       if (item.hobby.img) {
         cardsHtml += photoCard(
-            item.name, '#hobby/' + encodeURIComponent(item.name),
-            item.hobby.blurb || '', item.hobby.img,
-            _extraAttrs + ' class="outdoors-card"')
-            .replace('class="hot-card hot-card--photo"',
-                     'class="hot-card hot-card--photo outdoors-card"');
+                         item.name, '#hobby/' + encodeURIComponent(item.name),
+                         item.hobby.blurb || '', item.hobby.img,
+                         _extraAttrs + ' class="outdoors-card"')
+                         .replace(
+                             'class="hot-card hot-card--photo"',
+                             'class="hot-card hot-card--photo outdoors-card"');
       } else {
-        cardsHtml += typoCard(
-            item.name, '#hobby/' + encodeURIComponent(item.name),
-            item.hobby.blurb || '',
-            _extraAttrs + ' class="outdoors-card"')
-            .replace('class="hot-card hot-card--typo"',
-                     'class="hot-card hot-card--typo outdoors-card"');
+        cardsHtml +=
+            typoCard(
+                item.name, '#hobby/' + encodeURIComponent(item.name),
+                item.hobby.blurb || '', _extraAttrs + ' class="outdoors-card"')
+                .replace(
+                    'class="hot-card hot-card--typo"',
+                    'class="hot-card hot-card--typo outdoors-card"');
       }
     });
     cardsHtml += '</div>';
