@@ -644,18 +644,20 @@ function renderBrowse() {
   const tailClone = hotList.slice(0, CLONE).map(makeCard).join('');
 
   app.innerHTML = `<div class="page hot-list-page">
-    <div class="hot-list-header">
-      <h1 class="hot-list-title">Your next hobby is in here.</h1>
-    </div>
-    <div class="carousel-wrap">
-      <button class="carousel-btn carousel-prev" aria-label="Previous hobbies">&#8249;</button>
-      <div class="carousel-viewport">
-        <div class="carousel-track" id="carousel-track">
-          <div class="carousel-inner" id="carousel-inner">${headClone}${
-      realHtml}${tailClone}</div>
-        </div>
+    <div class="hot-list-hero">
+      <div class="hot-list-header">
+        <h1 class="hot-list-title">Your next <span style="color:var(--teal-shade)">hobby</span> is in here.</h1>
       </div>
-      <button class="carousel-btn carousel-next" aria-label="Next hobbies">&#8250;</button>
+      <div class="carousel-wrap">
+        <button class="carousel-btn carousel-prev" aria-label="Previous hobbies">&#8249;</button>
+        <div class="carousel-viewport">
+          <div class="carousel-track" id="carousel-track">
+            <div class="carousel-inner" id="carousel-inner">${headClone}${
+      realHtml}${tailClone}</div>
+          </div>
+        </div>
+        <button class="carousel-btn carousel-next" aria-label="Next hobbies">&#8250;</button>
+      </div>
     </div>
     <div class="hot-list-search-band"><p class="hot-list-search-prompt">Not seeing your thing? Search for it.</p><div class="hot-list-search">${
       searchForm()}</div></div>

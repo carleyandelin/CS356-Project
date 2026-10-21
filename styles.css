@@ -1,8 +1,9 @@
 :root {
-  --ink: #000000;
+  --ink: #2d7a75;          /* dark teal — replaces black throughout */
+  --ink-black: #111111;    /* true black — nav bar only */
   --paper: #f1f1f1;
   --line: #c0ddda;
-  --muted: #000000;
+  --muted: #2d7a75;
   --accent: #fbe29d;          /* warm gold — official accent */
   /* Teal palette */
   --teal-tint: #e8f5f3;
@@ -22,8 +23,8 @@ button, a { cursor: pointer; }
 .brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
 .brand-mark { display: block; width: 46px; height: 46px; object-fit: contain; }
 .brand strong, .brand small { display: block; }
-.brand strong { font-size: 18px; }
-.brand small { margin-top: 3px; font-size: 10px; }
+.brand strong { font-size: 18px; color: var(--ink-black); }
+.brand small { margin-top: 3px; font-size: 10px; color: var(--ink-black); }
 .top-nav { display: flex; align-items: stretch; gap: 20px; font-size: 14px; }
 .top-nav a {
   display: flex;
@@ -32,6 +33,7 @@ button, a { cursor: pointer; }
   position: relative;
   font-size: 14px;
   text-decoration: none;
+  color: var(--ink-black);
 }
 .top-nav a::after {
   content: '';
@@ -55,7 +57,7 @@ button, a { cursor: pointer; }
   text-decoration: none;
   border: none;
   background: none;
-  color: inherit;
+  color: var(--ink-black);
   cursor: pointer;
   height: 100%;
   white-space: nowrap;
@@ -75,7 +77,7 @@ button, a { cursor: pointer; }
 .facet-menu { display: none; position: absolute; z-index: 2; top: 100%; left: 0; min-width: 130px; border: 1px solid var(--line); background: var(--paper); padding-top: 4px; }
 .facet-menu::before { content: ''; position: absolute; top: -4px; left: 0; right: 0; height: 4px; }
 .category-menu:hover .facet-menu, .category-menu:focus-within .facet-menu { display: grid; }
-.facet-menu a { display: block; padding: 8px 10px; white-space: nowrap; }
+.facet-menu a { display: block; padding: 8px 10px; white-space: nowrap; color: var(--ink-black); }
 .facet-menu a:hover, .facet-menu a:focus-visible { background: var(--ink); color: var(--paper); }
 .wire-button { display: inline-block; border: 1px solid var(--ink); border-radius: 999px; background: var(--paper); padding: 9px 12px; font-size: 11px; }
 .wire-button:hover, .wire-button:focus-visible { background: var(--accent); }
@@ -279,14 +281,22 @@ th { font-weight: 400; }
 }
 
 /* ─── Hot List + Carousel ─────────────────────────────────────────────────── */
-.hot-list-page { padding-top: 32px; }
-.hot-list-header { margin-top: 48px; margin-bottom: 80px; text-align: center; }
+.hot-list-page { padding-top: 0; }
+.hot-list-hero {
+  background: var(--teal-tint);
+  margin-left: -32px;
+  margin-right: -32px;
+  padding: 64px 32px 80px;
+}
+.hot-list-header { margin-bottom: 64px; text-align: center; }
+.hot-list-title { color: var(--ink-black) !important; }
 .hot-list-title {
   margin: 0;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(24px, 4vw, 38px);
   font-weight: 400;
   line-height: 1.1;
+  color: var(--ink-black);
 }
 
 .carousel-wrap {
@@ -432,7 +442,7 @@ th { font-weight: 400; }
 .hot-card--photo {
   padding: 0;
   border: none;
-  background: var(--teal-shade);
+  background: var(--teal-tint);
   position: relative;
   overflow: hidden;
   transition:
@@ -594,6 +604,8 @@ th { font-weight: 400; }
 
 /* Start over in header — centered pill button */
 .site-header .wire-button {
+  border-color: var(--ink-black);
+  color: var(--ink-black);
   align-self: center;
   display: inline-block;
   border: 1px solid var(--ink);
