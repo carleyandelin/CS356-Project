@@ -236,10 +236,14 @@ const hobbies = {
   "Jet Skiing": {img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/jetskiing",  blurb: "A high-energy way to explore a shoreline and make a splash.", tags: ["outdoors","adventure","water"], time: "1 – 3 hrs", startingPoint: "Take a guided rental lesson on calm water.", related: ["Sailing","Whitewater Rafting"] },
   Bonsai: {img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/bonsai",  blurb: "Practice patience by shaping a living landscape over years.", tags: ["plants","patient","reflective"], time: "20 min / week", startingPoint: "Visit a nursery and choose a beginner tree.", related: ["Plant Propagation","Sourdough"] },
   "Plant Propagation": {img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/plant_propagation",  blurb: "Turn a small cutting into new growth and a daily moment of care.", tags: ["plants","patient","home"], time: "10 min / week", startingPoint: "Propagate a pothos cutting in a glass of water.", related: ["Bonsai","Sourdough"] },
-  Guitar: { blurb: "Learn the shapes and sounds that let you play along.", tags: ["music","skill","social"], time: "15 – 30 min", startingPoint: "Learn three chords to one favorite song.", related: ["DJing","Podcasting"] },
-  DJing: { blurb: "Shape a room's energy by finding the perfect next track.", tags: ["music","tech","social"], time: "30 min – 2 hrs", startingPoint: "Make a 20-minute mix from five songs you love.", related: ["Guitar","Podcasting"] },
-  Podcasting: { blurb: "Turn curiosity into a conversation, story, or tiny broadcast.", tags: ["media","learning","social"], time: "1 – 3 hrs", startingPoint: "Record a five-minute conversation with a friend.", related: ["DJing","Duo Lingo"] },
-  Photography: { blurb: "Train your eye to notice the light and stories hiding in plain sight.", tags: ["creative","outdoors","solo"], time: "20 min – 2 hrs", startingPoint: "Take ten photos of one ordinary object.", related: ["Painting","Scrapbooking"] },
+  Guitar: {
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/guitar", blurb: "Learn the shapes and sounds that let you play along.", tags: ["music","skill","social"], time: "15 – 30 min", startingPoint: "Learn three chords to one favorite song.", related: ["DJing","Podcasting"] },
+  DJing: {
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/djing", blurb: "Shape a room's energy by finding the perfect next track.", tags: ["music","tech","social"], time: "30 min – 2 hrs", startingPoint: "Make a 20-minute mix from five songs you love.", related: ["Guitar","Podcasting"] },
+  Podcasting: {
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/podcasting", blurb: "Turn curiosity into a conversation, story, or tiny broadcast.", tags: ["media","learning","social"], time: "1 – 3 hrs", startingPoint: "Record a five-minute conversation with a friend.", related: ["DJing","Duo Lingo"] },
+  Photography: {
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/photography", blurb: "Train your eye to notice the light and stories hiding in plain sight.", tags: ["creative","outdoors","solo"], time: "20 min – 2 hrs", startingPoint: "Take ten photos of one ordinary object.", related: ["Painting","Scrapbooking"] },
   Thrifting: {
       img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/thrifting", blurb: "Hunt secondhand shops for hidden gems and give clothes a second life.", tags: ["fashion","collecting","outdoors"], time: "1 – 3 hrs", startingPoint: "Set a $10 challenge at a local secondhand shop.", related: ["Antiquing","Cosplaying"] },
   Antiquing: {
@@ -292,13 +296,17 @@ const hobbies = {
   Crochet: { blurb: "Create fabric by looping yarn with a single hook.", tags: ["making","creative","patient"], time: "30 – 60 min", startingPoint: "Learn the chain stitch with one hook.", related: ["Embroidery","Quilting"] },
   "Air dry clay": { blurb: "Shape small sculptures that harden without a kiln.", tags: ["making","creative","solo"], time: "1 – 2 hrs", startingPoint: "Shape one small pinch pot.", related: ["Pottery","Resin Art"] },
   Pottery: { blurb: "Form objects from clay by hand or on a pottery wheel.", tags: ["making","creative","skill"], time: "2 – 3 hrs", startingPoint: "Take a beginner wheel or hand-building class.", related: ["Air dry clay","Painting"] },
-  Journaling: { blurb: "Record thoughts, observations, or memories in writing.", tags: ["reflective","solo","writing"], time: "5 – 15 min", startingPoint: "Write three sentences about today.", related: ["Poetry","Scrapbooking"] },
+  Journaling: {
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/journaling", blurb: "Record thoughts, observations, or memories in writing.", tags: ["reflective","solo","writing"], time: "5 – 15 min", startingPoint: "Write three sentences about today.", related: ["Poetry","Scrapbooking"] },
   "Bag charms": { blurb: "Make small decorative charms to attach to a bag.", tags: ["creative","making","fashion"], time: "30 – 60 min", startingPoint: "Make one charm from beads or buttons.", related: ["Jewelry Making","Bedazzling"] },
   Calligraphy: { blurb: "Create expressive lettering with careful strokes and spacing.", tags: ["creative","writing","skill"], time: "20 – 40 min", startingPoint: "Practice one alphabet with a brush pen.", related: ["Journaling","Graphic Design"] },
-  Coloring: { blurb: "Fill illustrations with color as a relaxing creative practice.", tags: ["creative","solo","relaxing"], time: "20 – 60 min", startingPoint: "Color one page with three colors.", related: ["Painting","Flower Pressing"] },
-  Poetry: { blurb: "Use rhythm, imagery, and words to express an idea or feeling.", tags: ["writing","creative","reflective"], time: "15 – 30 min", startingPoint: "Write a four-line poem about something nearby.", related: ["Journaling","Voice lessons"] },
+  Coloring: {
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/coloring", blurb: "Fill illustrations with color as a relaxing creative practice.", tags: ["creative","solo","relaxing"], time: "20 – 60 min", startingPoint: "Color one page with three colors.", related: ["Painting","Flower Pressing"] },
+  Poetry: {
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/poetry", blurb: "Use rhythm, imagery, and words to express an idea or feeling.", tags: ["writing","creative","reflective"], time: "15 – 30 min", startingPoint: "Write a four-line poem about something nearby.", related: ["Journaling","Voice lessons"] },
   Juggling: { blurb: "Keep multiple objects moving through the air in a pattern.", tags: ["skill","performance","solo"], time: "15 – 30 min", startingPoint: "Practice tossing one ball between hands.", related: ["Balloon Animals","Magic"] },
-  "Balloon Animals": { blurb: "Twist balloons into playful figures and shapes.", tags: ["skill","performance","social"], time: "30 – 60 min", startingPoint: "Make a simple balloon dog while following a tutorial.", related: ["Juggling","Magic"] },
+  "Balloon Animals": {
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/balloon_animals", blurb: "Twist balloons into playful figures and shapes.", tags: ["skill","performance","social"], time: "30 – 60 min", startingPoint: "Make a simple balloon dog while following a tutorial.", related: ["Juggling","Magic"] },
   Embroidery: { blurb: "Decorate fabric with stitched designs.", tags: ["making","creative","patient"], time: "30 – 60 min", startingPoint: "Learn a running stitch on scrap fabric.", related: ["Crochet","Quilting"] },
   Origami: { blurb: "Fold paper into sculptures, animals, and geometric forms.", tags: ["making","creative","solo"], time: "15 – 30 min", startingPoint: "Fold one paper crane.", related: ["Air dry clay","Calligraphy"] },
   Quilting: { blurb: "Join layers of fabric into a patterned, warm textile.", tags: ["making","creative","patient"], time: "1 – 3 hrs", startingPoint: "Piece two fabric squares together.", related: ["Crochet","Embroidery"] },
@@ -310,10 +318,14 @@ const hobbies = {
   "Graphic Design": { blurb: "Combine type, color, and images to communicate visually.", tags: ["creative","tech","visual"], time: "1 – 2 hrs", startingPoint: "Make a simple poster with two fonts.", related: ["Photography","Painting"] },
   "Flower Pressing": { blurb: "Flatten and preserve flowers for art and keepsakes.", tags: ["creative","plants","patient"], time: "15 – 30 min + 1 week press", startingPoint: "Press a few fresh flowers in a book.", related: ["Gardening","Scrapbooking"] },
   "Tie-Dye": { blurb: "Create colorful patterns by folding, tying, and dyeing fabric.", tags: ["creative","making","colorful"], time: "2 – 4 hrs", startingPoint: "Tie-dye one plain cotton shirt.", related: ["Painting","Quilting"] },
-  Concerts: { blurb: "Experience live music and the energy of a performing artist.", tags: ["music","social","experience"], time: "2 – 4 hrs", startingPoint: "Find a small local show and buy one ticket.", related: ["Guitar","DJing"] },
-  Videography: { blurb: "Record and edit moving images to tell a story.", tags: ["media","creative","tech"], time: "1 – 2 hrs", startingPoint: "Shoot a 30-second video about your day.", related: ["Photography","Podcasting"] },
-  "Voice lessons": { blurb: "Develop singing technique, pitch, and breath control.", tags: ["music","skill","performance"], time: "30 – 60 min", startingPoint: "Practice one song with a vocal warm-up.", related: ["Guitar","Beatboxing"] },
-  Beatboxing: { blurb: "Make rhythmic sounds and musical beats with your voice.", tags: ["music","skill","performance"], time: "15 – 30 min", startingPoint: "Practice a basic kick-and-snare pattern.", related: ["Voice lessons","DJing"] },
+  Concerts: {
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/concerts", blurb: "Experience live music and the energy of a performing artist.", tags: ["music","social","experience"], time: "2 – 4 hrs", startingPoint: "Find a small local show and buy one ticket.", related: ["Guitar","DJing"] },
+  Videography: {
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/videography", blurb: "Record and edit moving images to tell a story.", tags: ["media","creative","tech"], time: "1 – 2 hrs", startingPoint: "Shoot a 30-second video about your day.", related: ["Photography","Podcasting"] },
+  "Voice lessons": {
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/voice_lessons", blurb: "Develop singing technique, pitch, and breath control.", tags: ["music","skill","performance"], time: "30 – 60 min", startingPoint: "Practice one song with a vocal warm-up.", related: ["Guitar","Beatboxing"] },
+  Beatboxing: {
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/beatboxing", blurb: "Make rhythmic sounds and musical beats with your voice.", tags: ["music","skill","performance"], time: "15 – 30 min", startingPoint: "Practice a basic kick-and-snare pattern.", related: ["Voice lessons","DJing"] },
   Watches: {
       img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/watches", blurb: "Study, collect, or repair timepieces and their mechanisms.", tags: ["collecting","learning","patient"], time: "30 – 60 min", startingPoint: "Learn the parts of one favorite watch.", related: ["Vinyl Records","Thrifting"] },
   "Fidget Trading": {
