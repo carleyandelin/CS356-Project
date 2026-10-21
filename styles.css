@@ -159,7 +159,7 @@ th { font-weight: 400; }
 /* ─── Category Hero ───────────────────────────────────────────────────────── */
 .category-hero {
   margin: 32px -32px 0;
-  background: var(--teal-tint);
+  background: var(--paper);
   border-top: 1px solid var(--teal-base);
   border-bottom: 1px solid var(--teal-base);
   padding: 56px 32px;
@@ -283,7 +283,7 @@ th { font-weight: 400; }
 /* ─── Hot List + Carousel ─────────────────────────────────────────────────── */
 .hot-list-page { padding-top: 0; }
 .hot-list-hero {
-  background: var(--teal-tint);
+  background: var(--paper);
   margin-left: -32px;
   margin-right: -32px;
   padding: 64px 32px 80px;
@@ -300,13 +300,10 @@ th { font-weight: 400; }
 }
 
 .carousel-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 36px;
+  position: relative;
+  margin: 0 -32px 36px;  /* bleed to screen edges */
 }
 .carousel-viewport {
-  flex: 1;
   overflow: hidden;
   padding-block: 20px; /* vertical room for hover shadow */
   margin-block: -20px;
@@ -442,7 +439,7 @@ th { font-weight: 400; }
 .hot-card--photo {
   padding: 0;
   border: none;
-  background: var(--teal-tint);
+  background: var(--paper);
   position: relative;
   overflow: hidden;
   transition:
@@ -542,27 +539,49 @@ th { font-weight: 400; }
 .hot-card-blurb { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
 
 .carousel-btn {
-  flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 26px;
-  line-height: 1;
-  color: var(--ink);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 56px;
+  height: 56px;
+  background: var(--accent);
+  border: none;
+  border-radius: 50%;
+  font-size: 0;
+  color: var(--ink-black);
   cursor: pointer;
-  transition: background .15s ease;
+  transition: transform .18s ease, box-shadow .18s ease;
   padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.10);
 }
-.carousel-btn:hover:not(:disabled) { background: var(--accent); }
-.carousel-btn:disabled { opacity: .3; cursor: default; }
+.carousel-btn svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--ink-black);
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.carousel-prev { left: 56px; }
+.carousel-next { right: 56px; }
+.carousel-btn:hover:not(:disabled) {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 24px rgba(251,226,157,0.5), 0 2px 8px rgba(0,0,0,0.14);
+}
+.carousel-btn:active:not(:disabled) { transform: translateY(-50%) scale(0.96); }
+.carousel-btn:disabled { opacity: .25; cursor: default; }
 
 .hot-list-search-band {
   margin-top: 80px;
   margin-left: -32px;
   margin-right: -32px;
-  background: var(--teal-tint);
+  background: var(--paper);
   border-top: 1px solid var(--teal-base);
   border-bottom: 1px solid var(--teal-base);
   padding: 80px 32px;
