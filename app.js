@@ -542,8 +542,6 @@ function photoCard(name, href, blurb, imgUrl, extraAttrs) {
       '<p class="card-name">' + escapeHtml(name) + '</p>' +
       '<p class="card-blurb-photo">' + escapeHtml(blurb) + '</p>' +
       '</div>' +
-      '<div class="card-explore"><span>Try ' + escapeHtml(name) +
-      '</span><span class="card-explore-arrow">→</span></div>' +
       '</a>';
 }
 
@@ -642,6 +640,7 @@ function renderBrowse() {
   const realHtml = hotList.map(makeCard).join('');
   const headClone = hotList.slice(-CLONE).map(makeCard).join('');
   const tailClone = hotList.slice(0, CLONE).map(makeCard).join('');
+  const categoryCards = data.categories.map(groupBlock).join('');
 
   app.innerHTML = `<div class="page hot-list-page">
     <div class="hot-list-hero">
@@ -659,8 +658,24 @@ function renderBrowse() {
         <button class="carousel-btn carousel-next" aria-label="Next hobbies"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
       </div>
     </div>
-    <div class="hot-list-search-band"><p class="hot-list-search-prompt">Not seeing your thing? Search for it.</p><div class="hot-list-search">${
-      searchForm()}</div></div>
+    <section class="home-categories">
+      <div class="section-title">
+        <h2>Explore all categories</h2>
+        <div class="home-categories__actions">
+          <p>Start with a feeling, then follow your curiosity.</p>
+        </div>
+      </div>
+      <div class="group-list">${categoryCards}</div>
+    </section>
+    <div class="hot-list-search-band">
+      <div class="hot-list-search-layout">
+        <div class="hot-list-search-copy">
+          <p class="hot-list-search-prompt">Not seeing your thing? Search for it.</p>
+          ${searchForm()}
+        </div>
+        <a class="see-all-hobbies" href="#hobbies" data-log="See all hobbies" data-log-destination="hobbies">See all hobbies</a>
+      </div>
+    </div>
   </div>`;
 
   // fitTypoNames is defined at module level — called below after layout
@@ -775,6 +790,26 @@ function renderBrowse() {
     if (Math.abs(dx) < 40) return;
     slide(dx < 0 ? +1 : -1);
   });
+}
+
+function renderAllHobbies() {
+  const cards = [...data.allHobbies].sort((a, b) => a.localeCompare(b)).map((name) => {
+    const hobby = data.hobbies[name] || {};
+    const href = '#hobby/' + encodeURIComponent(name);
+    if (hobby.img) return photoCard(name, href, hobby.blurb || '', hobby.img);
+    return typoCard(name, href, hobby.blurb || '');
+  }).join('');
+
+  app.innerHTML = `<div class="page all-hobbies-page">
+    <div class="page-heading">
+      <div>
+        <p class="label">The full collection</p>
+        <h1>All hobbies</h1>
+      </div>
+      <span class="view-label">${data.allHobbies.length} ideas</span>
+    </div>
+    <div class="all-hobbies-grid outdoors-grid">${cards}</div>
+  </div>`;
 }
 
 function searchMatches(query) {
@@ -1252,12 +1287,20 @@ function renderHobby(name) {
     return;
   }
 
-  // Related cards using the unified typographic card style
+  const heroImage = hobby.img ?
+      `<div class="hobby-hero__image-wrap">
+        <img class="hobby-hero__image" src="${escapeHtml(hobby.img)}" alt="${escapeHtml(name)}">
+      </div>` :
+      '';
+
   const relatedCards = (hobby.related || [])
                            .map(function(relName) {
                              const rel = data.hobbies[relName] || {};
                              const href =
                                  '#hobby/' + encodeURIComponent(relName);
+                             if (rel.img)
+                               return photoCard(
+                                   relName, href, rel.blurb || '', rel.img);
                              return typoCard(relName, href, rel.blurb || '');
                            })
                            .join('');
@@ -1266,17 +1309,25 @@ function renderHobby(name) {
   app.innerHTML = `<div class="page hobby-page">
     <button class="back-arrow" onclick="history.back()" aria-label="Go back">←</button>
     <section class="hobby-hero">
-      <h1 class="hobby-hero__title">${escapeHtml(name)}</h1>
+      ${heroImage}
+      <div class="hobby-hero__content">
+        <p class="label">${escapeHtml(category ? category.label : 'Hobby')}</p>
+        <h1 class="hobby-hero__title">${escapeHtml(name)}</h1>
+        <p class="hobby-detail__blurb">${escapeHtml(hobby.blurb || '')}</p>
+        <div class="hobby-detail__intro">
+          <p class="hobby-detail__eyebrow">Why try it?</p>
+          <p>Start small, stay curious, and see whether ${escapeHtml(name)} fits your kind of fun.</p>
+        </div>
+      </div>
     </section>
     <article class="hobby-detail">
-      <p class="hobby-detail__blurb">${escapeHtml(hobby.blurb)}</p>
       <dl class="hobby-detail__meta">
         <div><dt>Time to try</dt><dd>${escapeHtml(hobby.time)}</dd></div>
         <div><dt>First step</dt><dd>${
       escapeHtml(hobby.startingPoint)}</dd></div>
       </dl>
       <section class="hobby-related">
-        <p class="hobby-related__heading">You may also like...</p>
+        <p class="hobby-related__heading">You may also like</p>
         <div class="outdoors-grid hobby-related__grid">${relatedCards}</div>
       </section>
     </article>
@@ -1402,7 +1453,10 @@ function render() {
   else if (route === 'search')
     renderSearch(
         decodeURIComponent(value || ''), decodeURIComponent(facetId || ''));
-  else if (route === 'log')
+  else if (route === 'hobbies') {
+    renderAllHobbies();
+    window.scrollTo(0, 0);
+  } else if (route === 'log')
     renderLog();
   else
     renderBrowse();
@@ -1506,6 +1560,32 @@ document.addEventListener('submit', (event) => {
     (_n, l) => `No experience needed. ${l} starts somewhere.`,
     (_n, l) => `Turns out you're exactly the kind of person who would love ${l}.`,
     (_n, l) => `${l} has been waiting for you this whole time.`,
+    (_n, l) => `A little curiosity could lead you to ${l}.`,
+    (_n, l) => `Make room for something new: ${l}.`,
+    (_n, l) => `${l} might be your next favorite way to spend a day.`,
+    (_n, l) => `Try ${l}. Keep the part that makes you smile.`,
+    (_n, l) => `Your next small adventure could be ${l}.`,
+    (_n, l) => `${l} is a good excuse to make time for yourself.`,
+    (_n, l) => `Start with ${l}, and follow where it takes you.`,
+    (_n, l) => `You don't have to be good at ${l} to enjoy it.`,
+    (_n, l) => `${l} is proof that hobbies don't have to be complicated.`,
+    (_n, l) => `Take a break from routine and meet ${l}.`,
+    (_n, l) => `There is always time to discover ${l}.`,
+    (_n, l) => `${l} could be the reset your week needs.`,
+    (_n, l) => `Find your kind of fun with ${l}.`,
+    (_n, l) => `Somewhere between curious and committed is ${l}.`,
+    (_n, l) => `${l} is a fresh way to spend your free time.`,
+    (_n, l) => `Follow your curiosity all the way to ${l}.`,
+    (_n, l) => `A new favorite might start with ${l}.`,
+    (_n, l) => `${l} gives your hands and mind something to do.`,
+    (_n, l) => `Make today a good day to try ${l}.`,
+    (_n, l) => `Your free time deserves more than another scroll. Try ${l}.`,
+    (_n, l) => `${l} is waiting for a first attempt, not perfection.`,
+    (_n, l) => `A small start can turn into a love for ${l}.`,
+    (_n, l) => `Meet the hobby that makes time disappear: ${l}.`,
+    (_n, l) => `What will you make of an hour spent on ${l}?`,
+    (_n, l) => `${l} belongs on your list of things to try.`,
+    (_n, l) => `Let ${l} surprise you.`,
   ];
 
   // Shuffle so order varies each session
@@ -1516,18 +1596,21 @@ document.addEventListener('submit', (event) => {
     return { html: tmpl[i % tmpl.length](name, link) };
   });
 
-  let index = 0;
+  let index = Math.floor(Math.random() * slogans.length);
 
   function showNext() {
     el.classList.add('fading');
     setTimeout(() => {
-      index = (index + 1) % slogans.length;
+      let nextIndex = Math.floor(Math.random() * slogans.length);
+      while (slogans.length > 1 && nextIndex === index)
+        nextIndex = Math.floor(Math.random() * slogans.length);
+      index = nextIndex;
       el.innerHTML = slogans[index].html;
       el.classList.remove('fading');
     }, 400);
   }
 
-  el.innerHTML = slogans[0].html;
+  el.innerHTML = slogans[index].html;
   setInterval(showNext, 15000);
 })();
 
