@@ -288,6 +288,8 @@ th { font-weight: 400; }
   font-weight: 400;
   line-height: 1.1;
 }
+.home-categories { margin: 82px 0 0; }
+.home-categories .group-list { grid-template-columns: repeat(3, 1fr); }
 
 .carousel-wrap {
   display: flex;
@@ -498,42 +500,14 @@ th { font-weight: 400; }
   opacity: 1;
   transform: translateY(0);
 }
-/* "Explore →" CTA — bottom-right, slides in on hover */
-.hot-card--photo .card-explore {
-  position: absolute;
-  bottom: 14px;
-  right: 16px;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  text-shadow: 0 1px 3px rgba(0,0,0,.4);
-  opacity: 0;
-  transform: translateX(6px);
-  transition: opacity .22s ease, transform .22s ease;
-  pointer-events: none;
-}
-.hot-card--photo:hover .card-explore {
-  opacity: 1;
-  transform: translateX(0);
-}
-.hot-card--photo .card-explore-arrow {
-  font-size: 14px;
-  line-height: 1;
-}
 .hot-card-blurb { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
 
 .carousel-btn {
   flex-shrink: 0;
   width: 38px;
   height: 38px;
-  background: var(--paper);
-  border: 1px solid var(--line);
+  background: var(--accent);
+  border: 1px solid var(--accent);
   border-radius: 999px;
   font-size: 26px;
   line-height: 1;
@@ -542,7 +516,11 @@ th { font-weight: 400; }
   transition: background .15s ease;
   padding: 0;
 }
-.carousel-btn:hover:not(:disabled) { background: var(--accent); }
+.carousel-btn:hover:not(:disabled), .carousel-btn:focus-visible {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
 .carousel-btn:disabled { opacity: .3; cursor: default; }
 
 .hot-list-search-band {
@@ -582,6 +560,7 @@ th { font-weight: 400; }
   .view-label { display: block; margin-top: 22px; }
   .section-title p { text-align: left; }
   .group-list, .category-grid, .findings-grid { grid-template-columns: 1fr; }
+  .home-categories .group-list { grid-template-columns: 1fr; }
   .hobby-grid { grid-template-columns: 1fr; }
   dl div { grid-template-columns: 1fr; gap: 6px; }
   .site-footer { flex-direction: column; }
@@ -690,4 +669,3 @@ th { font-weight: 400; }
   transition: opacity 0.15s;
 }
 .nav-search__close:hover { opacity: 1; }
-

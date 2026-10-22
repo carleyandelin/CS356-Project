@@ -542,8 +542,6 @@ function photoCard(name, href, blurb, imgUrl, extraAttrs) {
       '<p class="card-name">' + escapeHtml(name) + '</p>' +
       '<p class="card-blurb-photo">' + escapeHtml(blurb) + '</p>' +
       '</div>' +
-      '<div class="card-explore"><span>Try ' + escapeHtml(name) +
-      '</span><span class="card-explore-arrow">→</span></div>' +
       '</a>';
 }
 
@@ -642,6 +640,7 @@ function renderBrowse() {
   const realHtml = hotList.map(makeCard).join('');
   const headClone = hotList.slice(-CLONE).map(makeCard).join('');
   const tailClone = hotList.slice(0, CLONE).map(makeCard).join('');
+  const categoryCards = data.categories.map(groupBlock).join('');
 
   app.innerHTML = `<div class="page hot-list-page">
     <div class="hot-list-header">
@@ -655,6 +654,13 @@ function renderBrowse() {
       </div>
       <button class="carousel-btn carousel-next" aria-label="Next hobbies">&#8250;</button>
     </div>
+    <section class="home-categories">
+      <div class="section-title">
+        <h2>Explore all categories</h2>
+        <p>Start with a feeling, then follow your curiosity.</p>
+      </div>
+      <div class="group-list">${categoryCards}</div>
+    </section>
     <div class="hot-list-search-band"><p class="hot-list-search-prompt">Not seeing your thing? Search for it.</p><div class="hot-list-search">${
       searchForm()}</div></div>
   </div>`;
