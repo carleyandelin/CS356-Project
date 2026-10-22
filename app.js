@@ -1001,17 +1001,34 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
                                      });
 
     // Hero
-    var hero = '<div class="category-hero">' +
+    var CATEGORY_BANNERS = {
+      'outdoors':          'https://res.cloudinary.com/nxwrbcvt/image/upload/outdoors.jpg',
+      'movement':          'https://res.cloudinary.com/nxwrbcvt/image/upload/movement.jpg',
+      'home-garden':       'https://res.cloudinary.com/nxwrbcvt/image/upload/home_and_garden.jpg',
+      'games':             'https://res.cloudinary.com/nxwrbcvt/image/upload/games.jpg?v=2',
+      'creative-outlets':  'https://res.cloudinary.com/nxwrbcvt/image/upload/creative_outlet.jpg',
+      'education-tech':    'https://res.cloudinary.com/nxwrbcvt/image/upload/education_and_tech.jpg?v=2'
+    };
+    var bannerImg = CATEGORY_BANNERS[id];
+    var hero;
+    if (bannerImg) {
+      hero = '<div class="category-hero category-hero--banner">' +
+        '<div class="category-hero__img" style="background-image:url(' + bannerImg + ')"></div>' +
+        '<div class="category-hero__overlay"></div>' +
+        '<h1 class="category-hero__title category-hero__title--banner">' + escapeHtml(category.label) + '</h1>' +
+        '</div>';
+    } else {
+      hero = '<div class="category-hero">' +
         '<h1 class="category-hero__title">' + escapeHtml(category.label) +
         '</h1>' +
         '</div>';
+    }
 
     // Level-1 chip row + search bar + hidden sub-rows
     var hasFacets = category.facets && category.facets.length;
     var chipsHtml = '<div class="facet-filter-row" id="cat-chips">';
+    chipsHtml += '<button class="facet-chip-btn active" data-facet="all">All</button>';
     if (hasFacets) {
-      chipsHtml +=
-          '<button class="facet-chip-btn active" data-facet="all">All</button>';
       category.facets.forEach(function(facet) {
         chipsHtml += '<button class="facet-chip-btn" data-facet="' + facet.id +
             '">' + escapeHtml(facet.label) + '</button>';
@@ -1124,13 +1141,79 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
 
       var remaining = passing.length - showCount;
       var container = document.getElementById('see-more-container');
-      if (remaining > 0) {
-        var nextBatch = Math.min(COLLAPSE_PAGE, remaining);
+      // Always show the button on category pages so users can scroll down to see full cards.
+      // It hides itself only when we're already at the bottom AND there's nothing left to reveal.
+      var visibleCards = passing.length > 0;
+      if (visibleCards) {
+        var svgChevron = '<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
         container.innerHTML =
-            '<button class="see-more-btn">See ' + nextBatch + ' more</button>';
-        container.querySelector('.see-more-btn').onclick = function() {
-          showCount += COLLAPSE_PAGE;
-          applyCatFilter(false);
+            '<button class="see-more-btn" data-remaining="' + remaining + '" aria-label="' +
+            (remaining > 0 ? 'See ' + Math.min(COLLAPSE_PAGE, remaining) + ' more' : 'Scroll down') + '">' +
+            svgChevron +
+            '</button>';
+        var _btn = container.querySelector('.see-more-btn');
+        function _updateBtnLabel() {
+          if (!_btn || !_btn.isConnected) { window.removeEventListener('scroll', _updateBtnLabel); return; }
+          var atBottom = (window.scrollY + window.innerHeight) >= (document.documentElement.scrollHeight - 80);
+          var rem = parseInt(_btn.dataset.remaining, 10) || 0;
+          // Hide only when at bottom with nothing left to reveal
+          if (atBottom && rem <= 0) {
+            _btn.style.display = 'none';
+            return;
+          }
+          _btn.style.display = '';
+          // Show count label only when at bottom and there are hidden cards
+          if (atBottom && rem > 0 && !_btn.classList.contains('has-label')) {
+            _btn.classList.add('has-label');
+            _btn.innerHTML = svgChevron + '<span class="see-more-count">' + rem + ' more</span>';
+          } else if (!atBottom && _btn.classList.contains('has-label')) {
+            _btn.classList.remove('has-label');
+            _btn.innerHTML = svgChevron;
+          }
+        }
+        window.addEventListener('scroll', _updateBtnLabel, { passive: true });
+        _updateBtnLabel();
+        _btn.onclick = function() {
+          var atBottom = (window.scrollY + window.innerHeight) >= (document.documentElement.scrollHeight - 80);
+          var rem = parseInt(_btn.dataset.remaining, 10) || 0;
+          if (atBottom && rem > 0) {
+            // Reveal next batch
+            var prevCount = showCount;
+            showCount += COLLAPSE_PAGE;
+            applyCatFilter(false);
+            setTimeout(function() {
+              var allCards = Array.from(document.querySelectorAll('#cat-grid .outdoors-card'));
+              var visible = allCards.filter(function(c) { return c.style.display !== 'none'; });
+              var firstNew = visible[prevCount];
+              if (firstNew) {
+                firstNew.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 50);
+          } else {
+            // Scroll exactly one full row downward
+            var grid = document.getElementById('cat-grid');
+            var allVisible = grid
+              ? Array.from(grid.querySelectorAll('.hot-card')).filter(function(c) { return c.style.display !== 'none'; })
+              : [];
+            var rowH = 280; // fallback
+            if (allVisible.length > 1) {
+              // Find a card that sits in the next row (different top offset)
+              var firstTop = allVisible[0].getBoundingClientRect().top;
+              var nextRowCard = null;
+              for (var i = 1; i < allVisible.length; i++) {
+                if (allVisible[i].getBoundingClientRect().top > firstTop + 5) {
+                  nextRowCard = allVisible[i];
+                  break;
+                }
+              }
+              rowH = nextRowCard
+                ? (nextRowCard.getBoundingClientRect().top - firstTop)
+                : (allVisible[0].offsetHeight + 24);
+            } else if (allVisible.length === 1) {
+              rowH = allVisible[0].offsetHeight + 24;
+            }
+            window.scrollBy({ top: rowH, behavior: 'smooth' });
+          }
         };
       } else {
         container.innerHTML = '';
