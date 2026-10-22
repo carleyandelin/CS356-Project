@@ -4,6 +4,15 @@ const app = document.querySelector('#app');
 const categoryNav = document.querySelector('.category-nav');
 const testBanner = document.querySelector('#test-banner');
 
+
+const CATEGORY_BANNERS = {
+  'outdoors':         'https://res.cloudinary.com/nxwrbcvt/image/upload/outdoors.jpg',
+  'movement':         'https://res.cloudinary.com/nxwrbcvt/image/upload/movement.jpg',
+  'home-garden':      'https://res.cloudinary.com/nxwrbcvt/image/upload/home_and_garden.jpg',
+  'games':            'https://res.cloudinary.com/nxwrbcvt/image/upload/games.jpg?v=2',
+  'creative-outlets': 'https://res.cloudinary.com/nxwrbcvt/image/upload/creative_outlet.jpg',
+  'education-tech':   'https://res.cloudinary.com/nxwrbcvt/image/upload/education_and_tech.jpg?v=2'
+};
 const categoryById = Object.fromEntries(data.categories.map((c) => [c.id, c]));
 // Recursively build facetById to handle nested facets (e.g. Art > Craft >
 // Needle & Thread)
@@ -479,12 +488,20 @@ function searchForm() {
 }
 
 function groupBlock(group) {
-  return `<a class="group-block" href="#category/${group.id}" data-log="Open ${
-      escapeHtml(group.label)}" data-log-destination="category/${group.id}">
-    <div class="group-heading"><p class="label">activity</p><h2>${
-      escapeHtml(
-          group.label)}</h2><p>${escapeHtml(group.description || '')}</p></div>
-  </a>`;
+  var img = CATEGORY_BANNERS[group.id] || '';
+  var imgStyle = img ? ' style="background-image:url(' + img + ')"' : '';
+  return '<a class="group-block cat-card" href="#category/' + group.id + '"' +
+    ' data-log="Open ' + escapeHtml(group.label) + '"' +
+    ' data-log-destination="category/' + group.id + '"' +
+    ' data-cat-id="' + group.id + '">' +
+    '<div class="cat-card__img"' + imgStyle + '></div>' +
+    '<div class="cat-card__overlay"></div>' +
+    '<div class="cat-card__content">' +
+      '<h2 class="cat-card__title">' + escapeHtml(group.label) + '</h2>' +
+      '<p class="cat-card__desc">' + escapeHtml(group.description || '') + '</p>' +
+
+    '</div>' +
+  '</a>';
 }
 
 // — typo card names are sized via CSS (26px); this function is a no-op kept
@@ -640,7 +657,12 @@ function renderBrowse() {
   const realHtml = hotList.map(makeCard).join('');
   const headClone = hotList.slice(-CLONE).map(makeCard).join('');
   const tailClone = hotList.slice(0, CLONE).map(makeCard).join('');
-  const categoryCards = data.categories.map(groupBlock).join('');
+  const _catItems = data.categories.map(groupBlock);
+  const _catRows = [];
+  for (var _ri = 0; _ri < _catItems.length; _ri += 3) {
+    _catRows.push('<div class="cat-row">' + _catItems.slice(_ri, _ri + 3).join('') + '</div>');
+  }
+  const categoryCards = _catRows.join('');
 
   app.innerHTML = `<div class="page hot-list-page">
     <div class="hot-list-hero">
@@ -661,11 +683,11 @@ function renderBrowse() {
     <section class="home-categories">
       <div class="section-title">
         <h2>Explore all categories</h2>
-        <div class="home-categories__actions">
-          <p>Start with a feeling, then follow your curiosity.</p>
-        </div>
       </div>
       <div class="group-list">${categoryCards}</div>
+      <div class="cat-explore-all">
+        <a class="see-all-hobbies" href="#hobbies" data-log="See all hobbies" data-log-destination="hobbies">Explore all hobbies</a>
+      </div>
     </section>
     <div class="hot-list-search-band">
       <div class="hot-list-search-layout">
@@ -673,10 +695,52 @@ function renderBrowse() {
           <p class="hot-list-search-prompt">Not seeing your thing? Search for it.</p>
           ${searchForm()}
         </div>
-        <a class="see-all-hobbies" href="#hobbies" data-log="See all hobbies" data-log-destination="hobbies">See all hobbies</a>
       </div>
     </div>
   </div>`;
+
+  // — category card row-flex expand on hover —
+  (function() {
+    var grid = app.querySelector('.home-categories .group-list');
+    if (!grid) return;
+    var cards = Array.from(grid.querySelectorAll('.cat-card'));
+    var hoverTimer = null;
+    var currentCard = null;
+
+    var DELAY = 300;
+
+    function activate(card) {
+      if (currentCard === card) return;
+      deactivate();
+      currentCard = card;
+      card.classList.add('is-hovered');
+      var row = card.closest('.cat-row');
+      if (row) row.classList.add('has-hovered');
+    }
+
+    function deactivate() {
+      if (!currentCard) return;
+      currentCard.classList.remove('is-hovered');
+      var row = currentCard.closest('.cat-row');
+      if (row) row.classList.remove('has-hovered');
+      currentCard = null;
+    }
+
+    cards.forEach(function(card) {
+      card.addEventListener('mouseenter', function() {
+        clearTimeout(hoverTimer);
+        hoverTimer = setTimeout(function() { activate(card); }, DELAY);
+      });
+      card.addEventListener('mouseleave', function() {
+        clearTimeout(hoverTimer);
+      });
+    });
+
+    grid.addEventListener('mouseleave', function() {
+      clearTimeout(hoverTimer);
+      deactivate();
+    });
+  })();
 
   // fitTypoNames is defined at module level — called below after layout
 
@@ -1523,15 +1587,18 @@ function render() {
     btn.classList.toggle('active', !!activeId && btnId === activeId);
   });
 
-  if (route === 'facet')
+  if (route === 'facet') {
     renderFacet(decodeURIComponent(value || ''));
-  else if (route === 'category')
+    window.scrollTo(0, 0);
+  } else if (route === 'category') {
     renderCategory(
         decodeURIComponent(value || ''), decodeURIComponent(facetId || ''),
         decodeURIComponent(facetId2 || ''), decodeURIComponent(facetId3 || ''));
-  else if (route === 'hobby')
+    window.scrollTo(0, 0);
+  } else if (route === 'hobby') {
     renderHobby(decodeURIComponent(value || ''));
-  else if (route === 'about')
+    window.scrollTo(0, 0);
+  } else if (route === 'about')
     renderAbout();
   else if (route === 'search')
     renderSearch(
