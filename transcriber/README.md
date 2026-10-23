@@ -23,19 +23,21 @@ Turn screen-recording videos into an annotated transcript:
 Steps per video:
   1. Transcribe speech with timestamps (faster-whisper, runs locally)
   2. Extract a frame every N seconds (ffmpeg), skipping near-duplicate frames
-  3. Merge transcript + frames into a Markdown timeline
-  4. (Optional, --describe) Ask Claude to describe what the user does on screen
+  3. Merge transcript + frames into a timeline
+  4. Pack frames into labeled grid images (a few frames per image, each stamped
+     with its timestamp) so you only have to upload a handful of files
+  5. (Optional, --describe) Ask Claude to describe what the user does on screen
      between consecutive frames, and write the result into the Markdown
 
 Setup:
-  run `pip install faster-whisper pillow anthropic` (once)
-  ffmpeg must be installed and on your PATH (brew install ffmpeg / apt install ffmpeg)
+  pip install faster-whisper pillow anthropic
+  # ffmpeg must be installed and on your PATH (brew install ffmpeg / apt install ffmpeg)
   export ANTHROPIC_API_KEY=sk-ant-...      # only needed for --describe
 
 Usage:
-  python video-walkthrough.py video1.mp4 video2.mp4
-  python video-walkthrough.py video1.mp4 video2.mp4 --describe
-  python video-walkthrough.py *.mp4 --interval 2 --whisper-model small --describe
+  python video_walkthrough.py video1.mp4 video2.mp4
+  python video_walkthrough.py video1.mp4 video2.mp4 --describe
+  python video_walkthrough.py *.mp4 --interval 2 --whisper-model small --describe
 
 **Notes:**
 

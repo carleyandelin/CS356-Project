@@ -3,12 +3,13 @@
 import argparse
 import base64
 import io
+import math
 import os
 import subprocess
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageStat
+from PIL import Image, ImageChops, ImageDraw, ImageFont, ImageStat
 
 
 # ---------- helpers ----------
@@ -103,6 +104,60 @@ def merge_timeline(segments, frames):
     return timeline
 
 
+# ---------- step 3b: labeled grids ----------
+
+def load_font(size: int):
+    for name in ("Arial Bold.ttf", "Arial.ttf", "Helvetica.ttc", "DejaVuSans-Bold.ttf"):
+        try:
+            return ImageFont.truetype(name, size)
+        except OSError:
+            continue
+    try:
+        return ImageFont.load_default(size=size)
+    except TypeError:
+        return ImageFont.load_default()
+
+
+def make_grids(timeline, out_dir: Path, grid_size: int, cols: int, cell_width: int):
+    """Pack frames into grid images, each cell stamped with its timestamp."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    font = load_font(max(20, cell_width // 16))
+    pad, gap = 8, 6
+    grids = []
+
+    for n, start in enumerate(range(0, len(timeline), grid_size), start=1):
+        chunk = timeline[start:start + grid_size]
+        cells = []
+        for entry in chunk:
+            img = Image.open(entry["frame"]).convert("RGB")
+            img = img.resize((cell_width, int(img.height * cell_width / img.width)))
+            draw = ImageDraw.Draw(img)
+            label = fmt_time(entry["time"])
+            bbox = draw.textbbox((0, 0), label, font=font)
+            draw.rectangle([0, 0, bbox[2] + 2 * pad, bbox[3] + 2 * pad], fill="black")
+            draw.text((pad, pad), label, fill="yellow", font=font)
+            cells.append(img)
+
+        cell_h = max(c.height for c in cells)
+        rows = math.ceil(len(cells) / cols)
+        used_cols = min(cols, len(cells))
+        sheet = Image.new(
+            "RGB",
+            (used_cols * cell_width + (used_cols - 1) * gap, rows * cell_h + (rows - 1) * gap),
+            "white",
+        )
+        for i, cell in enumerate(cells):
+            r, c = divmod(i, cols)
+            sheet.paste(cell, (c * (cell_width + gap), r * (cell_h + gap)))
+
+        path = out_dir / f"grid_{n:02d}.jpg"
+        sheet.save(path, quality=88)
+        grids.append({"path": path, "entries": chunk})
+
+    print(f"  Made {len(grids)} grid image(s) of up to {grid_size} frames each.")
+    return grids
+
+
 # ---------- step 4: describe with Claude ----------
 
 def encode_image(path: Path, max_width: int = 1280) -> str:
@@ -171,21 +226,23 @@ def describe_actions(timeline, model: str):
 
 # ---------- output ----------
 
-def write_markdown(video: Path, timeline, out_path: Path):
+def write_markdown(video: Path, grids, out_path: Path):
     lines = [f"# Walkthrough: {video.name}", ""]
-    for entry in timeline:
-        lines.append(f"## [{fmt_time(entry['time'])}]")
-        if entry["action"]:
-            lines.append(f"**On screen:** {entry['action']}")
+    for n, grid in enumerate(grids, start=1):
+        entries = grid["entries"]
+        lines.append(f"## Grid {n} ({fmt_time(entries[0]['time'])} - {fmt_time(entries[-1]['time'])})")
+        lines.append(f"Image: `{grid['path'].name}` (each frame is labeled with its timestamp)")
+        lines.append("")
+        for entry in entries:
+            lines.append(f"### [{fmt_time(entry['time'])}]")
+            if entry["action"]:
+                lines.append(f"**On screen:** {entry['action']}")
+            if entry["speech"]:
+                for t, text in entry["speech"]:
+                    lines.append(f"- **{fmt_time(t)}** \"{text}\"")
+            else:
+                lines.append("- *(no speech)*")
             lines.append("")
-        if entry["speech"]:
-            for t, text in entry["speech"]:
-                lines.append(f"- **{fmt_time(t)}** \"{text}\"")
-        else:
-            lines.append("- *(no speech)*")
-        lines.append("")
-        lines.append(f"![frame at {fmt_time(entry['time'])}]({entry['frame'].relative_to(out_path.parent).as_posix()})")
-        lines.append("")
     out_path.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -201,9 +258,12 @@ def process(video: Path, args):
     if args.describe:
         describe_actions(timeline, args.model)
 
+    grids = make_grids(timeline, out_dir / "grids", args.grid_size, args.grid_cols, args.cell_width)
+
     md_path = out_dir / "walkthrough.md"
-    write_markdown(video, timeline, md_path)
+    write_markdown(video, grids, md_path)
     print(f"  Done -> {md_path}")
+    print(f"  Upload walkthrough.md plus the images in {out_dir / 'grids'}")
 
 
 def main():
@@ -215,6 +275,9 @@ def main():
                    help="Skip frames that differ less than this from the last kept frame (default 2.0; 0 keeps all)")
     p.add_argument("--whisper-model", default="base",
                    help="tiny/base/small/medium/large-v3 (bigger = more accurate, slower)")
+    p.add_argument("--grid-size", type=int, default=4, help="Frames per grid image (default 4)")
+    p.add_argument("--grid-cols", type=int, default=2, help="Columns per grid image (default 2)")
+    p.add_argument("--cell-width", type=int, default=760, help="Width in px of each frame in a grid (default 760)")
     p.add_argument("--describe", action="store_true",
                    help="Use the Anthropic API to describe what is clicked on screen")
     p.add_argument("--model", default="claude-sonnet-5-5", help="Claude model used with --describe")
