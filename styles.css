@@ -255,9 +255,139 @@ th { font-weight: 400; }
 .facet-chip { padding: 8px 10px; border: 1px solid var(--line); background: var(--accent); font-size: 11px; }
 .facet-chip:hover, .facet-chip:focus-visible { background: var(--accent); }
 .search-results .hobby-grid { margin-top: 14px; }
-.no-results { max-width: 620px; margin: 48px 0; padding: 28px; border: 1px dashed var(--ink); background: var(--accent); }
-.no-results h2 { margin: 8px 0; font-size: 28px; font-weight: 400; }
-.no-results p:not(.label) { max-width: 500px; line-height: 1.6; }
+.no-results {
+  margin: 0 -32px;
+  padding: 56px 32px 64px;
+  background: var(--accent);
+  border-top: 1px solid var(--teal-shade);
+}
+.no-results .label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink);
+  opacity: 0.6;
+  margin: 0 0 14px;
+}
+.no-results h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 400;
+  color: var(--ink-black);
+  margin: 0 0 14px;
+  line-height: 1.15;
+}
+.no-results p:not(.label) {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink);
+  max-width: 480px;
+  margin: 0 0 32px;
+}
+.no-results-hint {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+.no-results-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 36px;
+}
+.suggestion-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  transition: background .15s, color .15s, box-shadow .15s;
+}
+.suggestion-chip:hover {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.13);
+}
+.no-results .wire-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 13px 24px;
+  border-radius: 999px;
+  border: none;
+  background: var(--ink);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.09);
+  transition: opacity .18s, box-shadow .18s;
+}
+.no-results .wire-button:hover {
+  opacity: 0.88;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+}
+
+/* ── Search highlight mark ──────────────────────────────────────────────── */
+mark.search-hl {
+  background: var(--accent);
+  color: var(--ink-black);
+  border-radius: 2px;
+  padding: 0 2px;
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* ── Search results hero (replaces plain h1 title) ──────────────────────── */
+.search-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding-bottom: 8px;
+}
+.search-hero .search-form--results {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 6px 6px 18px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: border-color .15s, box-shadow .15s;
+}
+.search-hero .search-form--results:focus-within {
+  border-color: var(--ink);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.13);
+}
+.search-hero .search-form--results input[type="search"] {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  color: var(--ink);
+  min-width: 0;
+}
+.search-hero__label {
+  font-size: 13px;
+  color: var(--ink);
+  opacity: 0.65;
+  margin: 0;
+}
 .site-footer { display: flex; justify-content: space-between; gap: 20px; padding: 18px 0; border-top: 1px solid var(--line); font-size: 10px; }
 
 /* ─── Category Hero ───────────────────────────────────────────────────────── */
@@ -267,6 +397,11 @@ th { font-weight: 400; }
   padding: 56px 32px;
   text-align: center;
   position: relative;
+}
+/* Search results page — tighter bottom so filter chips sit flush */
+.category-hero.search-hero {
+  padding-bottom: 20px;
+  text-align: left;
 }
 .category-hero .view-label {
   position: absolute;
@@ -346,6 +481,8 @@ th { font-weight: 400; }
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  padding-top: 16px;
+  padding-bottom: 20px;
 }
 #cat-chips.facet-filter-row {
   margin: 0 -32px;

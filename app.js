@@ -511,15 +511,15 @@ function fitTypoNames() {}
 // ── Shared typographic card template (used by all views) ──────────────────
 // extraAttrs: optional string of extra HTML attributes, e.g. data-f1="..."
 // data-name="..."
-function typoCard(name, href, blurb, extraAttrs) {
+function typoCard(name, href, blurb, extraAttrs, nameHtml, blurbHtml) {
   var attrs = extraAttrs ? (' ' + extraAttrs) : '';
   var dest = href.replace(/^#/, '');
   return '<a class="hot-card hot-card--typo"' + attrs + ' href="' + href + '"' +
       ' data-log="Open ' + escapeHtml(name) + '"' +
       ' data-log-destination="' + escapeHtml(dest) + '">' +
       '<p class="hot-card-typo__eyebrow"></p>' +
-      '<p class="hot-card-typo__name">' + escapeHtml(name) + '</p>' +
-      '<p class="hot-card-blurb hot-card-typo__blurb">' + escapeHtml(blurb) +
+      '<p class="hot-card-typo__name">' + (nameHtml || escapeHtml(name)) + '</p>' +
+      '<p class="hot-card-blurb hot-card-typo__blurb">' + (blurbHtml || escapeHtml(blurb)) +
       '</p>' +
       '</a>';
 }
@@ -540,7 +540,7 @@ function _lqipLoad(img) {
   loader.src = full;
 }
 
-function photoCard(name, href, blurb, imgUrl, extraAttrs) {
+function photoCard(name, href, blurb, imgUrl, extraAttrs, nameHtml, blurbHtml) {
   var attrs = extraAttrs ? (' ' + extraAttrs) : '';
   var dest = href.replace(/^#/, '');
   // LQIP: tiny 20px blurred version loads instantly (~300 bytes)
@@ -556,8 +556,8 @@ function photoCard(name, href, blurb, imgUrl, extraAttrs) {
       '" onload="_lqipLoad(this)">' +
       '<div class="card-scrim"></div>' +
       '<div class="card-text">' +
-      '<p class="card-name">' + escapeHtml(name) + '</p>' +
-      '<p class="card-blurb-photo">' + escapeHtml(blurb) + '</p>' +
+      '<p class="card-name">' + (nameHtml || escapeHtml(name)) + '</p>' +
+      '<p class="card-blurb-photo">' + (blurbHtml || escapeHtml(blurb)) + '</p>' +
       '</div>' +
       '</a>';
 }
@@ -876,24 +876,108 @@ function renderAllHobbies() {
   </div>`;
 }
 
+// Levenshtein edit distance for fuzzy matching
+function levenshtein(a, b) {
+  if (Math.abs(a.length - b.length) > 3) return 99;
+  const dp = [];
+  for (let i = 0; i <= a.length; i++) {
+    dp[i] = [i];
+    for (let j = 1; j <= b.length; j++) {
+      dp[i][j] = i === 0 ? j :
+        a[i-1] === b[j-1] ? dp[i-1][j-1] :
+        1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[a.length][b.length];
+}
+
+// Wrap matching text in <mark> for search result highlighting.
+// Escapes the source text safely, then annotates matches.
+function highlightText(text, query) {
+  if (!text || !query) return escapeHtml(text || '');
+  var safe = escapeHtml(text);
+  var terms = [];
+  var fullQ = query.trim().toLowerCase();
+  if (fullQ) terms.push(fullQ);
+  fullQ.split(/\s+/).forEach(function(w) {
+    if (w.length > 2 && terms.indexOf(w) < 0) terms.push(w);
+  });
+  // Sort longest first so multi-word phrases highlight before single words
+  terms.sort(function(a, b) { return b.length - a.length; });
+  terms.forEach(function(term) {
+    var safeT = escapeHtml(term).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    safe = safe.replace(new RegExp('(' + safeT + ')', 'gi'), '<mark class="search-hl">$1</mark>');
+  });
+  return safe;
+}
+
+// Words that carry no hobby-search meaning — filtered out of phrases
+var SEARCH_STOP_WORDS = new Set([
+  'i','me','my','myself','we','our','us','you','your',
+  'want','need','like','love','try','find','get','give','feel','make',
+  'looking','searching','wondering','thinking',
+  'to','do','todo','did','does','done','doing',
+  'a','an','the','and','or','but','in','on','at','for','of','with',
+  'is','are','was','were','be','been','being','have','has','had',
+  'can','could','would','should','will','may','might',
+  'that','this','these','those','it','its','there','their',
+  'some','any','all','other','more','most','so','very','just',
+  'really','quite','how','what','when','where','which','who',
+  'something','anything','everything','nothing','stuff','things','thing',
+  'new','good','fun','cool','interesting','nice','great','kind','type','sort',
+  'hobby','hobbies','activity','activities','idea','ideas'
+]);
+
 function searchMatches(query) {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return [];
+  const terms = normalized.split(/\s+/).filter(t => t.length > 0);
+
+  // Strip filler/stop words to get the meaningful signal words
+  // e.g. "I want todo something creative" → ["creative"]
+  const meaningfulTerms = terms.filter(t => t.length > 1 && !SEARCH_STOP_WORDS.has(t));
+  // Fall back to all terms only if every word was a stop word
+  const activeTerms = meaningfulTerms.length > 0 ? meaningfulTerms : terms;
+
+  // Expand concepts: collect all concept terms that match the query or any meaningful term
+  const conceptHits = Object.entries(data.searchConcepts)
+    .filter(([term, synonyms]) =>
+      normalized === term || synonyms.some(s => normalized === s) ||
+      synonyms.some(s => s.includes(normalized)) || normalized.includes(term) ||
+      activeTerms.some(t => term === t || synonyms.some(s => s.includes(t)) || t.includes(term)))
+    .flatMap(([term, synonyms]) => [term, ...synonyms]);
+
   return data.allHobbies.filter((name) => {
     const hobby = data.hobbies[name];
     const category = categoryById[hobby.category];
+    // Extended haystack: blurb, tags, startingPoint, related hobbies, category
     const haystack = [
-      name, hobby.summary, hobby.blurb, ...(hobby.tags || []), category?.label,
-      ...(data.searchConcepts[normalized] || [])
-    ].join(' ').toLowerCase();
-    const conceptHits =
-        Object.entries(data.searchConcepts)
-            .filter(
-                ([term, synonyms]) => normalized === term ||
-                    synonyms.some((synonym) => normalized === synonym))
-            .flatMap(([term, synonyms]) => [term, ...synonyms]);
-    return haystack.includes(normalized) ||
-        conceptHits.some((term) => haystack.includes(term));
+      name,
+      hobby.blurb,
+      hobby.summary,
+      hobby.startingPoint,
+      ...(hobby.tags || []),
+      ...(hobby.related || []),
+      category?.label,
+      ...(data.searchConcepts[normalized] || []),
+    ].filter(Boolean).join(' ').toLowerCase();
+
+    // 1. Exact substring match on full query
+    if (haystack.includes(normalized)) return true;
+
+    // 2. Concept/synonym match
+    if (conceptHits.some(t => haystack.includes(t))) return true;
+
+    // 3. Each meaningful word must match (exact or fuzzy) somewhere in haystack
+    //    Using activeTerms drops fillers like "want", "something", "todo"
+    const haystackWords = haystack.split(/\W+/).filter(w => w.length > 1);
+    return activeTerms.every(term => {
+      if (term.length <= 2) return haystack.includes(term);
+      if (haystack.includes(term)) return true;
+      // Allow 1 typo for 4-6 char words, 2 for 7+ char words
+      const maxDist = term.length <= 6 ? 1 : 2;
+      return haystackWords.some(hw => levenshtein(term, hw) <= maxDist);
+    });
   });
 }
 
@@ -930,9 +1014,17 @@ function renderSearch(query, facetId) {
     });
   });
 
-  // Hero
-  var hero = '<div class="category-hero">' +
-      '<h1 class="category-hero__title">“' + escapeHtml(query) + '”</h1>' +
+  // Hero — pre-filled search bar so users can refine from results
+  var hero = '<div class="category-hero search-hero">' +
+      '<form class="search-form search-form--results" data-search-form role="search">' +
+      '<label class="sr-only" for="sr-refine-input">Refine search</label>' +
+      '<input id="sr-refine-input" type="search" name="q" value="' + escapeHtml(query) + '" autocomplete="off" />' +
+      '<button type="submit" class="search-form__icon-btn" aria-label="Search">' +
+      '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>' +
+      '</button></form>' +
+      '<p class="search-hero__label">' +
+      (results.length ? results.length + ' result' + (results.length === 1 ? '' : 's') : 'No results') +
+      ' for &ldquo;' + escapeHtml(query) + '&rdquo;</p>' +
       '</div>';
 
   // Filter chips by top-level facet (or category for flat categories)
@@ -963,11 +1055,14 @@ function renderSearch(query, facetId) {
       var img = 'https://source.unsplash.com/400x400/?' + kw;
       var href = '#hobby/' + encodeURIComponent(name);
       var blurb = hobby.blurb || '';
+      var hName = highlightText(name, query);
+      var hBlurb = highlightText(blurb, query);
       if (hobby.img) {
         cardsHtml +=
             photoCard(
                 name, href, blurb, hobby.img,
-                'data-name="' + name.toLowerCase() + '" class="outdoors-card"')
+                'data-name="' + name.toLowerCase() + '" class="outdoors-card"',
+                hName, hBlurb)
                 .replace(
                     'class="hot-card hot-card--photo"',
                     'class="hot-card hot-card--photo outdoors-card"');
@@ -975,7 +1070,8 @@ function renderSearch(query, facetId) {
         cardsHtml +=
             typoCard(
                 name, href, blurb,
-                'data-name="' + name.toLowerCase() + '" class="outdoors-card"')
+                'data-name="' + name.toLowerCase() + '" class="outdoors-card"',
+                hName, hBlurb)
                 .replace(
                     'class="hot-card hot-card--typo"',
                     'class="hot-card hot-card--typo outdoors-card"');
@@ -983,10 +1079,49 @@ function renderSearch(query, facetId) {
     });
     cardsHtml += '</div>';
   } else {
+    // Build smart suggestions: hobbies that partially match, or popular picks
+    var partialMatches = (function() {
+      var q = query.trim().toLowerCase();
+      if (!q) return [];
+      // Try single-word fragments of query against hobby names/blurbs
+      var words = q.split(/\s+/).filter(function(w) { return w.length > 2; });
+      var scored = data.allHobbies.map(function(name) {
+        var hobby = data.hobbies[name];
+        var hay = [name, hobby.blurb, hobby.startingPoint, (hobby.tags||[]).join(' ')].filter(Boolean).join(' ').toLowerCase();
+        var score = 0;
+        words.forEach(function(w) { if (hay.includes(w)) score += 2; });
+        // Fuzzy single-char tolerance on the hobby name
+        if (q.length > 3) {
+          var nameLow = name.toLowerCase();
+          var dist = levenshtein(q, nameLow);
+          if (dist <= 2) score += (3 - dist);
+        }
+        return { name: name, score: score };
+      }).filter(function(r) { return r.score > 0; });
+      scored.sort(function(a,b) { return b.score - a.score; });
+      return scored.slice(0, 5).map(function(r) { return r.name; });
+    })();
+
+    var suggestionLinks = '';
+    if (partialMatches.length > 0) {
+      suggestionLinks = '<p class="no-results-hint">Did you mean one of these?</p><div class="no-results-suggestions">' +
+        partialMatches.map(function(name) {
+          return '<a class="suggestion-chip" href="#hobby/' + encodeURIComponent(name) + '">' + name + '</a>';
+        }).join('') + '</div>';
+    } else {
+      // Fall back to a few popular picks from different categories
+      var fallbacks = ['Origami','Stargazing','Sourdough','Photography','Watercolor painting'];
+      suggestionLinks = '<p class="no-results-hint">Try exploring one of these:</p><div class="no-results-suggestions">' +
+        fallbacks.map(function(name) {
+          return '<a class="suggestion-chip" href="#hobby/' + encodeURIComponent(name) + '">' + name + '</a>';
+        }).join('') + '</div>';
+    }
+
     cardsHtml = '<section class="no-results">' +
-        '<p class="label">No exact or concept matches</p>' +
-        '<h2>Try a nearby idea</h2>' +
-        '<p>Search for &ldquo;stars,&rdquo; &ldquo;bread,&rdquo; &ldquo;vintage,&rdquo; &ldquo;programming,&rdquo; or &ldquo;friends&rdquo; to explore the concept vocabulary.</p>' +
+        '<p class="label">No results for &ldquo;' + query.trim() + '&rdquo;</p>' +
+        '<h2>Nothing matched — yet</h2>' +
+        '<p>Try checking your spelling, or use a broader term like the activity or material involved.</p>' +
+        suggestionLinks +
         '<a class="wire-button" href="#browse" data-log="Return to explore" data-log-destination="browse">Return to explore</a>' +
         '</section>';
   }
@@ -1623,6 +1758,32 @@ document.addEventListener('submit', (event) => {
   logSearch(query, results.length);
   location.hash = `search/${encodeURIComponent(query)}`;
 });
+
+// Live search: update results as the user types (280ms debounce)
+(function() {
+  var _lsTimer = null;
+  var _lastQuery = '';
+  document.addEventListener('input', function(e) {
+    var input = e.target;
+    if (!input.matches('[data-search-form] input[name="q"]')) return;
+    var query = input.value.trim();
+    clearTimeout(_lsTimer);
+    if (!query || query === _lastQuery) return;
+    _lsTimer = setTimeout(function() {
+      _lastQuery = query;
+      var encoded = encodeURIComponent(query);
+      var newHash = 'search/' + encoded;
+      // replaceState keeps history clean while user is still typing
+      history.replaceState(null, '', '#' + newHash);
+      logSearch(query, searchMatches(query).length);
+      renderSearch(query);
+      window.scrollTo(0, 0);
+      // Re-focus the input (renderSearch may have replaced it)
+      var inp = document.querySelector('[data-search-form] input[name="q"]');
+      if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+    }, 280);
+  });
+})();
 
 
 /* ─── Rotating phrase banner ──────────────────────────────────────────────

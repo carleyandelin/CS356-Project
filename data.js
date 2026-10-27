@@ -479,16 +479,187 @@ const tasks = [
 ];
 
 const searchConcepts = {
-  stargazing: ["astronomy", "stars", "night sky", "constellation"],
-  meditation: ["mindfulness", "calm", "stress relief", "morning practice"],
-  quilting: ["textiles", "sewing", "handmade", "fabric", "crochet", "embroidery"],
-  climbing: ["bouldering", "climbing gym", "rock wall"],
-  thrifting: ["vintage", "antiquing", "secondhand", "furniture flipping"],
-  "3d printing": ["maker", "designing", "custom objects", "prototyping"],
-  coding: ["programming", "app development", "software", "tech"],
-  "escape rooms": ["team puzzle", "friday night", "group activity"],
-  "disc golf": ["park game", "friends", "outdoor game", "frisbee"],
-  sourdough: ["bread", "starter", "baking", "kitchen"],
+  // Astronomy / stargazing
+  stargazing: ["astronomy", "stars", "night sky", "constellation", "telescope", "space", "cosmos"],
+
+  // Mindfulness
+  meditation: ["mindfulness", "calm", "stress relief", "morning practice", "breathing", "relaxation", "zen"],
+
+  // Textile crafts
+  quilting: ["textiles", "sewing", "handmade", "fabric", "crochet", "embroidery", "knitting", "fiber arts"],
+
+  // Climbing / bouldering
+  climbing: ["bouldering", "climbing gym", "rock wall", "rock climbing", "wall climbing"],
+
+  // Thrifting / vintage
+  thrifting: ["vintage", "antiquing", "secondhand", "furniture flipping", "thrift shop", "flea market", "resale"],
+
+  // 3D printing / making
+  "3d printing": ["maker", "designing", "custom objects", "prototyping", "additive manufacturing", "fabrication"],
+
+  // Coding / programming
+  coding: ["programming", "app development", "software", "tech", "web development", "developer", "javascript", "python"],
+
+  // Social / group games
+  "escape rooms": ["team puzzle", "friday night", "group activity", "puzzle game", "team building"],
+
+  // Disc golf / outdoor games
+  "disc golf": ["park game", "friends", "outdoor game", "frisbee", "disc sport"],
+
+  // Bread baking
+  sourdough: ["bread", "starter", "baking", "kitchen", "fermentation", "loaf", "homemade bread"],
+
+  // Paper folding / origami
+  origami: ["paper crane", "paper folding", "paper cranes", "paper art", "paper sculpture", "folding paper", "paper animals"],
+
+  // Drawing / sketching
+  drawing: ["sketching", "illustration", "pencil art", "art", "sketch", "doodling", "anime art", "figure drawing"],
+
+  // Music / instruments
+  guitar: ["instrument", "music", "strumming", "chord", "acoustic", "electric guitar", "playing music"],
+  piano: ["keyboard", "keys", "instrument", "music", "playing music", "classical music"],
+  music: ["instrument", "playing", "band", "melody", "rhythm", "song writing"],
+
+  // Photography
+  photography: ["photos", "camera", "shooting", "photo walk", "portrait", "landscape photography", "editing photos"],
+
+  // Running / fitness outdoors
+  running: ["jogging", "marathon", "5k", "trail running", "cardio", "fitness outdoors"],
+  hiking: ["trail", "nature walk", "outdoors", "backpacking", "walking in nature", "mountains"],
+
+  // Gaming
+  gaming: ["video games", "board games", "tabletop", "rpg", "game night", "dungeons and dragons"],
+
+  // Cooking / food
+  cooking: ["recipes", "chef", "meal prep", "kitchen", "culinary", "food", "home cooking"],
+  baking: ["cookies", "cake", "pastry", "bread", "kitchen", "dessert", "sweets"],
+
+  // Gardening / plants
+  gardening: ["plants", "growing", "garden", "flowers", "vegetables", "herbs", "green thumb", "houseplants"],
+
+  // Reading / writing
+  reading: ["books", "novels", "literature", "fiction", "nonfiction", "book club"],
+  writing: ["journaling", "creative writing", "fiction", "poetry", "storytelling", "blog"],
+
+  // Yoga / wellness
+  yoga: ["stretching", "flexibility", "wellness", "poses", "asana", "flow", "mindfulness"],
+
+  // ── Intent / feeling mappings ─────────────────────────────────────────
+  // These map emotional/descriptive words to actual tag values so phrase
+  // searches like "something exciting" or "a chill indoor hobby" work.
+
+  // Exciting / thrilling / dangerous
+  exciting:   ["adventure", "thrill", "sport", "movement", "adrenaline"],
+  thrilling:  ["adventure", "thrill", "adrenaline", "sport"],
+  dangerous:  ["thrill", "adventure", "extreme", "risk"],
+  adrenaline: ["adventure", "thrill", "sport", "movement"],
+  extreme:    ["thrill", "adventure", "sport"],
+  edgy:       ["thrill", "adventure", "extreme"],
+  wild:       ["adventure", "thrill", "outdoors"],
+
+  // Relaxing / calm / chill / peaceful
+  relaxing:   ["relaxing", "wellness", "mindfulness", "reflective", "calm", "peaceful", "patient"],
+  calming:    ["relaxing", "wellness", "mindfulness", "patient", "solo", "reflective"],
+  chill:      ["relaxing", "solo", "indoor", "patient", "wellness"],
+  peaceful:   ["relaxing", "reflective", "wellness", "patient", "solo"],
+  "stress relief": ["wellness", "mindfulness", "relaxing", "meditation", "calm"],
+  zen:        ["mindfulness", "wellness", "relaxing", "reflective"],
+  meditative: ["mindfulness", "wellness", "reflective", "patient"],
+  soothing:   ["relaxing", "wellness", "patient", "reflective"],
+  mellow:     ["relaxing", "solo", "patient", "reflective"],
+  slow:       ["patient", "relaxing", "reflective", "solo"],
+  gentle:     ["relaxing", "patient", "wellness", "solo"],
+  lowkey:     ["solo", "indoor", "relaxing", "patient"],
+  "low key":  ["solo", "indoor", "relaxing", "patient"],
+
+  // Creative / artistic / expressive
+  artistic:   ["creative", "making", "visual", "drawing", "painting"],
+  expressive: ["creative", "making", "performance", "writing"],
+  "hands on": ["making", "creative", "skill"],
+  "hands-on": ["making", "creative", "skill"],
+  crafty:     ["creative", "making", "handmade", "quilting"],
+  crafts:     ["creative", "making", "handmade"],
+  craft:      ["creative", "making", "handmade"],
+  artistic:   ["creative", "visual", "making", "drawing"],
+  imaginative:["creative", "making", "writing", "performance"],
+  arty:       ["creative", "visual", "making", "drawing"],
+
+  // Social / group
+  social:     ["social", "team", "group"],
+  "with friends": ["social", "team", "group"],
+  "meet people": ["social", "team", "group"],
+  "make friends": ["social", "team", "community"],
+  group:      ["social", "team"],
+  "team activity": ["social", "team"],
+  "group activity": ["social", "team"],
+  "go out":   ["social", "outdoors", "adventure"],
+
+  // Solo / alone / independent
+  alone:      ["solo", "indoor", "relaxing"],
+  solo:       ["solo", "individual"],
+  independent: ["solo"],
+  "by myself": ["solo"],
+  introverted: ["solo", "indoor", "patient", "reflective"],
+  introvert:   ["solo", "indoor", "patient", "reflective"],
+  quiet:       ["solo", "patient", "reflective", "relaxing"],
+
+  // Physical / active / sporty
+  active:     ["fitness", "movement", "sport", "outdoors"],
+  physical:   ["fitness", "movement", "sport", "strength"],
+  sporty:     ["sport", "fitness", "movement"],
+  athletic:   ["sport", "fitness", "movement", "strength"],
+  workout:    ["fitness", "movement", "strength", "sport"],
+  exercise:   ["fitness", "movement", "sport", "strength"],
+  energetic:  ["fitness", "movement", "sport", "adventure"],
+  "get fit":  ["fitness", "movement", "strength"],
+  "stay fit": ["fitness", "movement", "strength"],
+  "lose weight": ["fitness", "movement", "sport"],
+
+  // Mental / intellectual / brain
+  intellectual: ["learning", "strategy", "reflective"],
+  educational:  ["learning", "strategy", "skill"],
+  "brain games": ["strategy", "learning", "puzzle"],
+  mental:       ["strategy", "learning", "mindfulness", "wellness"],
+  mindful:      ["mindfulness", "wellness", "reflective", "relaxing"],
+  thoughtful:   ["reflective", "learning", "strategy", "patient"],
+  strategic:    ["strategy", "learning", "skill"],
+  puzzle:       ["strategy", "learning", "skill"],
+  stimulating:  ["learning", "strategy", "skill", "creative"],
+
+  // Outdoors / nature
+  outside:    ["outdoors", "nature"],
+  "fresh air": ["outdoors", "nature"],
+  "get outside": ["outdoors", "adventure"],
+  nature:     ["outdoors", "plants", "animals"],
+  "in nature": ["outdoors", "plants"],
+  scenery:    ["outdoors", "reflective", "adventure"],
+
+  // Indoor / cozy / home
+  indoor:     ["indoor", "home", "solo"],
+  cozy:       ["indoor", "home", "relaxing", "patient"],
+  cosy:       ["indoor", "home", "relaxing", "patient"],
+  "at home":  ["indoor", "home"],
+  homebody:   ["indoor", "home", "solo"],
+  "stay home": ["indoor", "home", "solo"],
+
+  // Fun / playful / light
+  fun:        ["playful", "social", "adventure", "creative"],
+  playful:    ["playful", "social", "creative"],
+  silly:      ["playful", "social"],
+  lighthearted: ["playful", "social", "relaxing"],
+
+  // Productive / learning
+  productive: ["learning", "skill", "making", "creative"],
+  "learn something": ["learning", "skill", "strategy"],
+  "learn a skill": ["learning", "skill", "technique"],
+  useful:     ["making", "learning", "skill", "food"],
+
+  // Water-related
+  water:      ["water", "outdoors", "adventure", "fitness"],
+  "water sports": ["water", "outdoors", "adventure", "fitness"],
+  swimming:   ["water", "fitness", "outdoors"],
+  ocean:      ["water", "outdoors", "adventure"],
+  lake:       ["water", "outdoors", "relaxing"],
 };
 
 window.HobbyAtlasData = {
