@@ -1,0 +1,16 @@
+# Python virtual environment
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Video files
+*.mp4
+*.mov
+*.avi
+
+# Mac system files
+.DS_Store
+
+# Node
+node_modules/
