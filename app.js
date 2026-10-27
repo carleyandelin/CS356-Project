@@ -1151,9 +1151,6 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
       applyCatFilter(false);
     });
 
-    var COLLAPSE_PAGE = 8;
-    var showCount = COLLAPSE_PAGE;
-
     // Populate a sub-chip row from a facet's children, or hide it
     function setSubChips(rowId, facetId, parentLabel) {
       var row = document.getElementById(rowId);
@@ -1195,90 +1192,29 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
             (!query || card.dataset.name.includes(query));
       });
 
-      if (resetCollapse) showCount = COLLAPSE_PAGE;
-      cards.forEach(function(card) {
-        card.style.display = 'none';
-      });
-      passing.forEach(function(card, i) {
-        card.style.display = i < showCount ? '' : 'none';
-      });
+      // Show all matching cards — no collapsing
+      cards.forEach(function(card) { card.style.display = 'none'; });
+      passing.forEach(function(card) { card.style.display = ''; });
 
-      var remaining = passing.length - showCount;
+      // Static scroll indicator — shows count of hobbies below, not a reveal button
       var container = document.getElementById('see-more-container');
-      // Always show the button on category pages so users can scroll down to see full cards.
-      // It hides itself only when we're already at the bottom AND there's nothing left to reveal.
-      var visibleCards = passing.length > 0;
-      if (visibleCards) {
+      if (passing.length > 0) {
         var svgChevron = '<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>';
         container.innerHTML =
-            '<button class="see-more-btn" data-remaining="' + remaining + '" aria-label="' +
-            (remaining > 0 ? 'See ' + Math.min(COLLAPSE_PAGE, remaining) + ' more' : 'Scroll down') + '">' +
-            svgChevron +
-            '</button>';
-        var _btn = container.querySelector('.see-more-btn');
-        function _updateBtnLabel() {
-          if (!_btn || !_btn.isConnected) { window.removeEventListener('scroll', _updateBtnLabel); return; }
-          var atBottom = (window.scrollY + window.innerHeight) >= (document.documentElement.scrollHeight - 80);
-          var rem = parseInt(_btn.dataset.remaining, 10) || 0;
-          // Hide only when at bottom with nothing left to reveal
-          if (atBottom && rem <= 0) {
-            _btn.style.display = 'none';
-            return;
-          }
-          _btn.style.display = '';
-          // Show count label only when at bottom and there are hidden cards
-          if (atBottom && rem > 0 && !_btn.classList.contains('has-label')) {
-            _btn.classList.add('has-label');
-            _btn.innerHTML = svgChevron + '<span class="see-more-count">' + rem + ' more</span>';
-          } else if (!atBottom && _btn.classList.contains('has-label')) {
-            _btn.classList.remove('has-label');
-            _btn.innerHTML = svgChevron;
-          }
+          '<div class="scroll-indicator has-label">' +
+          svgChevron +
+          '<span>' + passing.length + ' hobb' + (passing.length === 1 ? 'y' : 'ies') + ' below</span>' +
+          '</div>';
+        // Hide indicator once user has scrolled past the fold
+        function _checkScroll() {
+          var el = container.querySelector('.scroll-indicator');
+          if (!el || !el.isConnected) { window.removeEventListener('scroll', _checkScroll); return; }
+          var scrolled = window.scrollY > (window.innerHeight * 0.4);
+          el.style.opacity = scrolled ? '0' : '';
+          el.style.pointerEvents = scrolled ? 'none' : '';
         }
-        window.addEventListener('scroll', _updateBtnLabel, { passive: true });
-        _updateBtnLabel();
-        _btn.onclick = function() {
-          var atBottom = (window.scrollY + window.innerHeight) >= (document.documentElement.scrollHeight - 80);
-          var rem = parseInt(_btn.dataset.remaining, 10) || 0;
-          if (atBottom && rem > 0) {
-            // Reveal next batch
-            var prevCount = showCount;
-            showCount += COLLAPSE_PAGE;
-            applyCatFilter(false);
-            setTimeout(function() {
-              var allCards = Array.from(document.querySelectorAll('#cat-grid .outdoors-card'));
-              var visible = allCards.filter(function(c) { return c.style.display !== 'none'; });
-              var firstNew = visible[prevCount];
-              if (firstNew) {
-                firstNew.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
-            }, 50);
-          } else {
-            // Scroll exactly one full row downward
-            var grid = document.getElementById('cat-grid');
-            var allVisible = grid
-              ? Array.from(grid.querySelectorAll('.hot-card')).filter(function(c) { return c.style.display !== 'none'; })
-              : [];
-            var rowH = 280; // fallback
-            if (allVisible.length > 1) {
-              // Find a card that sits in the next row (different top offset)
-              var firstTop = allVisible[0].getBoundingClientRect().top;
-              var nextRowCard = null;
-              for (var i = 1; i < allVisible.length; i++) {
-                if (allVisible[i].getBoundingClientRect().top > firstTop + 5) {
-                  nextRowCard = allVisible[i];
-                  break;
-                }
-              }
-              rowH = nextRowCard
-                ? (nextRowCard.getBoundingClientRect().top - firstTop)
-                : (allVisible[0].offsetHeight + 24);
-            } else if (allVisible.length === 1) {
-              rowH = allVisible[0].offsetHeight + 24;
-            }
-            window.scrollBy({ top: rowH, behavior: 'smooth' });
-          }
-        };
+        window.addEventListener('scroll', _checkScroll, { passive: true });
+        _checkScroll();
       } else {
         container.innerHTML = '';
       }
