@@ -1353,8 +1353,9 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
           var el = container.querySelector('.scroll-indicator');
           if (!el || !el.isConnected) { window.removeEventListener('scroll', _checkScroll); return; }
           var scrolled = window.scrollY > (window.innerHeight * 0.4);
-          el.style.opacity = scrolled ? '0' : '';
-          el.style.pointerEvents = scrolled ? 'none' : '';
+          var noRoom = document.documentElement.scrollHeight <= window.innerHeight + 10;
+          el.style.opacity = (scrolled || noRoom) ? '0' : '';
+          el.style.pointerEvents = (scrolled || noRoom) ? 'none' : '';
         }
         window.addEventListener('scroll', _checkScroll, { passive: true });
         _checkScroll();
@@ -1575,10 +1576,10 @@ function renderHobby(name) {
       '';
   const costRanges = {'$': '$10-$30', '$$': '$30-$100', '$$$': '$100+'};
 
-  // ── Air Dry Clay redesign prototype ──────────────────────────────────────
-  if (name === 'Air dry clay') {
+  // ── Hobby detail redesign ──────────────────────────────────────────────────
+  {
     const breadcrumbHtml = buildBreadcrumbHtml(name);
-    const embedUrl = 'https://www.youtube.com/embed/e4lYE5yoVPU';
+    const embedUrl = introVideo ? introVideo.replace('https://youtu.be/', 'https://www.youtube.com/embed/') : '';
     const imgUrl = hobby.img || '';
     // Collage tiles: one clean control + rotations at cardinal angles + graduated blur
     // shadow: 'left'|'right' = dark gradient edge facing the control tile (simulates cast shadow)
@@ -1627,7 +1628,7 @@ function renderHobby(name) {
         </div>
       </div>
       <hr class="hobby-divider hobby-divider--top">
-      <div class="hobby-video-band">
+      ${embedUrl ? `<div class="hobby-video-band">
       <div class="hobby-video-centered">
         <iframe
           class="hobby-video"
@@ -1638,7 +1639,7 @@ function renderHobby(name) {
           allowfullscreen>
         </iframe>
       </div>
-      </div>
+      </div>` : ''}
       <hr class="hobby-divider hobby-divider--bottom">
       <section class="hobby-related hobby-related--full">
         <p class="hobby-related__heading">You may also like</p>
@@ -1647,67 +1648,37 @@ function renderHobby(name) {
     </div>`;
 
     // Tutorial scroll hint — fixed pill, fades out once video scrolls into view
-    (function() {
-      var svgChevron = '<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-      var hint = document.createElement('div');
-      hint.className = 'scroll-indicator has-label tutorial-hint';
-      hint.innerHTML = svgChevron + '<span>Watch a tutorial</span>';
-      document.body.appendChild(hint);
+    if (embedUrl) {
+      (function() {
+        var svgChevron = '<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+        var hint = document.createElement('div');
+        hint.className = 'scroll-indicator has-label tutorial-hint';
+        hint.innerHTML = svgChevron + '<span>Watch a tutorial</span>';
+        document.body.appendChild(hint);
 
-      function checkScroll() {
-        if (!hint.isConnected) { window.removeEventListener('scroll', checkScroll); return; }
-        var video = document.querySelector('.hobby-video-centered');
-        if (!video) { hint.style.opacity = '0'; return; }
-        var rect = video.getBoundingClientRect();
-        var visible = rect.top < window.innerHeight * 0.85;
-        hint.style.opacity = visible ? '0' : '';
-        hint.style.pointerEvents = 'none';
-      }
-      window.addEventListener('scroll', checkScroll, { passive: true });
-      checkScroll();
+        function checkScroll() {
+          if (!hint.isConnected) { window.removeEventListener('scroll', checkScroll); return; }
+          var video = document.querySelector('.hobby-video-centered');
+          if (!video) { hint.style.opacity = '0'; return; }
+          var rect = video.getBoundingClientRect();
+          var visible = rect.top < window.innerHeight * 0.85;
+          hint.style.opacity = visible ? '0' : '';
+          hint.style.pointerEvents = 'none';
+        }
+        window.addEventListener('scroll', checkScroll, { passive: true });
+        checkScroll();
 
-      // Remove hint on navigation
-      window.addEventListener('hashchange', function _cleanup() {
-        hint.remove();
-        window.removeEventListener('scroll', checkScroll);
-        window.removeEventListener('hashchange', _cleanup);
-      }, { once: true });
-    })();
+        // Remove hint on navigation
+        window.addEventListener('hashchange', function _cleanup() {
+          hint.remove();
+          window.removeEventListener('scroll', checkScroll);
+          window.removeEventListener('hashchange', _cleanup);
+        }, { once: true });
+      })();
+    }
 
     return;
   }
-
-    // Normal view: redesigned hobby detail
-  app.innerHTML = `<div class="page hobby-page">
-    <button class="back-arrow" onclick="history.back()" aria-label="Go back">←</button>
-    <section class="hobby-hero">
-      ${heroImage}
-      <div class="hobby-hero__content">
-        <p class="label">${escapeHtml(category ? category.label : 'Hobby')}</p>
-        <h1 class="hobby-hero__title">${escapeHtml(name)}</h1>
-        <p class="hobby-detail__blurb">${escapeHtml(hobby.blurb || '')}</p>
-        <div class="hobby-detail__intro">
-          <p class="hobby-detail__eyebrow">Why try it?</p>
-          <p>Start small, stay curious, and see whether ${escapeHtml(name)} fits your kind of fun.</p>
-        </div>
-        ${introVideoLink}
-      </div>
-    </section>
-    <article class="hobby-detail">
-      <div class="hobby-info-grid">
-        <div><dt>Time to try</dt><dd>${escapeHtml(hobby.time)}</dd></div>
-        <div><dt>First step</dt><dd>${
-      escapeHtml(hobby.startingPoint)}</dd></div>
-        ${details ? `<div><dt>Cost to start</dt><dd>${costRanges[details.cost] || 'Varies'}</dd></div>
-        <div><dt>Basic equipment</dt><dd>${escapeHtml(details.equipment)}</dd></div>
-        <div><dt>Find community</dt><dd>${escapeHtml(details.community)}</dd></div>` : ''}
-      </div>
-      <section class="hobby-related">
-        <p class="hobby-related__heading">You may also like</p>
-        <div class="outdoors-grid hobby-related__grid">${relatedCards}</div>
-      </section>
-    </article>
-  </div>`;
 }
 
 function renderAbout() {
