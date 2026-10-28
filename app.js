@@ -926,19 +926,37 @@ var SEARCH_STOP_WORDS = new Set([
   'really','quite','how','what','when','where','which','who',
   'something','anything','everything','nothing','stuff','things','thing',
   'new','good','fun','cool','interesting','nice','great','kind','type','sort',
-  'hobby','hobbies','activity','activities','idea','ideas'
+  'hobby','hobbies','activity','activities','idea','ideas',
+  'free','cheap','inexpensive','affordable','economical','budget','low','cost',
+  'price','low-cost','low-price','no-cost','zero-cost','little','money',
+  'without','spending','zero'
 ]);
+
+function getCostSearchIntent(query) {
+  const normalized = query.trim().toLowerCase();
+  if (/(^|\s)(free|no[- ]?cost|zero[- ]?cost)(\s|$)/.test(normalized) ||
+      /without (spending|money)/.test(normalized)) {
+    return 'free';
+  }
+  if (/(^|\s)(cheap|inexpensive|affordable|economical|budget)(\s|$)/.test(normalized) ||
+      /\blow[- ]cost\b|\blow[- ]price\b|\blittle money\b|\bon a budget\b/.test(normalized)) {
+    return 'low';
+  }
+  return '';
+}
 
 function searchMatches(query) {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return [];
+  const costIntent = getCostSearchIntent(normalized);
   const terms = normalized.split(/\s+/).filter(t => t.length > 0);
 
   // Strip filler/stop words to get the meaningful signal words
   // e.g. "I want todo something creative" → ["creative"]
   const meaningfulTerms = terms.filter(t => t.length > 1 && !SEARCH_STOP_WORDS.has(t));
   // Fall back to all terms only if every word was a stop word
-  const activeTerms = meaningfulTerms.length > 0 ? meaningfulTerms : terms;
+  const activeTerms = meaningfulTerms.length > 0 ? meaningfulTerms :
+      (costIntent ? [] : terms);
 
   // Expand concepts: collect all concept terms that match the query or any meaningful term
   const conceptHits = Object.entries(data.searchConcepts)
@@ -948,9 +966,14 @@ function searchMatches(query) {
       activeTerms.some(t => term === t || synonyms.some(s => s.includes(t)) || t.includes(term)))
     .flatMap(([term, synonyms]) => [term, ...synonyms]);
 
-  return data.allHobbies.filter((name) => {
+  const matches = data.allHobbies.filter((name) => {
     const hobby = data.hobbies[name];
+    const details = data.hobbyDetails[name];
     const category = categoryById[hobby.category];
+    if (costIntent === 'free' && details?.cost !== 'free') return false;
+    if (costIntent === 'low' && !['free', '$'].includes(details?.cost)) {
+      return false;
+    }
     // Extended haystack: blurb, tags, startingPoint, related hobbies, category
     const haystack = [
       name,
@@ -980,6 +1003,14 @@ function searchMatches(query) {
       return haystackWords.some(hw => levenshtein(term, hw) <= maxDist);
     });
   });
+
+  if (costIntent) {
+    const costRank = {free: 0, '$': 1};
+    matches.sort((a, b) =>
+      (costRank[data.hobbyDetails[a]?.cost] ?? 2) -
+      (costRank[data.hobbyDetails[b]?.cost] ?? 2));
+  }
+  return matches;
 }
 
 function logSearch(query, resultCount) {
@@ -1569,7 +1600,12 @@ function renderHobby(name) {
   const introVideoLink = introVideo ?
       `<a class="hobby-intro-video" href="${escapeHtml(introVideo)}" target="_blank" rel="noopener noreferrer">Watch intro video</a>` :
       '';
-  const costRanges = {'$': '$10-$30', '$$': '$30-$100', '$$$': '$100+'};
+  const costRanges = {
+    free: 'Free',
+    '$': '$10-$30',
+    '$$': '$30-$100',
+    '$$$': '$100+'
+  };
 
   // ── Hobby detail redesign ──────────────────────────────────────────────────
   {
