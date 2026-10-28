@@ -1353,9 +1353,10 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
           var el = container.querySelector('.scroll-indicator');
           if (!el || !el.isConnected) { window.removeEventListener('scroll', _checkScroll); return; }
           var scrolled = window.scrollY > (window.innerHeight * 0.4);
-          var noRoom = document.documentElement.scrollHeight <= window.innerHeight + 10;
-          el.style.opacity = (scrolled || noRoom) ? '0' : '';
-          el.style.pointerEvents = (scrolled || noRoom) ? 'none' : '';
+          var grid = document.querySelector('.outdoors-grid');
+          var gridVisible = grid && grid.getBoundingClientRect().bottom <= window.innerHeight + 10;
+          el.style.opacity = (scrolled || gridVisible) ? '0' : '';
+          el.style.pointerEvents = (scrolled || gridVisible) ? 'none' : '';
         }
         window.addEventListener('scroll', _checkScroll, { passive: true });
         _checkScroll();
