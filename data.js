@@ -301,7 +301,7 @@ const hobbies = {
   Crochet: {
       img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/crochet", blurb: "Create fabric by looping yarn with a single hook.", tags: ["making","creative","patient"], time: "30 – 60 min", startingPoint: "Learn the chain stitch with one hook.", related: ["Embroidery","Quilting"] },
   "Air dry clay": {
-      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/air-dry-clay", blurb: "Shape small sculptures that harden without a kiln.", tags: ["making","creative","solo"], time: "1 – 2 hrs", startingPoint: "Shape one small pinch pot.", related: ["Pottery","Resin Art"] },
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/air-dry-clay", blurb: "Shape small sculptures that harden without a kiln.", why: "Grab a lump of clay and start smooshing. Wonky is charming, mistakes become features, and your first lopsided little bowl might just end up on your shelf forever. No kiln, no studio, no problem.", tags: ["making","creative","solo"], time: "1 – 2 hrs", startingPoint: "Shape one small pinch pot.", related: ["Pottery","Resin Art","Origami","Candle Making"] },
   Pottery: {
       img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/pottery", blurb: "Form objects from clay by hand or on a pottery wheel.", tags: ["making","creative","skill"], time: "2 – 3 hrs", startingPoint: "Take a beginner wheel or hand-building class.", related: ["Air dry clay","Painting"] },
   Journaling: {
@@ -436,7 +436,7 @@ const hobbyIntroVideos = {
   "Coloring": "https://youtu.be/Ezcz9l3JWEg",
   "Concerts": "https://youtu.be/ATqsHGjlhio",
   "Cosplaying": "https://youtu.be/U_KB51_03Bg",
-  "Crochet": "https://youtu.be/GcOzdAzmtNM",
+  "Crochet": "https://youtu.be/aAxGTnVNJiE",
   "Cycling": "https://youtu.be/JGhWkTRxSjk",
   "Disc Golf": "https://youtu.be/WJRNK0eKuNw",
   "DJing": "https://youtu.be/O-pdaMnOJBQ",
@@ -474,7 +474,7 @@ const hobbyIntroVideos = {
   "Parkour": "https://youtu.be/DxEomfCerLY",
   "Photography": "https://youtu.be/ppTr4NVqWgI",
   "Pickleball": "https://youtu.be/rD1O3R9B0Sw",
-  "Pilates": "https://youtu.be/44HquH6QyXc",
+  "Pilates": "https://youtu.be/CdjRQ6GG8bA",
   "Plant Propagation": "https://youtu.be/_YFf4vqcqhY",
   "Podcasting": "https://youtu.be/1ljTathnfBI",
   "Poetry": "https://youtu.be/ImBO35GznsY",
@@ -499,7 +499,7 @@ const hobbyIntroVideos = {
   "Thrifting": "https://youtu.be/zG8E9k9WZxk",
   "Tie-Dye": "https://youtu.be/v-BvyNgrthg",
   "Trampolining": "https://youtu.be/8WlJQ2FisI0",
-  "Trivia": "https://youtu.be/HcuhU-4P8J4",
+  "Trivia": "https://youtu.be/3ShqXh5tI1s",
   "Video Games": "https://youtu.be/tar9g1qKrDM",
   "Videography": "https://youtu.be/x1WMLywZWGM",
   "Vinyl Records": "https://youtu.be/bCS5nuG80LQ",

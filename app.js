@@ -31,6 +31,7 @@ const facetById = Object.fromEntries(
 // facet. For flat categories (no facets), maps the hobby to the category itself
 // as the chip.
 var hobbyTopFacetMap = {};  // name → [{id, label, categoryId}]
+var _prevHash = '';  // previous hash before last navigation, for breadcrumbs
 data.categories.forEach(function(cat) {
   if (cat.facets && cat.facets.length) {
     cat.facets.forEach(function(facet) {
@@ -1495,6 +1496,43 @@ function renderFacet(id) {
   }
 }
 
+// ── Breadcrumb builder — parses _prevHash to get navigation trail ─────────
+function buildBreadcrumbHtml(hobbyName) {
+  var crumbs = [{ label: 'Home', href: '#browse' }];
+  if (_prevHash) {
+    var parts = _prevHash.slice(1).split('/');
+    if (parts[0] === 'category' && parts[1]) {
+      var catId = decodeURIComponent(parts[1]);
+      var cat = categoryById[catId];
+      if (cat) {
+        crumbs.push({ label: cat.label, href: '#category/' + catId });
+        if (parts[2]) {
+          var f1Id = decodeURIComponent(parts[2]);
+          var f1 = facetById[f1Id];
+          if (f1) {
+            crumbs.push({ label: f1.label, href: '#category/' + catId + '/' + f1Id });
+            if (parts[3]) {
+              var f2Id = decodeURIComponent(parts[3]);
+              var f2 = facetById[f2Id];
+              if (f2) {
+                crumbs.push({ label: f2.label, href: '#category/' + catId + '/' + f1Id + '/' + f2Id });
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  crumbs.push({ label: hobbyName, href: null });
+  return crumbs.map(function(c, i) {
+    if (i === crumbs.length - 1) {
+      return '<span class="breadcrumb__current">' + escapeHtml(c.label) + '</span>';
+    }
+    return '<a class="breadcrumb__link" href="' + c.href + '">' + escapeHtml(c.label) + '</a>' +
+           '<span class="breadcrumb__sep">/</span>';
+  }).join('');
+}
+
 function renderHobby(name) {
   const hobby = data.hobbies[name];
   if (!hobby) return renderBrowse();
@@ -1537,7 +1575,109 @@ function renderHobby(name) {
       '';
   const costRanges = {'$': '$10-$30', '$$': '$30-$100', '$$$': '$100+'};
 
-  // Normal view: redesigned hobby detail
+  // ── Air Dry Clay redesign prototype ──────────────────────────────────────
+  if (name === 'Air dry clay') {
+    const breadcrumbHtml = buildBreadcrumbHtml(name);
+    const embedUrl = 'https://www.youtube.com/embed/e4lYE5yoVPU';
+    const imgUrl = hobby.img || '';
+    // Collage tiles: one clean control + rotations at cardinal angles + graduated blur
+    // shadow: 'left'|'right' = dark gradient edge facing the control tile (simulates cast shadow)
+    const tileData = [
+      {rot:   0, blur: 6,   shadow: 'none'},   // heavy blur
+      {rot:  90, blur: 0,   shadow: 'right'},  // left neighbor of control — shadow on its right edge
+      {rot:   0, blur: 0,   control: true},    // CONTROL — clean, elevated
+      {rot: 180, blur: 2,   shadow: 'left'},   // right neighbor of control — shadow on its left edge
+      {rot: 270, blur: 0,   shadow: 'none'},   // 270° turn, crisp
+      {rot:   0, blur: 3.5, shadow: 'none'},   // medium blur
+    ];
+    // Use background-image so tile sizing is fully CSS-driven (no <img> height issues)
+    const tilesHtml = tileData.map(function(t) {
+      var filter = (!t.control && t.blur > 0) ? 'blur(' + t.blur + 'px)' : 'none';
+      var shadowGrad = '';
+      if (t.shadow === 'right') shadowGrad = 'linear-gradient(to right, transparent 55%, rgba(0,0,0,0.55) 100%), ';
+      if (t.shadow === 'left')  shadowGrad = 'linear-gradient(to left,  transparent 55%, rgba(0,0,0,0.55) 100%), ';
+      var bg = shadowGrad + 'url(' + escapeHtml(imgUrl) + ')';
+      var extraClass = t.control ? ' collage-tile--control' : '';
+      var scale = t.control ? 1.14 : 1.08;
+      return '<div class="collage-tile' + extraClass + '" style="background-image:' + bg + ';transform:rotate(' + (t.rot||0) + 'deg) scale(' + scale + ');filter:' + filter + ';"></div>';
+    }).join('');
+    app.innerHTML = `<div class="page hobby-page hobby-page--redesign">
+      <nav class="breadcrumb" aria-label="Breadcrumb">${breadcrumbHtml}</nav>
+      <section class="hobby-collage-hero">
+        <div class="collage-grid">${tilesHtml}</div>
+        <div class="collage-overlay">
+          <h1 class="collage-title">${escapeHtml(name)}</h1>
+          <p class="collage-subtitle">${escapeHtml(hobby.blurb || '')}</p>
+        </div>
+      </section>
+      <div class="hobby-mid-row">
+        <div class="hobby-why-block">
+          <p class="hobby-why-block__heading">Why Try It?</p>
+          <p class="hobby-why-block__text">${escapeHtml(hobby.why || hobby.blurb || '')}</p>
+        </div>
+        <div class="hobby-knowhow-block">
+          <p class="hobby-knowhow-block__heading">At a Glance</p>
+          <dl class="hobby-knowhow-grid">
+            <dt>Time to try</dt><dd>${escapeHtml(hobby.time)}</dd>
+            <dt>First step</dt><dd>${escapeHtml(hobby.startingPoint)}</dd>
+            ${details ? `<dt>Cost to start</dt><dd>${costRanges[details.cost] || 'Varies'}</dd>
+            <dt>Basic equipment</dt><dd>${escapeHtml(details.equipment)}</dd>
+            <dt>Find community</dt><dd>${escapeHtml(details.community)}</dd>` : ''}
+          </dl>
+        </div>
+      </div>
+      <hr class="hobby-divider hobby-divider--top">
+      <div class="hobby-video-band">
+      <div class="hobby-video-centered">
+        <iframe
+          class="hobby-video"
+          src="${escapeHtml(embedUrl)}"
+          title="${escapeHtml(name)} intro video"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
+      </div>
+      </div>
+      <hr class="hobby-divider hobby-divider--bottom">
+      <section class="hobby-related hobby-related--full">
+        <p class="hobby-related__heading">You may also like</p>
+        <div class="hobby-related__grid--row">${relatedCards}</div>
+      </section>
+    </div>`;
+
+    // Tutorial scroll hint — fixed pill, fades out once video scrolls into view
+    (function() {
+      var svgChevron = '<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+      var hint = document.createElement('div');
+      hint.className = 'scroll-indicator has-label tutorial-hint';
+      hint.innerHTML = svgChevron + '<span>Watch a tutorial</span>';
+      document.body.appendChild(hint);
+
+      function checkScroll() {
+        if (!hint.isConnected) { window.removeEventListener('scroll', checkScroll); return; }
+        var video = document.querySelector('.hobby-video-centered');
+        if (!video) { hint.style.opacity = '0'; return; }
+        var rect = video.getBoundingClientRect();
+        var visible = rect.top < window.innerHeight * 0.85;
+        hint.style.opacity = visible ? '0' : '';
+        hint.style.pointerEvents = 'none';
+      }
+      window.addEventListener('scroll', checkScroll, { passive: true });
+      checkScroll();
+
+      // Remove hint on navigation
+      window.addEventListener('hashchange', function _cleanup() {
+        hint.remove();
+        window.removeEventListener('scroll', checkScroll);
+        window.removeEventListener('hashchange', _cleanup);
+      }, { once: true });
+    })();
+
+    return;
+  }
+
+    // Normal view: redesigned hobby detail
   app.innerHTML = `<div class="page hobby-page">
     <button class="back-arrow" onclick="history.back()" aria-label="Go back">←</button>
     <section class="hobby-hero">
@@ -1879,7 +2019,7 @@ document.addEventListener('submit', (event) => {
   setInterval(showNext, 15000);
 })();
 
-window.addEventListener('hashchange', render);
+window.addEventListener('hashchange', function(e) { _prevHash = e.oldURL.includes('#') ? '#' + e.oldURL.split('#').slice(1).join('#') : ''; render(); });
 render();
 
 // ─── Nav search icon expand/collapse ──────────────────────────────────────

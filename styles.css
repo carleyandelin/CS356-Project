@@ -1153,3 +1153,233 @@ mark.search-hl {
   transition: opacity 0.15s;
 }
 .nav-search__close:hover { opacity: 1; }
+
+/* ─── Redesigned Hobby Page (Air Dry Clay prototype) ────────────────────── */
+
+.hobby-page--redesign { padding-top: 9px; }
+
+/* Breadcrumb */
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 9px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+.breadcrumb__link {
+  color: var(--teal-shade);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity .15s;
+}
+.breadcrumb__link:hover { opacity: 1; text-decoration: underline; }
+.breadcrumb__sep { color: var(--teal-muted); font-weight: 400; }
+.breadcrumb__current { color: var(--ink-black); }
+
+/* Collage hero — full-bleed one-row strip matching category banner aspect ratio */
+.hobby-collage-hero {
+  position: relative;
+  margin: 0 -32px;
+  aspect-ratio: 5 / 1;
+  overflow: hidden;
+  background: var(--teal-base);
+}
+/* Tile strip fills the hero absolutely — height is always the rendered hero height */
+.collage-grid {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 110%;
+  left: -5%;
+}
+/* Square tiles via background-image — no <img> height ambiguity */
+.collage-tile {
+  flex: 0 0 auto;
+  aspect-ratio: 1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  will-change: transform;
+  position: relative;
+  z-index: 1;
+}
+.collage-tile--control {
+  z-index: 3;
+}
+.collage-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.68) 0%,
+    rgba(0,0,0,0.22) 55%,
+    rgba(0,0,0,0.04) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 44px;
+  z-index: 2;
+}
+.collage-title {
+  margin: 0 0 8px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(28px, 4.5vw, 58px);
+  font-weight: 400;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.4);
+}
+.collage-subtitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.82);
+  max-width: 42ch;
+}
+
+/* Mid row: why try it (left teal block) + at a glance (right) */
+.hobby-mid-row {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+  margin-top: 32px;
+}
+.hobby-why-block {
+  flex: 1 1 0;
+  background: #d6ecea;
+  border-radius: 16px;
+  padding: 40px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.hobby-why-block__heading {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--teal-shade);
+}
+.hobby-why-block__text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-black);
+}
+.hobby-knowhow-block {
+  flex: 1 1 0;
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.hobby-knowhow-block__heading {
+  margin: 0 0 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--teal-shade);
+}
+.hobby-knowhow-grid {
+  margin: 0;
+  border-top: none;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 20px;
+  row-gap: 12px;
+  align-items: baseline;
+}
+.hobby-knowhow-grid dt {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink-black);
+  white-space: nowrap;
+}
+.hobby-knowhow-grid dd {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-black);
+  opacity: 0.75;
+}
+
+/* Centered standalone video */
+.hobby-video-centered {
+  margin: 0 auto;
+  width: 720px;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(45,122,117,.16);
+}
+.hobby-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Full-width related row (4 cards) */
+.hobby-related--full {
+  margin-top: 0;
+}
+.hobby-related--full .hobby-related__heading {
+  margin: 0 0 16px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--teal-shade);
+  text-align: left;
+  opacity: 1;
+}
+.hobby-related__grid--row {
+  display: flex;
+  gap: 12px;
+  max-width: 50%;
+}
+.hobby-related__grid--row > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Light teal band around video */
+.hobby-video-band {
+  background: #d6ecea;
+  margin: 0 -32px;
+  padding: 32px;
+}
+.hobby-video-band .hobby-video-centered {
+  margin: 0 auto;
+}
+
+/* Teal section dividers */
+.hobby-divider {
+  border: none;
+  border-top: 1.5px solid var(--teal-base);
+  margin: 32px -32px;
+}
+/* Dividers flanking the teal video band — no inner margin so band touches the line */
+.hobby-divider--top { margin-bottom: 0; }
+.hobby-divider--bottom { margin-top: 0; }
+
+/* Mobile tweaks */
+@media (max-width: 700px) {
+  .hobby-mid-row { flex-direction: column; }
+  .hobby-video-centered { width: 100%; }
+  .hobby-related__grid--row { flex-wrap: wrap; }
+  .hobby-related__grid--row > * { flex: 1 1 calc(50% - 6px); }
+}
+@media (max-width: 600px) {
+  .hobby-collage-hero { margin: 0 -18px; }
+  .collage-overlay { padding: 0 18px; }
+}
