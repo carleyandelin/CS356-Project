@@ -1554,12 +1554,6 @@ function renderHobby(name) {
     return;
   }
 
-  const heroImage = hobby.img ?
-      `<div class="hobby-hero__image-wrap">
-        <img class="hobby-hero__image" src="${escapeHtml(hobby.img)}" alt="${escapeHtml(name)}">
-      </div>` :
-      '';
-
   const relatedCards = [...(hobby.related || [])]
                            .sort((a, b) => a.localeCompare(b))
                            .map(function(relName) {
@@ -1582,32 +1576,23 @@ function renderHobby(name) {
     const breadcrumbHtml = buildBreadcrumbHtml(name);
     const embedUrl = introVideo ? introVideo.replace('https://youtu.be/', 'https://www.youtube.com/embed/') : '';
     const imgUrl = hobby.img || '';
-    // Collage tiles: one clean control + rotations at cardinal angles + graduated blur
-    // shadow: 'left'|'right' = dark gradient edge facing the control tile (simulates cast shadow)
     const tileData = [
-      {rot:   0, blur: 6,   shadow: 'none'},   // heavy blur
-      {rot:  90, blur: 0,   shadow: 'right'},  // left neighbor of control — shadow on its right edge
-      {rot:   0, blur: 0,   control: true},    // CONTROL — clean, elevated
-      {rot: 180, blur: 2,   shadow: 'left'},   // right neighbor of control — shadow on its left edge
-      {rot: 270, blur: 0,   shadow: 'none'},   // 270° turn, crisp
-      {rot:   0, blur: 3.5, shadow: 'none'},   // medium blur
+      {blur: 4.5, opacity: .68},
+      {blur: 2.8, opacity: .8},
+      {blur: 1.5, opacity: .9},
+      {blur: .5, opacity: .97},
+      {blur: 0, opacity: 1, control: true},
     ];
-    // Use background-image so tile sizing is fully CSS-driven (no <img> height issues)
-    const tilesHtml = tileData.map(function(t) {
-      var filter = (!t.control && t.blur > 0) ? 'blur(' + t.blur + 'px)' : 'none';
-      var shadowGrad = '';
-      if (t.shadow === 'right') shadowGrad = 'linear-gradient(to right, transparent 55%, rgba(0,0,0,0.55) 100%), ';
-      if (t.shadow === 'left')  shadowGrad = 'linear-gradient(to left,  transparent 55%, rgba(0,0,0,0.55) 100%), ';
-      var bg = shadowGrad + 'url(' + escapeHtml(imgUrl) + ')';
-      var extraClass = t.control ? ' collage-tile--control' : '';
-      var scale = t.control ? 1.14 : 1.08;
-      return '<div class="collage-tile' + extraClass + '" style="background-image:' + bg + ';transform:rotate(' + (t.rot||0) + 'deg) scale(' + scale + ');filter:' + filter + ';"></div>';
+    const tilesHtml = tileData.map(function(t, index) {
+      const extraClass = t.control ? ' collage-tile--control' : '';
+      return `<div class="collage-tile${extraClass}" style="left:${index * 18}%;background-image:url('${escapeHtml(imgUrl)}');filter:blur(${t.blur}px);opacity:${t.opacity};"></div>`;
     }).join('');
     app.innerHTML = `<div class="page hobby-page hobby-page--redesign">
       <nav class="breadcrumb" aria-label="Breadcrumb">${breadcrumbHtml}</nav>
       <section class="hobby-collage-hero">
         <div class="collage-grid">${tilesHtml}</div>
         <div class="collage-overlay">
+          <p class="collage-eyebrow">${escapeHtml(category ? category.label : 'Hobby')}</p>
           <h1 class="collage-title">${escapeHtml(name)}</h1>
           <p class="collage-subtitle">${escapeHtml(hobby.blurb || '')}</p>
         </div>
