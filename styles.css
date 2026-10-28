@@ -90,6 +90,7 @@ button, a { cursor: pointer; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 #app { outline: none; }
+[hidden] { display: none !important; }
 .page { padding: 48px 0 80px; }
 .outdoors-page { padding-top: 0; }
 .page-heading { display: flex; justify-content: space-between; gap: 24px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
@@ -510,7 +511,7 @@ mark.search-hl {
 }
 #cat-chips.facet-filter-row {
   margin: 0 -32px;
-  padding: 18px 32px;
+  padding: 14px 32px;
   background: #d6ecea;
   border-bottom: 1px solid var(--teal-base);
 }
@@ -559,7 +560,7 @@ mark.search-hl {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 14px;
-  margin-top: 24px;
+  margin-top: 31px;
 }
 .outdoors-grid .hot-card { flex: none; width: 100%; }
 @media (max-width: 700px) {
