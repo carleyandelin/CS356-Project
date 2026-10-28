@@ -1198,6 +1198,13 @@ function renderCategory(id, preselectedF1, preselectedF2, preselectedF3) {
                                          hobby: data.hobbies[name] || {}
                                        };
                                      });
+    allCards = allCards.filter(function(item, index, cards) {
+      return cards.findIndex(function(candidate) {
+        return candidate.name === item.name;
+      }) === index;
+    }).sort(function(a, b) {
+      return a.name.localeCompare(b.name);
+    });
 
     // Hero
     var CATEGORY_BANNERS = {
@@ -1492,6 +1499,8 @@ function renderHobby(name) {
   const hobby = data.hobbies[name];
   if (!hobby) return renderBrowse();
   const category = categoryById[hobby.category];
+  const introVideo = data.hobbyIntroVideos[name];
+  const details = data.hobbyDetails[name];
 
   // In test mode: show only the name + answer button
   if (MODE === 'test') {
@@ -1511,7 +1520,8 @@ function renderHobby(name) {
       </div>` :
       '';
 
-  const relatedCards = (hobby.related || [])
+  const relatedCards = [...(hobby.related || [])]
+                           .sort((a, b) => a.localeCompare(b))
                            .map(function(relName) {
                              const rel = data.hobbies[relName] || {};
                              const href =
@@ -1522,6 +1532,10 @@ function renderHobby(name) {
                              return typoCard(relName, href, rel.blurb || '');
                            })
                            .join('');
+  const introVideoLink = introVideo ?
+      `<a class="hobby-intro-video" href="${escapeHtml(introVideo)}" target="_blank" rel="noopener noreferrer">Watch intro video</a>` :
+      '';
+  const costRanges = {'$': '$10-$30', '$$': '$30-$100', '$$$': '$100+'};
 
   // Normal view: redesigned hobby detail
   app.innerHTML = `<div class="page hobby-page">
@@ -1536,14 +1550,18 @@ function renderHobby(name) {
           <p class="hobby-detail__eyebrow">Why try it?</p>
           <p>Start small, stay curious, and see whether ${escapeHtml(name)} fits your kind of fun.</p>
         </div>
+        ${introVideoLink}
       </div>
     </section>
     <article class="hobby-detail">
-      <dl class="hobby-detail__meta">
+      <div class="hobby-info-grid">
         <div><dt>Time to try</dt><dd>${escapeHtml(hobby.time)}</dd></div>
         <div><dt>First step</dt><dd>${
       escapeHtml(hobby.startingPoint)}</dd></div>
-      </dl>
+        ${details ? `<div><dt>Cost to start</dt><dd>${costRanges[details.cost] || 'Varies'}</dd></div>
+        <div><dt>Basic equipment</dt><dd>${escapeHtml(details.equipment)}</dd></div>
+        <div><dt>Find community</dt><dd>${escapeHtml(details.community)}</dd></div>` : ''}
+      </div>
       <section class="hobby-related">
         <p class="hobby-related__heading">You may also like</p>
         <div class="outdoors-grid hobby-related__grid">${relatedCards}</div>
