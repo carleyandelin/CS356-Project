@@ -1191,36 +1191,25 @@ mark.search-hl {
 }
 .collage-grid {
   position: absolute;
-  inset: -14px;
+  inset: 0;
   overflow: hidden;
 }
-.collage-tile {
-  position: absolute;
-  top: 0;
-  width: 28%;
-  height: 100%;
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-  transform: scale(1.04);
-  will-change: filter;
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    #000 14%,
-    #000 86%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    #000 14%,
-    #000 86%,
-    transparent 100%
-  );
+@keyframes kenburns {
+  0%   { transform: scale(1.08) translate(-3%,  2%); }
+  20%  { transform: scale(1.14) translate( 3%, -3%); }
+  40%  { transform: scale(1.10) translate(-2%, -2%); }
+  60%  { transform: scale(1.15) translate( 2%,  3%); }
+  80%  { transform: scale(1.09) translate( 3%, -1%); }
+  100% { transform: scale(1.08) translate(-3%,  2%); }
 }
-.collage-tile--control {
-  z-index: 1;
+.collage-kb-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  animation: kenburns 50s ease-in-out infinite;
+  will-change: transform;
 }
 .collage-overlay {
   position: absolute;

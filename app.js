@@ -1697,17 +1697,9 @@ function renderHobby(name) {
     const breadcrumbHtml = buildBreadcrumbHtml(name);
     const embedUrl = introVideo ? introVideo.replace('https://youtu.be/', 'https://www.youtube.com/embed/') : '';
     const imgUrl = hobby.img || '';
-    const tileData = [
-      {blur: 4.5, opacity: .68},
-      {blur: 2.8, opacity: .8},
-      {blur: 1.5, opacity: .9},
-      {blur: .5, opacity: .97},
-      {blur: 0, opacity: 1, control: true},
-    ];
-    const tilesHtml = tileData.map(function(t, index) {
-      const extraClass = t.control ? ' collage-tile--control' : '';
-      return `<div class="collage-tile${extraClass}" style="left:${index * 18}%;background-image:url('${escapeHtml(imgUrl)}');filter:blur(${t.blur}px);opacity:${t.opacity};"></div>`;
-    }).join('');
+    const tilesHtml = imgUrl
+      ? `<div class="collage-kb-img" style="background-image:url('${escapeHtml(imgUrl)}');"></div>`
+      : '';
     app.innerHTML = `<div class="page hobby-page hobby-page--redesign">
       <nav class="breadcrumb" aria-label="Breadcrumb">${breadcrumbHtml}</nav>
       <section class="hobby-collage-hero">
