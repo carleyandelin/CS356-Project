@@ -1006,7 +1006,7 @@ function searchMatches(query) {
     // ── Tier 2: Tag matches ───────────────────────────────────────────────
     activeTerms.forEach(term => {
       // Direct tag hit
-      if (tags.some(tag => tag === term || tag.includes(term) || term.includes(tag))) {
+      if (tags.some(tag => tag === term || tag.includes(term))) {
         score += 58;
       } else {
         // Concept-expanded tag hit — score each matching tag so hobbies with more

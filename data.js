@@ -221,7 +221,7 @@ const hobbies = {
   "Escape Rooms": {img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/escape_room",  blurb: "Solve a story-shaped puzzle with a team and a ticking clock.", why: "There are padlocks everywhere, a ticking clock, and someone in your group who refuses to share what they found. It is chaotic and perfect and you will argue productively about it for an hour after.", tags: ["social","strategy","adventure"], time: "1 – 2 hrs", startingPoint: "Book a beginner room with three friends.", related: ["Mahjong","Cosplaying","Puzzles","Trivia"] },
   "Duo Lingo": {img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/duo_lingo",  blurb: "Build a small language habit through playful daily practice.", why: "The owl is relentless and kind of right. Five minutes a day adds up faster than you expect, and the first time you understand a song lyric in another language feels genuinely magical.", tags: ["learning","solo","10 minutes"], time: "10 – 20 min", startingPoint: "Choose a language and complete the first five-minute lesson.", related: ["Podcasting","Chess","Calligraphy","Concerts"] },
   Painting: {
-      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/painting", blurb: "Turn color, texture, and a blank surface into a practice of noticing.", why: "You do not need talent, you need a surface and something to put on it. The first few paintings are terrible in the most instructive way possible, and then one day something clicks.", tags: ["creative","solo","relaxing"], time: "30 min – 3 hrs", startingPoint: "Pick three colors and paint what is in front of you.", related: ["Photography","Scrapbooking","Coloring","Graphic Design"] },
+      img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/painting", blurb: "Turn color, texture, and a blank surface into a practice of noticing.", why: "You do not need talent, you need a surface and something to put on it. The first few paintings are terrible in the most instructive way possible, and then one day something clicks.", tags: ["creative","solo","relaxing"], time: "30 min – 3 hrs", startingPoint: "Try watercolor or acrylic — pick three colors and paint what is in front of you.", related: ["Photography","Scrapbooking","Coloring","Graphic Design"] },
   "Nail Art": {
       img: "https://res.cloudinary.com/nxwrbcvt/image/upload/f_auto,q_auto,w_600,h_600,c_fill/nail-art", blurb: "A tiny canvas for pattern, color, and a little everyday delight.", why: "Ten tiny canvases that you carry around all week. Start with a dot and a stripe on one accent nail and see how far down the rabbit hole you want to go.", tags: ["creative","fashion","solo"], time: "30 – 90 min", startingPoint: "Try one accent nail with a two-color palette.", related: ["Painting","Cosplaying","Makeup Artistry","Jewelry Making"] },
   Scrapbooking: {
@@ -717,7 +717,9 @@ const searchConcepts = {
   origami: ["paper crane", "paper folding", "paper cranes", "paper art", "paper sculpture", "folding paper", "paper animals"],
 
   // Drawing / sketching
-  drawing: ["sketching", "illustration", "pencil art", "art", "sketch", "doodling", "anime art", "figure drawing"],
+  drawing: ["creative", "visual", "making", "skill", "solo"],
+  sketching: ["creative", "visual", "making", "solo"],
+  sketch: ["creative", "visual", "making", "solo"],
 
   // Music / instruments
   guitar: ["instrument", "music", "strumming", "chord", "acoustic", "electric guitar", "playing music"],
@@ -777,16 +779,29 @@ const searchConcepts = {
   "low key":  ["solo", "indoor", "relaxing", "patient"],
 
   // Creative / artistic / expressive
-  artistic:   ["creative", "making", "visual", "drawing", "painting"],
+  artistic:   ["creative", "visual", "making", "skill", "colorful"],
   expressive: ["creative", "making", "performance", "writing"],
   "hands on": ["making", "creative", "skill"],
   "hands-on": ["making", "creative", "skill"],
-  crafty:     ["creative", "making", "handmade", "quilting"],
-  crafts:     ["creative", "making", "handmade"],
-  craft:      ["creative", "making", "handmade"],
-  artistic:   ["creative", "visual", "making", "drawing"],
+  crafty:     ["creative", "making", "home", "solo"],
+  crafts:     ["creative", "making", "home", "solo"],
+  craft:      ["creative", "making", "home", "solo"],
   imaginative:["creative", "making", "writing", "performance"],
-  arty:       ["creative", "visual", "making", "drawing"],
+  arty:       ["creative", "visual", "making", "colorful"],
+
+  // Art mediums / techniques — map to tags so specific searches find Painting and similar
+  painting:       ["creative", "visual", "colorful", "making", "relaxing", "solo"],
+  watercolor:     ["creative", "visual", "colorful", "making", "relaxing"],
+  watercolour:    ["creative", "visual", "colorful", "making", "relaxing"],
+  acrylic:        ["creative", "visual", "colorful", "making"],
+  "oil painting": ["creative", "visual", "making", "patient", "solo"],
+  "oil paint":    ["creative", "visual", "making", "patient", "solo"],
+  illustration:   ["creative", "visual", "making", "skill"],
+  doodling:       ["creative", "visual", "solo", "relaxing"],
+  "figure drawing": ["creative", "visual", "making", "skill"],
+  calligraphy:    ["creative", "visual", "skill", "patient"],
+  collage:        ["creative", "making", "colorful", "visual"],
+  printmaking:    ["creative", "visual", "making", "skill"],
 
   // Social / group
   social:     ["social", "team", "group"],
