@@ -864,6 +864,138 @@ const searchConcepts = {
   swimming:   ["water", "fitness", "outdoors"],
   ocean:      ["water", "outdoors", "adventure"],
   lake:       ["water", "outdoors", "relaxing"],
+
+  // ── Situation / context mappings ─────────────────────────────────────────
+  // "date night", "with a friend", "rainy day", etc.
+  "date night":    ["social", "experience", "food", "performance", "adventure"],
+  "date idea":     ["social", "experience", "food", "performance", "adventure"],
+  "date activity": ["social", "experience", "food", "performance", "playful"],
+  "romantic":      ["social", "experience", "food", "visual"],
+  "couple":        ["social", "experience"],
+  "with someone":  ["social", "experience"],
+  "with a friend": ["social", "playful", "experience"],
+  "with kids":     ["playful", "social", "making", "creative", "animals", "learning"],
+  "family":        ["playful", "social", "making", "animals", "food", "outdoors"],
+  "kids":          ["playful", "social", "making", "creative", "animals"],
+  "children":      ["playful", "making", "learning", "creative", "animals"],
+
+  // Boredom / nothing to do
+  "bored":         ["playful", "creative", "social", "adventure", "experience", "learning"],
+  "boring":        ["playful", "social", "creative", "adventure"],
+  "nothing to do": ["playful", "creative", "social", "adventure", "experience"],
+  "boredom":       ["playful", "creative", "social", "adventure"],
+  "kill time":     ["playful", "creative", "solo", "indoor", "relaxing"],
+  "pass time":     ["relaxing", "solo", "indoor", "playful", "creative"],
+
+  // Budget / cost
+  "cheap":         ["making", "creative", "indoor", "home", "writing", "learning"],
+  "free":          ["outdoor", "fitness", "creative", "writing", "home", "learning"],
+  "budget":        ["making", "creative", "indoor", "home", "writing"],
+  "affordable":    ["making", "creative", "indoor", "home", "learning"],
+  "inexpensive":   ["making", "creative", "indoor", "home", "writing"],
+  "no money":      ["making", "creative", "indoor", "home", "writing", "outdoors"],
+
+  // Beginner / entry-level
+  "beginner":      ["making", "learning", "creative", "skill", "wellness"],
+  "easy":          ["relaxing", "making", "creative", "indoor", "solo"],
+  "simple":        ["relaxing", "solo", "making", "indoor", "learning"],
+  "starter":       ["learning", "skill", "making", "creative"],
+  "first time":    ["learning", "skill", "experience", "making"],
+  "no experience": ["learning", "making", "creative", "skill"],
+
+  // DIY / hands-on
+  "diy":           ["making", "creative", "home", "skill"],
+  "make something":["making", "creative", "skill"],
+  "build something":["making", "skill", "tech", "home"],
+  "create":        ["creative", "making", "visual", "writing"],
+
+  // Weather / time-of-day / season
+  "rainy day":     ["indoor", "home", "relaxing", "creative", "solo", "making"],
+  "rainy":         ["indoor", "home", "relaxing", "creative"],
+  "stuck inside":  ["indoor", "home", "relaxing", "creative", "solo"],
+  "can't go out":  ["indoor", "home", "relaxing", "creative"],
+  "summer":        ["outdoors", "water", "adventure", "travel", "social", "fitness"],
+  "winter":        ["winter", "indoor", "home", "relaxing", "wellness", "making"],
+  "cold":          ["indoor", "home", "winter", "relaxing", "solo"],
+  "morning":       ["fitness", "wellness", "mindfulness", "outdoors"],
+  "night":         ["indoor", "home", "relaxing", "solo", "creative", "media"],
+  "weekend":       ["adventure", "social", "creative", "outdoors", "experience"],
+  "evening":       ["indoor", "relaxing", "social", "creative", "food"],
+
+  // Mental health / emotional state
+  "anxious":       ["wellness", "mindfulness", "relaxing", "reflective", "solo"],
+  "anxiety":       ["wellness", "mindfulness", "relaxing", "reflective", "patient"],
+  "stressed":      ["wellness", "mindfulness", "relaxing", "reflective", "solo"],
+  "stress":        ["wellness", "mindfulness", "relaxing", "reflective"],
+  "depressed":     ["social", "creative", "wellness", "reflective", "mindfulness"],
+  "lonely":        ["social", "community", "creative", "experience"],
+  "sad":           ["social", "creative", "wellness", "reflective", "mindfulness"],
+  "overwhelmed":   ["solo", "relaxing", "wellness", "patient", "mindfulness"],
+  "therapeutic":   ["wellness", "mindfulness", "reflective", "relaxing", "making"],
+  "healing":       ["wellness", "mindfulness", "reflective", "relaxing"],
+  "self care":     ["wellness", "mindfulness", "relaxing", "reflective", "solo"],
+  "self-care":     ["wellness", "mindfulness", "relaxing", "reflective", "solo"],
+  "mental health": ["wellness", "mindfulness", "reflective", "relaxing"],
+  "grounding":     ["mindfulness", "wellness", "reflective", "relaxing", "outdoors"],
+  "cathartic":     ["creative", "writing", "making", "wellness", "reflective"],
+
+  // Aesthetic / style / visual
+  "aesthetic":     ["visual", "creative", "colorful", "making", "fashion"],
+  "instagram":     ["visual", "creative", "colorful", "outdoors", "food", "making"],
+  "tiktok":        ["performance", "creative", "social", "media"],
+  "youtube":       ["media", "learning", "creative", "tech"],
+  "colorful":      ["colorful", "creative", "visual", "making"],
+  "pretty":        ["visual", "creative", "colorful", "making", "plants"],
+  "beautiful":     ["visual", "creative", "colorful", "outdoors", "plants"],
+  "art":           ["creative", "visual", "making", "skill", "colorful"],
+  "artsy":         ["creative", "visual", "making", "colorful"],
+
+  // Competitive / achievement
+  "competitive":   ["strategy", "sport", "skill", "social", "fitness"],
+  "challenge":     ["skill", "learning", "strategy", "fitness", "adventure"],
+  "achievement":   ["skill", "learning", "making", "strategy"],
+  "goal":          ["fitness", "skill", "learning", "making", "strategy"],
+  "win":           ["strategy", "sport", "skill", "social"],
+
+  // Spiritual / mindful
+  "spiritual":     ["mindfulness", "reflective", "wellness", "solo"],
+  "reflect":       ["reflective", "writing", "mindfulness", "solo"],
+  "mindful":       ["mindfulness", "wellness", "reflective", "relaxing"],
+
+  // Adventurous / explore
+  "adventurous":   ["adventure", "thrill", "outdoors", "travel", "exploration"],
+  "explore":       ["exploration", "adventure", "outdoors", "travel", "learning"],
+  "discover":      ["exploration", "learning", "adventure", "travel"],
+  "experience":    ["experience", "adventure", "social", "exploration", "travel"],
+  "try something new": ["experience", "adventure", "learning", "exploration"],
+
+  // Animals / pets / nature
+  "animals":       ["animals", "outdoors", "nature", "pets"],
+  "pets":          ["animals", "home"],
+  "dogs":          ["animals", "outdoors", "fitness"],
+  "cats":          ["animals", "home", "solo"],
+  "birds":         ["animals", "outdoors", "patient", "reflective"],
+  "wildlife":      ["animals", "outdoors", "exploration", "adventure"],
+
+  // Tech / digital
+  "digital":       ["tech", "creative", "media", "learning"],
+  "computer":      ["tech", "strategy", "learning", "creative"],
+  "app":           ["tech", "learning", "creative"],
+  "online":        ["tech", "learning", "social", "media"],
+
+  // Vintage / collecting
+  "vintage":       ["collecting", "visual", "creative", "exploration"],
+  "retro":         ["collecting", "strategy", "media", "indoor"],
+  "antique":       ["collecting", "exploration", "learning"],
+  "collect":       ["collecting", "learning", "visual", "exploration"],
+
+  // Food / drink
+  "food":          ["food", "making", "social", "creative", "skill"],
+  "drink":         ["food", "social", "making", "creative"],
+  "eat":           ["food", "social", "making", "travel"],
+  "meal":          ["food", "making", "social", "skill"],
+  "snack":         ["food", "home", "making", "relaxing"],
+  "coffee":        ["food", "solo", "relaxing", "social"],
 };
 
 window.HobbyAtlasData = {

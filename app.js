@@ -934,52 +934,137 @@ function searchMatches(query) {
   if (!normalized) return [];
   const terms = normalized.split(/\s+/).filter(t => t.length > 0);
 
-  // Strip filler/stop words to get the meaningful signal words
+  // Strip filler/stop words to get meaningful signal words
   // e.g. "I want todo something creative" → ["creative"]
   const meaningfulTerms = terms.filter(t => t.length > 1 && !SEARCH_STOP_WORDS.has(t));
-  // Fall back to all terms only if every word was a stop word
   const activeTerms = meaningfulTerms.length > 0 ? meaningfulTerms : terms;
 
-  // Expand concepts: collect all concept terms that match the query or any meaningful term
-  const conceptHits = Object.entries(data.searchConcepts)
-    .filter(([term, synonyms]) =>
-      normalized === term || synonyms.some(s => normalized === s) ||
-      synonyms.some(s => s.includes(normalized)) || normalized.includes(term) ||
-      activeTerms.some(t => term === t || synonyms.some(s => s.includes(t)) || t.includes(term)))
-    .flatMap(([term, synonyms]) => [term, ...synonyms]);
+  // Build per-term concept expansion map and a combined set for the full query.
+  // Only forward-lookup: find concept keys that match the term (not reverse synonym lookup,
+  // which caused false positives like "creative" matching "fun" concept via shared synonyms).
+  const conceptTagsForQuery = new Set(data.searchConcepts[normalized] || []);
+  const termConceptMap = new Map();
+  activeTerms.forEach(term => {
+    const tags = new Set();
+    Object.entries(data.searchConcepts).forEach(([key, synonyms]) => {
+      // Forward-only key matching: concept key must contain the search term (not the reverse),
+      // to avoid false positives like "creative".includes("eat") matching the eat concept.
+      if (key === term || key.includes(term)) {
+        synonyms.forEach(t => tags.add(t));
+        tags.add(key);
+      }
+    });
+    if (tags.size > 0) {
+      termConceptMap.set(term, tags);
+      tags.forEach(t => conceptTagsForQuery.add(t));
+    }
+  });
 
-  return data.allHobbies.filter((name) => {
+  const results = data.allHobbies.map((name) => {
     const hobby = data.hobbies[name];
     const category = categoryById[hobby.category];
-    // Extended haystack: blurb, tags, startingPoint, related hobbies, category
+    const nameLower = name.toLowerCase();
+    const tags = (hobby.tags || []);
+
+    let score = 0;
+
+    // ── Tier 1: Name matches (highest value) ─────────────────────────────
+    if (nameLower === normalized) {
+      score += 100;
+    } else if (nameLower.includes(normalized)) {
+      score += 78;
+    } else {
+      const nameWords = nameLower.split(/\W+/).filter(w => w.length > 1);
+      activeTerms.forEach(term => {
+        if (nameLower.includes(term)) {
+          score += 62;
+        } else {
+          const maxDist = term.length < 9 ? 1 : 2;
+          if (nameWords.some(nw => levenshtein(term, nw) <= maxDist)) score += 42;
+        }
+      });
+    }
+
+    // ── Tier 2: Tag matches ───────────────────────────────────────────────
+    activeTerms.forEach(term => {
+      // Direct tag hit
+      if (tags.some(tag => tag === term || tag.includes(term) || term.includes(tag))) {
+        score += 58;
+      } else {
+        // Concept-expanded tag hit — score each matching tag so hobbies with more
+        // relevant tags rank higher (e.g. Meditation > Air dry clay for "anxious")
+        const conceptTags = termConceptMap.get(term);
+        if (conceptTags) {
+          const matchCount = tags.filter(tag => conceptTags.has(tag)).length;
+          if (matchCount > 0) score += 46 + (matchCount - 1) * 20;
+        }
+      }
+    });
+
+    // Full-query concept → tag hit (only for single active-term or exact concept match)
+    // Avoids over-scoring multi-term queries by treating the combined expansion too broadly
+    const isExactConcept = data.searchConcepts[normalized] != null;
+    if (conceptTagsForQuery.size > 0 && (activeTerms.length === 1 || isExactConcept) &&
+        tags.some(tag => conceptTagsForQuery.has(tag))) {
+      score += 36;
+    }
+
+    // ── Tier 3: Haystack content matches ─────────────────────────────────
     const haystack = [
-      name,
+      nameLower,
       hobby.blurb,
+      hobby.why,           // ← included for richer semantic matching
       hobby.summary,
       hobby.startingPoint,
-      ...(hobby.tags || []),
+      tags.join(' '),
       ...(hobby.related || []),
       category?.label,
-      ...(data.searchConcepts[normalized] || []),
     ].filter(Boolean).join(' ').toLowerCase();
 
-    // 1. Exact substring match on full query
-    if (haystack.includes(normalized)) return true;
-
-    // 2. Concept/synonym match
-    if (conceptHits.some(t => haystack.includes(t))) return true;
-
-    // 3. Each meaningful word must match (exact or fuzzy) somewhere in haystack
-    //    Using activeTerms drops fillers like "want", "something", "todo"
     const haystackWords = haystack.split(/\W+/).filter(w => w.length > 1);
-    return activeTerms.every(term => {
-      if (term.length <= 2) return haystack.includes(term);
-      if (haystack.includes(term)) return true;
-      // Allow 1 typo for 4-6 char words, 2 for 7+ char words
-      const maxDist = term.length <= 6 ? 1 : 2;
-      return haystackWords.some(hw => levenshtein(term, hw) <= maxDist);
+
+    // Full query exact match in haystack
+    if (haystack.includes(normalized)) score += 52;
+
+    let termMisses = 0;
+    activeTerms.forEach(term => {
+      if (term.length <= 2) {
+        if (!haystack.includes(term)) termMisses++;
+        return;
+      }
+      if (haystack.includes(term)) {
+        score += 32;
+      } else {
+        // Concept expansion in haystack
+        const conceptTags = termConceptMap.get(term);
+        const conceptInHaystack = conceptTags && [...conceptTags].some(ct => haystack.includes(ct));
+        if (conceptInHaystack) {
+          score += 22;
+        } else {
+          // Fuzzy haystack match
+          const maxDist = term.length < 9 ? 1 : 2;
+          if (haystackWords.some(hw => levenshtein(term, hw) <= maxDist)) {
+            score += 14;
+          } else {
+            termMisses++;
+          }
+        }
+      }
     });
+
+    // Multi-term bonus: all active terms matched → extra relevance signal
+    if (activeTerms.length > 1 && termMisses === 0) score += 28;
+    // Proportional penalty for unmatched terms (weighted by how many terms total)
+    if (termMisses > 0) score -= termMisses * (activeTerms.length > 1 ? 48 : 30);
+
+    return { name, score };
   });
+
+  // Return hobbies sorted by score, filtering out zero/negative matches
+  return results
+    .filter(r => r.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map(r => r.name);
 }
 
 function logSearch(query, resultCount) {
