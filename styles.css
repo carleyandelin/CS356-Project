@@ -1179,52 +1179,72 @@ mark.search-hl {
 .breadcrumb__sep { color: var(--teal-muted); font-weight: 400; }
 .breadcrumb__current { color: var(--ink-black); }
 
-/* Collage hero — full-bleed one-row strip matching category banner aspect ratio */
-.hobby-collage-hero { isolation: isolate;
+/* Hobby hero — a consistent left-to-right clarity gradient keeps the banner playful
+   without rotating the image or obscuring its subject. */
+.hobby-collage-hero {
+  isolation: isolate;
   position: relative;
   margin: 0 -32px;
   aspect-ratio: 5 / 1;
   overflow: hidden;
   background: var(--teal-base);
 }
-/* Tile strip fills the hero absolutely — height is always the rendered hero height */
 .collage-grid {
   position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  width: 110%;
-  left: -5%;
+  inset: -14px;
+  overflow: hidden;
 }
-/* Square tiles via background-image — no <img> height ambiguity */
 .collage-tile {
-  flex: 0 0 auto;
-  aspect-ratio: 1;
+  position: absolute;
+  top: 0;
+  width: 28%;
+  height: 100%;
   background-size: cover;
-  background-position: center;
+  background-position: center top;
   background-repeat: no-repeat;
-  will-change: transform;
-  position: relative;
-  z-index: 1;
+  transform: scale(1.04);
+  will-change: filter;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
 }
 .collage-tile--control {
-  z-index: 3;
+  z-index: 1;
 }
 .collage-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to right,
-    rgba(0,0,0,0.68) 0%,
-    rgba(0,0,0,0.22) 55%,
-    rgba(0,0,0,0.04) 100%
-  );
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 0 44px;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,.7) 0%,
+    rgba(0,0,0,.36) 46%,
+    rgba(0,0,0,.08) 100%
+  );
   z-index: 2;
+}
+.collage-eyebrow {
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  opacity: .8;
 }
 .collage-title {
   margin: 0 0 8px;
@@ -1233,14 +1253,14 @@ mark.search-hl {
   font-weight: 400;
   line-height: 1;
   color: #fff;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.4);
+  text-shadow: 0 2px 16px rgba(0,0,0,.4);
 }
 .collage-subtitle {
+  max-width: 42ch;
   margin: 0;
+  color: rgba(255,255,255,.82);
   font-size: 14px;
   line-height: 1.5;
-  color: rgba(255,255,255,0.82);
-  max-width: 42ch;
 }
 
 /* Mid row: why try it (left teal block) + at a glance (right) */
@@ -1380,6 +1400,6 @@ mark.search-hl {
   .hobby-related__grid--row > * { flex: 1 1 calc(50% - 6px); }
 }
 @media (max-width: 600px) {
-  .hobby-collage-hero { isolation: isolate; margin: 0 -18px; }
+  .hobby-collage-hero { margin: 0 -18px; aspect-ratio: 4 / 3; }
   .collage-overlay { padding: 0 18px; }
 }
