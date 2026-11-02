@@ -565,13 +565,14 @@ function photoCard(name, href, blurb, imgUrl, extraAttrs, nameHtml, blurbHtml) {
 
 function renderBrowse() {
   const hotList = [
-    {label: 'Mahjong', key: 'Mahjong', rank: 'No. 01', demoStyle: 'typo'},
-    {label: 'Pickleball', key: 'Pickleball', rank: 'No. 02', demoStyle: 'typo'},
+    {label: 'Mahjong', key: 'Mahjong', rank: 'No. 01', demoStyle: 'typo', badge: 'HOT'},
+    {label: 'Pickleball', key: 'Pickleball', rank: 'No. 02', demoStyle: 'typo', badge: 'HOT'},
     {
       label: 'Scrapbooking',
       key: 'Scrapbooking',
       rank: 'No. 03',
-      demoStyle: 'typo'
+      demoStyle: 'typo',
+      badge: 'HOT'
     },
     {
       label: 'Hiking',
@@ -583,7 +584,7 @@ function renderBrowse() {
       label: 'Snowshoeing',
       key: 'Snowshoeing',
       rank: 'No. 05',
-      demoStyle: 'typo'
+      demoStyle: 'typo',
     },
     {label: 'Sourdough', key: 'Sourdough', rank: 'No. 06', demoStyle: 'typo'},
     {
@@ -591,26 +592,30 @@ function renderBrowse() {
       key: 'Video Games',
       destination: 'category/games',
       rank: 'No. 07',
-      demoStyle: 'typo'
+      demoStyle: 'typo',
     },
     {label: 'Thrifting', key: 'Thrifting', rank: 'No. 08', demoStyle: 'typo'},
     {
       label: 'Photography',
       key: 'Photography',
       rank: 'No. 09',
-      demoStyle: 'typo'
+      demoStyle: 'typo',
     },
     {label: 'Yoga', key: 'Yoga', rank: 'No. 10', demoStyle: 'typo'},
   ];
 
-  function makeCard({label, key, destination, rank, demoStyle}) {
+  function makeCard({label, key, destination, rank, demoStyle, badge}) {
     const hobby = data.hobbies[key] || {};
     const dest = destination || `hobby/${encodeURIComponent(key)}`;
     const href = `#${dest}`;
     const log = `Open ${escapeHtml(label)}`;
 
     if (hobby.img) {
-      return photoCard(label, href, hobby.blurb || '', hobby.img);
+      if (!badge) return photoCard(label, href, hobby.blurb || '', hobby.img);
+      const badgeHtml = `<div class="card-hot-badge" aria-label="${escapeHtml(badge)}"><span>${escapeHtml(badge)}</span></div>`;
+      const card = photoCard(label, href, hobby.blurb || '', hobby.img);
+      // Inject badge inside the <a> before its closing tag
+      return card.slice(0, card.lastIndexOf('</a>')) + badgeHtml + '</a>';
     }
 
     if (demoStyle === 'overlay') {
@@ -624,9 +629,10 @@ function renderBrowse() {
     }
 
     if (demoStyle === 'typo') {
+      const badgeHtml = badge ? `<div class="card-hot-badge" aria-label="${escapeHtml(badge)}"><span>${escapeHtml(badge)}</span></div>` : '';
       return `<a class="hot-card hot-card--typo" href="${href}"
         data-log="${log}" data-log-destination="${dest}">
-        <p class="label hot-card-label hot-card-typo__eyebrow">${
+        ${badgeHtml}<p class="label hot-card-label hot-card-typo__eyebrow">${
           escapeHtml(rank || '')}</p>
         <p class="hot-card-typo__name">${escapeHtml(label)}</p>
         <p class="hot-card-blurb hot-card-typo__blurb">${
